@@ -1,0 +1,60 @@
+# Deploying to cPanel Hosting (One-Click Installer)
+
+This project ships fully self-contained — the `vendor/` folder (all PHP dependencies) is already included in the repository, so **you do not need Composer, SSH, or command-line access** on your hosting account. You only need to upload the files and run the setup wizard in your browser.
+
+## Step 1 — Download / Prepare the Files
+
+Download or clone this repository as a ZIP file.
+
+## Step 2 — Create a MySQL Database (recommended)
+
+In cPanel:
+
+1. Open **MySQL® Databases**.
+2. Create a new database (e.g. `cpaneluser_restaurant`).
+3. Create a new database user with a strong password.
+4. Add the user to the database with **All Privileges**.
+5. Note down the database name, username, password and host (usually `localhost`).
+
+_(Alternatively, the installer also supports SQLite for quick testing — no database creation needed.)_
+
+## Step 3 — Upload the Files
+
+You have two options, depending on what your host allows:
+
+### Option A — Recommended: dedicated document root
+
+1. In **cPanel → File Manager**, upload and extract the ZIP into a folder **outside** `public_html`, e.g. `/home/cpaneluser/restaurant_app`.
+2. In **cPanel → Domains**, set the document root for your domain (or a subdomain) to `restaurant_app/public`.
+3. This is the cleanest and most secure setup, since only the `public/` folder (CSS, JS, images, `index.php`) is web-accessible — your application code, `.env` and database credentials stay outside the web root.
+
+### Option B — Simplest: upload directly into `public_html`
+
+1. Extract the ZIP directly into `public_html` (or a subfolder / addon domain's root), so that `public_html/app`, `public_html/public`, `public_html/vendor`, `public_html/.htaccess`, etc. all sit side by side.
+2. The included root `.htaccess` file automatically forwards all requests to the `public/` folder, so the site works immediately without changing your document root.
+3. This is quicker to set up but exposes the general folder structure (not the file contents — `.env`, `composer.json` etc. are blocked by `.htaccess`) to anyone who guesses paths. Option A is preferred for production use.
+
+## Step 4 — Run the Setup Wizard
+
+1. Visit your domain in a browser. You'll be redirected automatically to `/install`.
+2. **Welcome** — click "Start Installation".
+3. **Requirements** — the wizard checks your PHP version and required extensions (all standard on cPanel/LiteSpeed hosting) and that `storage/` and `bootstrap/cache/` are writable. If a folder isn't writable, use File Manager to `chmod` it to `775`.
+4. **Database & Restaurant Setup** — enter your MySQL credentials from Step 2 (or choose SQLite), your restaurant's name, phone, WhatsApp number, email and address, and create your admin account.
+5. Click **Install Website**. The wizard will write your `.env` file, run all database migrations, seed your menu with sample Gulf-cuisine dishes and legal pages, and create your admin account.
+6. **Done!** Your restaurant website is now live.
+
+The installer locks itself after a successful run (`storage/installed.lock`) so it cannot be run again by accident. To reinstall from scratch, delete that file via File Manager.
+
+## Step 5 — Go Live Checklist
+
+- [ ] Replace the placeholder menu photos in `database/seeders/MenuSeeder.php` with your own food photography, then re-run that seeder.
+- [ ] Update your logo/branding copy if you renamed your restaurant during setup.
+- [ ] Review the Terms, Privacy, Cookies and Refund pages (`pages` table) and adjust for your local regulations.
+- [ ] Set up SSL (Let's Encrypt is free and usually one click inside cPanel) so your site runs on `https://`.
+- [ ] Set up a daily database backup in cPanel.
+
+## Troubleshooting
+
+- **Blank page / 500 error**: check `storage/logs/laravel.log`. Usually caused by `storage/` or `bootstrap/cache/` not being writable — `chmod -R 775` both folders.
+- **"No application encryption key"**: this shouldn't happen since a key ships pre-generated, but if you see it, run the installer again or manually add a `base64:` key to `APP_KEY` in `.env`.
+- **Database connection errors during install**: double-check the database name/username include your cPanel username prefix (e.g. `cpaneluser_restaurant`, `cpaneluser_dbuser`), which cPanel adds automatically.
