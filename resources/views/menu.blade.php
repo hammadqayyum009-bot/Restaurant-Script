@@ -24,7 +24,7 @@
                 @if ($category->availableItems->isNotEmpty())
                     <div class="menu-category" id="cat-{{ $category->slug }}">
                         <h2>{{ $category->icon }} {{ $category->name }}</h2>
-                        <div class="grid grid-3">
+                        <div class="grid menu-grid">
                             @foreach ($category->availableItems as $item)
                                 <div class="dish-card">
                                     <div class="dish-media">
@@ -46,7 +46,7 @@
                                                 <input type="hidden" name="menu_item_id" value="{{ $item->id }}">
                                                 <button type="submit" class="add-to-cart-btn">
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                                                    Add to Cart
+                                                    Add
                                                 </button>
                                             </form>
                                         </div>
