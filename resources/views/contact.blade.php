@@ -56,7 +56,7 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="var(--maroon-800)" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
                         <span style="color:var(--ink-700)">{{ config('site.opening_hours') }}</span>
                     </div>
-                    <a href="https://wa.me/{{ config('site.whatsapp') }}" target="_blank" rel="noopener" class="btn btn-primary btn-block" style="margin-top:16px;">Chat on WhatsApp</a>
+                    <a href="{{ route('reservations.create') }}" class="btn btn-primary btn-block" style="margin-top:16px;">Book a Table</a>
                 </div>
             </div>
         </div>

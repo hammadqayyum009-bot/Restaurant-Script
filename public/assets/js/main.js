@@ -101,8 +101,9 @@
     }
     var subtotalEl = document.getElementById("cart-subtotal-value");
     if (subtotalEl && typeof data.subtotal !== "undefined") {
-      subtotalEl.textContent = Number(data.subtotal).toFixed(2);
+      subtotalEl.setAttribute("data-aed", data.subtotal);
     }
+    if (window.applyCurrency) window.applyCurrency();
   }
 
   function initAddToCartForms() {

@@ -40,7 +40,7 @@
                                                 <span>{{ $line['name'] }}</span>
                                             </div>
                                         </td>
-                                        <td>{{ config('site.currency') }} {{ number_format($line['price'], 2) }}</td>
+                                        <td class="js-price" data-aed="{{ $line['price'] }}">{{ config('site.currency') }} {{ number_format($line['price'], 2) }}</td>
                                         <td>
                                             <div class="qty-control">
                                                 <button type="button" data-qty-decrease data-id="{{ $line['id'] }}" data-qty="{{ $line['quantity'] }}">&minus;</button>
@@ -48,7 +48,7 @@
                                                 <button type="button" data-qty-increase data-id="{{ $line['id'] }}" data-qty="{{ $line['quantity'] }}">+</button>
                                             </div>
                                         </td>
-                                        <td>{{ config('site.currency') }} {{ number_format($line['price'] * $line['quantity'], 2) }}</td>
+                                        <td class="js-price" data-aed="{{ $line['price'] * $line['quantity'] }}">{{ config('site.currency') }} {{ number_format($line['price'] * $line['quantity'], 2) }}</td>
                                         <td>
                                             <button type="button" class="remove-line" data-remove-item data-id="{{ $line['id'] }}">
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-8 0l1 13a1 1 0 001 1h6a1 1 0 001-1l1-13"/></svg>
@@ -63,9 +63,9 @@
                     <div>
                         <div class="cart-summary-box">
                             <h3>Order Summary</h3>
-                            <div class="summary-row"><span>Subtotal</span><span>{{ config('site.currency') }} {{ number_format($subtotal, 2) }}</span></div>
+                            <div class="summary-row"><span>Subtotal</span><span class="js-price" data-aed="{{ $subtotal }}">{{ config('site.currency') }} {{ number_format($subtotal, 2) }}</span></div>
                             <div class="summary-row"><span>Delivery Fee</span><span>Calculated at checkout</span></div>
-                            <div class="summary-row total"><span>Estimated Total</span><span>{{ config('site.currency') }} {{ number_format($subtotal, 2) }}</span></div>
+                            <div class="summary-row total"><span>Estimated Total</span><span class="js-price" data-aed="{{ $subtotal }}">{{ config('site.currency') }} {{ number_format($subtotal, 2) }}</span></div>
                             <a href="{{ route('checkout.show') }}" class="btn btn-primary btn-block" style="margin-top:16px;">Proceed to Checkout</a>
                             <a href="{{ route('menu.index') }}" class="btn btn-outline on-light btn-block" style="margin-top:10px;">Add More Items</a>
                         </div>

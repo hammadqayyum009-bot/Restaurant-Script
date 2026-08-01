@@ -46,6 +46,7 @@ class CheckoutController extends Controller
         $deliveryFee = $data['order_type'] === 'delivery' && $subtotal > 0 ? 10 : 0;
 
         $order = Order::create([
+            'user_id' => $request->user()?->id,
             'order_number' => 'ORD-'.strtoupper(Str::random(8)),
             'customer_name' => $data['customer_name'],
             'phone' => $data['phone'],

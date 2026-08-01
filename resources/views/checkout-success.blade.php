@@ -27,7 +27,7 @@
 
             <div style="margin-top:26px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
                 <a href="{{ route('home') }}" class="btn btn-outline on-light">Back to Home</a>
-                <a href="https://wa.me/{{ config('site.whatsapp') }}?text={{ urlencode('Hi, I just placed order #'.$order->order_number) }}" target="_blank" rel="noopener" class="btn btn-primary">Confirm on WhatsApp</a>
+                <a href="{{ route('menu.index') }}" class="btn btn-primary">Order More</a>
             </div>
         </div>
     </section>

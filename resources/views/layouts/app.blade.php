@@ -37,12 +37,13 @@
             @include('partials.mini-cart', ['items' => app(\App\Services\Cart::class)->contents(), 'subtotal' => app(\App\Services\Cart::class)->subtotal()])
         </div>
         <div class="cart-drawer-foot">
-            <div class="cart-subtotal-row"><span>Subtotal</span><span>{{ config('site.currency') }} <span id="cart-subtotal-value">{{ number_format(app(\App\Services\Cart::class)->subtotal(), 2) }}</span></span></div>
+            <div class="cart-subtotal-row"><span>Subtotal</span><span class="js-price" id="cart-subtotal-value" data-aed="{{ app(\App\Services\Cart::class)->subtotal() }}">{{ config('site.currency') }} {{ number_format(app(\App\Services\Cart::class)->subtotal(), 2) }}</span></div>
             <a href="{{ route('checkout.show') }}" class="btn btn-primary btn-block">Proceed to Checkout</a>
         </div>
     </div>
     <div class="nav-scrim" id="cart-scrim"></div>
 
+    <script src="{{ asset('assets/js/currency.js') }}"></script>
     <script src="{{ asset('assets/js/main.js') }}"></script>
     @stack('scripts')
 </body>

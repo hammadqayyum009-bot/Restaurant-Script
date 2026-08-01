@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MenuCategory;
 use App\Models\MenuItem;
+use App\Models\Review;
 
 class HomeController extends Controller
 {
@@ -18,7 +19,9 @@ class HomeController extends Controller
 
         $categories = MenuCategory::where('is_active', true)->orderBy('sort_order')->get();
 
-        return view('home', compact('featured', 'categories'));
+        $reviews = Review::where('is_approved', true)->latest()->take(6)->get();
+
+        return view('home', compact('featured', 'categories', 'reviews'));
     }
 
     public function about()

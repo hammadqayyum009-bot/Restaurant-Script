@@ -40,7 +40,7 @@
                                         <h3>{{ $item->name }}</h3>
                                         <p>{{ $item->description }}</p>
                                         <div class="dish-foot">
-                                            <span class="price">{{ config('site.currency') }} {{ number_format($item->price, 2) }}</span>
+                                            <span class="price js-price" data-aed="{{ $item->price }}">{{ config('site.currency') }} {{ number_format($item->price, 2) }}</span>
                                             <form class="add-to-cart-form" action="{{ route('cart.add') }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="menu_item_id" value="{{ $item->id }}">
