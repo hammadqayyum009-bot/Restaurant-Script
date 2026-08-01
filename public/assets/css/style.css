@@ -165,6 +165,10 @@ button { font-family: inherit; cursor: pointer; }
 }
 .main-nav a.active, .main-nav a:hover { color: var(--gold-400); }
 .main-nav .nav-cta { margin-top: 18px; }
+/* The nav link colour would otherwise beat .btn-primary and leave the CTA
+   cream-on-gold. */
+.main-nav .nav-cta .btn-primary,
+.main-nav .nav-cta .btn-primary:hover { color: var(--maroon-950); }
 
 .nav-scrim {
   position: fixed;
@@ -250,6 +254,7 @@ button { font-family: inherit; cursor: pointer; }
     transform: none;
     overflow: visible;
   }
+  .main-nav { display: flex; align-items: center; gap: 28px; }
   .main-nav ul { flex-direction: row; align-items: center; gap: 28px; }
   .main-nav a { border-bottom: none; padding: 6px 0; position: relative; }
   .main-nav a.active::after, .main-nav a:hover::after {
@@ -259,8 +264,15 @@ button { font-family: inherit; cursor: pointer; }
     height: 2px;
     background: var(--gold-500);
   }
-  .main-nav .nav-cta { margin-top: 0; }
+  /* The drawer CTA would stack under the links on desktop — hide it until
+     there is room to show it inline beside them. */
+  .main-nav .nav-cta { margin-top: 0; display: none; }
   .nav-scrim { display: none; }
+}
+
+@media (min-width: 1140px) {
+  .main-nav .nav-cta { display: block; }
+  .main-nav .nav-cta .btn { width: auto; padding: 10px 20px; font-size: 0.84rem; }
 }
 
 /* ---------- Hero ---------- */
