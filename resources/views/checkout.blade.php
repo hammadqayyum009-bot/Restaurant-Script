@@ -20,19 +20,19 @@
                     <div class="form-row cols-2">
                         <div class="form-group">
                             <label for="customer_name">Full Name</label>
-                            <input type="text" class="form-control" id="customer_name" name="customer_name" value="{{ old('customer_name') }}" required>
+                            <input type="text" class="form-control" id="customer_name" name="customer_name" value="{{ old('customer_name', auth()->user()->name ?? '') }}" required>
                             @error('customer_name')<span class="error-text">{{ $message }}</span>@enderror
                         </div>
                         <div class="form-group">
                             <label for="phone">Phone Number</label>
-                            <input type="text" class="form-control" id="phone" name="phone" value="{{ old('phone') }}" required>
+                            <input type="text" class="form-control" id="phone" name="phone" value="{{ old('phone', auth()->user()->phone ?? '') }}" required>
                             @error('phone')<span class="error-text">{{ $message }}</span>@enderror
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label for="email">Email (optional)</label>
-                        <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}">
+                        <input type="email" class="form-control" id="email" name="email" value="{{ old('email', auth()->user()->email ?? '') }}">
                         @error('email')<span class="error-text">{{ $message }}</span>@enderror
                     </div>
 
@@ -68,9 +68,9 @@
                     <div class="cart-summary-box">
                         <h3>Order Summary</h3>
                         @foreach ($items as $line)
-                            <div class="summary-row"><span>{{ $line['quantity'] }} &times; {{ $line['name'] }}</span><span>{{ config('site.currency') }} {{ number_format($line['price'] * $line['quantity'], 2) }}</span></div>
+                            <div class="summary-row"><span>{{ $line['quantity'] }} &times; {{ $line['name'] }}</span><span class="js-price" data-aed="{{ $line['price'] * $line['quantity'] }}">{{ config('site.currency') }} {{ number_format($line['price'] * $line['quantity'], 2) }}</span></div>
                         @endforeach
-                        <div class="summary-row total"><span>Subtotal</span><span>{{ config('site.currency') }} {{ number_format($subtotal, 2) }}</span></div>
+                        <div class="summary-row total"><span>Subtotal</span><span class="js-price" data-aed="{{ $subtotal }}">{{ config('site.currency') }} {{ number_format($subtotal, 2) }}</span></div>
                         <p style="font-size:0.82rem; color:var(--ink-500); margin-top:6px;">A flat delivery fee of {{ config('site.currency') }} 10 applies for delivery orders.</p>
                         <button type="submit" class="btn btn-primary btn-block" style="margin-top:16px;">Place Order</button>
                     </div>

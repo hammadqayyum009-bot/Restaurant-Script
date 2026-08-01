@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             MenuSeeder::class,
             PageSeeder::class,
+            ReviewSeeder::class,
         ]);
     }
 }

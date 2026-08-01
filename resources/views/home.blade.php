@@ -4,13 +4,21 @@
 
 @section('content')
     <section class="hero">
+        <div class="hero-slides" aria-hidden="true">
+            <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1600&q=70')"></div>
+            <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1607330289024-1535c6b4e1c1?auto=format&fit=crop&w=1600&q=70')"></div>
+            <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=1600&q=70')"></div>
+            <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1600&q=70')"></div>
+            <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1571091718767-18b5b1457add?auto=format&fit=crop&w=1600&q=70')"></div>
+            <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1600&q=70')"></div>
+        </div>
         <div class="container">
             <span class="eyebrow">&#10022; Authentic Arabian &amp; Gulf Cuisine</span>
-            <h1>Taste the Gulf &mdash; <em>Grilled, Spiced &amp; Served with Love</em></h1>
-            <p class="lead">From smoky Mashawi grills to slow-cooked Mandi and fragrant Machboos, {{ config('site.name') }} brings the authentic flavours of Arabia to your table. Order online for delivery or pickup, ready in minutes.</p>
+            <h1 class="hero-3d">Taste the Gulf &mdash; <em>Grilled, Spiced &amp; Served with Love</em></h1>
+            <p class="lead">Charcoal grills, slow-cooked Mandi and fragrant Machboos &mdash; authentic Gulf flavours, cooked fresh daily and served with genuine Arabian hospitality.</p>
             <div class="hero-cta">
-                <a href="{{ route('menu.index') }}" class="btn btn-primary">View Full Menu</a>
-                <a href="https://wa.me/{{ config('site.whatsapp') }}" target="_blank" rel="noopener" class="btn btn-outline">Order on WhatsApp</a>
+                <a href="{{ route('menu.index') }}" class="btn btn-primary">View Menu</a>
+                <a href="{{ route('reservations.create') }}" class="btn btn-outline">Book a Table</a>
             </div>
             <div class="hero-stats">
                 <div><strong>15+</strong><span>Years Serving</span></div>
@@ -48,7 +56,7 @@
                             <h3>{{ $item->name }}</h3>
                             <p>{{ $item->description }}</p>
                             <div class="dish-foot">
-                                <span class="price">{{ config('site.currency') }} {{ number_format($item->price, 2) }}</span>
+                                <span class="price js-price" data-aed="{{ $item->price }}">{{ config('site.currency') }} {{ number_format($item->price, 2) }}</span>
                                 <form class="add-to-cart-form" action="{{ route('cart.add') }}" method="POST">
                                     @csrf
                                     <input type="hidden" name="menu_item_id" value="{{ $item->id }}">
@@ -118,11 +126,96 @@
     </section>
 
     <section class="section">
-        <div class="container text-center">
+        <div class="container">
+            <div class="section-heading">
+                <span class="eyebrow">Behind the Scenes</span>
+                <h2>Our Kitchen &amp; Our People</h2>
+                <p>A glimpse of the space, the fire and the hands behind every plate we serve.</p>
+            </div>
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1466637574441-749b8f19452f?auto=format&fit=crop&w=1000&q=75" alt="Restaurant dining hall" loading="lazy">
+                    <span class="cap">Our Dining Hall</span>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=700&q=75" alt="Chef preparing a dish" loading="lazy">
+                    <span class="cap">Our Chefs</span>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=700&q=75" alt="Charcoal grill in action" loading="lazy">
+                    <span class="cap">Live Charcoal Grill</span>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=700&q=75" alt="Fresh spices and ingredients" loading="lazy">
+                    <span class="cap">Fresh Ingredients Daily</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" style="background:var(--cream-100);" id="reviews">
+        <div class="container">
+            <div class="section-heading">
+                <span class="eyebrow">Guest Reviews</span>
+                <h2>What Our Guests Say</h2>
+                <p>Real feedback from real guests &mdash; and we'd love to hear from you too.</p>
+            </div>
+
+            <div class="grid grid-3">
+                @forelse ($reviews as $review)
+                    <div class="review-card">
+                        <div class="review-head">
+                            <span class="review-avatar">{{ collect(explode(' ', $review->name))->map(fn($n) => mb_substr($n,0,1))->take(2)->implode('') }}</span>
+                            <div>
+                                <div class="review-name">{{ $review->name }}</div>
+                                <div class="review-stars">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</div>
+                            </div>
+                        </div>
+                        <p class="review-comment">&ldquo;{{ $review->comment }}&rdquo;</p>
+                        <span class="review-date">{{ $review->created_at->format('d M Y') }}</span>
+                    </div>
+                @empty
+                    <p>Be the first to leave a review!</p>
+                @endforelse
+            </div>
+
+            <div class="cart-summary-box" style="max-width:560px; margin:36px auto 0;">
+                <h3>Leave a Review</h3>
+                @if (session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                @endif
+                <form method="POST" action="{{ route('reviews.store') }}#reviews">
+                    @csrf
+                    <div class="form-group">
+                        <label for="review-name">Your Name</label>
+                        <input type="text" class="form-control" id="review-name" name="name" value="{{ old('name') }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Your Rating</label>
+                        <div class="star-picker">
+                            <input type="radio" name="rating" id="star5" value="5" checked><label for="star5">★</label>
+                            <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
+                            <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
+                            <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
+                            <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="review-comment">Your Review</label>
+                        <textarea class="form-control" id="review-comment" name="comment" placeholder="Tell us about your experience..." required>{{ old('comment') }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Submit Review</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="section text-center">
+        <div class="container">
             <span class="eyebrow">Hungry Already?</span>
-            <h2>Order Now &amp; Taste the Gulf Tonight</h2>
+            <h2>Taste the Gulf Tonight</h2>
             <p style="color:var(--ink-500); max-width:520px; margin:10px auto 26px;">Fresh, hot, and delivered fast. Browse our full menu and add your favourites to the cart in seconds.</p>
-            <a href="{{ route('menu.index') }}" class="btn btn-primary">Start Your Order</a>
+            <a href="{{ route('menu.index') }}" class="btn btn-primary">Explore the Menu</a>
         </div>
     </section>
 @endsection
