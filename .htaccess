@@ -1,0 +1,18 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # If the document root is already set to /public (recommended setup),
+    # this file is simply never reached and has no effect.
+    #
+    # If you uploaded the whole project directly into public_html
+    # (the common one-click cPanel scenario), this rewrites every
+    # request through to the /public folder transparently.
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ /public/$1 [L]
+</IfModule>
+
+# Block direct access to sensitive application files when the project
+# root is used as the document root.
+<FilesMatch "^\.env|composer\.(json|lock)$">
+    Require all denied
+</FilesMatch>
