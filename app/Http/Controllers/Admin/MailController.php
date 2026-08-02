@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\EmailLog;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use App\Services\Mailer;
 use App\Services\Settings;
 use Illuminate\Http\Request;
@@ -12,7 +13,11 @@ use Illuminate\Support\Facades\Auth;
 
 class MailController extends Controller
 {
-    public function __construct(protected Settings $settings, protected Mailer $mailer)
+    public function __construct(
+        protected Settings $settings,
+        protected Mailer $mailer,
+        protected ActivityLogger $activity,
+    )
     {
     }
 
@@ -50,6 +55,8 @@ class MailController extends Controller
         }
 
         $this->settings->setMany($data, 'mail');
+
+        $this->activity->settings('email');
 
         return back()->with('success', 'Email settings saved. Send a test email to confirm they work.');
     }
@@ -101,6 +108,8 @@ class MailController extends Controller
             }
         }
 
+        $this->activity->log('email', 'Edited the email templates');
+
         return back()->with('success', 'Email templates saved.');
     }
 
@@ -147,6 +156,8 @@ class MailController extends Controller
                 ? $sent++
                 : $failed++;
         }
+
+        $this->activity->log('email', 'Sent '.$sent.' email(s) to '.$data['audience']);
 
         return redirect()->route('admin.email.logs')->with(
             $failed === 0 ? 'success' : 'error',

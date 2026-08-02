@@ -3,13 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\ActivityLogger;
 use App\Services\Settings;
 use App\Services\Uploader;
 use Illuminate\Http\Request;
 
 class SettingsController extends Controller
 {
-    public function __construct(protected Settings $settings, protected Uploader $uploader)
+    public function __construct(
+        protected Settings $settings,
+        protected Uploader $uploader,
+        protected ActivityLogger $activity,
+    )
     {
     }
 
@@ -44,6 +49,8 @@ class SettingsController extends Controller
         $this->handleImage($request, 'logo', 'site_logo', 'branding');
         $this->handleImage($request, 'favicon', 'site_favicon', 'branding');
 
+        $this->activity->settings('site');
+
         return back()->with('success', 'Website settings saved.');
     }
 
@@ -67,6 +74,8 @@ class SettingsController extends Controller
         $this->settings->setMany($data, 'panel');
         $this->handleImage($request, 'logo', 'panel_logo', 'branding');
         $this->handleImage($request, 'favicon', 'panel_favicon', 'branding');
+
+        $this->activity->settings('panel');
 
         return back()->with('success', 'Admin panel settings saved.');
     }
@@ -99,6 +108,8 @@ class SettingsController extends Controller
         }
 
         $this->settings->setMany($data, 'shop');
+
+        $this->activity->settings('shop');
 
         return back()->with('success', 'Ordering settings saved.');
     }

@@ -4,11 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reservation;
+use App\Services\ActivityLogger;
 use App\Services\Mailer;
 use Illuminate\Http\Request;
 
 class ReservationController extends Controller
 {
+    public function __construct(protected ActivityLogger $activity)
+    {
+    }
+
     public const STATUSES = ['pending', 'confirmed', 'seated', 'cancelled'];
 
     public function index(Request $request)
@@ -45,8 +50,14 @@ class ReservationController extends Controller
             'status' => ['required', 'in:'.implode(',', self::STATUSES)],
         ]);
 
-        $changed = $reservation->status !== $data['status'];
+        $previous = $reservation->status;
+        $changed = $previous !== $data['status'];
         $reservation->update($data);
+
+        if ($changed) {
+            $this->activity->log('status',
+                'Reservation for '.$reservation->name.': '.$previous.' → '.$reservation->status, $reservation);
+        }
 
         if ($changed && $reservation->email && config('notifications.on_reservation')) {
             $mailer->dispatchTemplate('reservation_status', $reservation->email, $reservation->name, [
@@ -63,6 +74,7 @@ class ReservationController extends Controller
 
     public function destroy(Reservation $reservation)
     {
+        $this->activity->deleted('reservation for '.$reservation->name, $reservation);
         $reservation->delete();
 
         return back()->with('success', 'Reservation deleted.');

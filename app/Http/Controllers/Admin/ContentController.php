@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\ActivityLogger;
 use App\Services\Settings;
 use App\Services\Uploader;
 use Illuminate\Http\Request;
@@ -14,7 +15,11 @@ use Illuminate\Http\Request;
  */
 class ContentController extends Controller
 {
-    public function __construct(protected Settings $settings, protected Uploader $uploader)
+    public function __construct(
+        protected Settings $settings,
+        protected Uploader $uploader,
+        protected ActivityLogger $activity,
+    )
     {
     }
 
@@ -47,6 +52,8 @@ class ContentController extends Controller
         ], 'header');
 
         $this->saveLinks('header_nav', $request->input('nav_label', []), $request->input('nav_url', []), 'header');
+
+        $this->activity->log('settings', 'Edited the header content');
 
         return back()->with('success', 'Header saved.');
     }
@@ -109,6 +116,8 @@ class ContentController extends Controller
 
         unset($heroUpload, $storyUpload);
 
+        $this->activity->log('settings', 'Edited the home page content');
+
         return back()->with('success', 'Home page content saved.');
     }
 
@@ -135,6 +144,8 @@ class ContentController extends Controller
         $this->settings->setMany($data, 'footer');
         $this->saveLinks('footer_explore', $request->input('explore_label', []), $request->input('explore_url', []), 'footer');
         $this->saveLinks('footer_legal', $request->input('legal_label', []), $request->input('legal_url', []), 'footer');
+
+        $this->activity->log('settings', 'Edited the footer content');
 
         return back()->with('success', 'Footer saved.');
     }

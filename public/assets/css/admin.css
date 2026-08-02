@@ -193,7 +193,9 @@ p:last-child { margin-bottom: 0; }
 /* Grid children default to min-width:auto, so a wide table inside a card would
    stretch its track past the viewport instead of scrolling within the card. */
 .a-grid > * { min-width: 0; }
-@media (min-width: 640px) { .a-grid.cols-2 { grid-template-columns: repeat(2, 1fr); } }
+/* Cards in a two-up grid hold their own height rather than stretching to
+   match the tallest sibling. */
+@media (min-width: 640px) { .a-grid.cols-2 { grid-template-columns: repeat(2, 1fr); align-items: start; } }
 @media (min-width: 900px) { .a-grid.cols-3 { grid-template-columns: repeat(3, 1fr); } }
 @media (min-width: 1180px) { .a-grid.cols-4 { grid-template-columns: repeat(4, 1fr); } }
 @media (min-width: 900px) { .a-grid.side { grid-template-columns: 2fr 1fr; align-items: start; } }
@@ -454,4 +456,120 @@ select:focus-visible, textarea:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
+}
+
+
+/* ---------- Chart ----------
+   One series, so no legend: the card heading names it. Grid and axis stay
+   recessive; only the peak bar is emphasised, and the value lives in the
+   tooltip rather than on every bar. */
+
+.chart {
+  position: relative;
+  height: 240px;
+  margin: 4px 0 6px;
+  padding-left: 62px;
+}
+
+.chart-grid {
+  position: absolute;
+  inset: 0 0 34px 62px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.chart-gridline {
+  position: relative;
+  border-top: 1px solid var(--a-line);
+}
+.chart-gridline span {
+  position: absolute;
+  right: calc(100% + 8px);
+  top: -0.55em;
+  font-size: 0.68rem;
+  color: var(--a-ink-faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.chart-bars {
+  position: absolute;
+  inset: 0 0 34px 62px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+.chart-bar-slot {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  min-width: 0;
+  cursor: default;
+}
+.chart-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: var(--a-accent);
+  opacity: 0.68;
+  transition: opacity 0.15s ease;
+}
+.chart-bar.is-peak { opacity: 1; }
+.chart-bar-slot:hover .chart-bar,
+.chart-bar-slot:focus-visible .chart-bar { opacity: 1; }
+.chart-bar-slot:focus-visible { outline: 2px solid var(--a-accent); outline-offset: 2px; border-radius: 4px; }
+
+.chart-axis {
+  position: absolute;
+  left: 62px;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.7rem;
+  color: var(--a-ink-faint);
+  padding-top: 8px;
+}
+.chart-axis-peak { color: var(--a-accent); font-weight: 600; }
+
+.chart-tip {
+  position: absolute;
+  bottom: 44px;
+  transform: translateX(-50%);
+  background: var(--a-sidebar);
+  color: #fff;
+  padding: 7px 11px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 5;
+  box-shadow: 0 6px 18px rgba(33, 26, 23, 0.25);
+}
+.chart-tip strong { display: block; font-size: 0.8rem; }
+.chart-tip span { display: block; font-variant-numeric: tabular-nums; }
+.chart-tip .muted { color: #b9aaa1; }
+
+/* Proportion bar used by the report breakdowns. */
+.meter {
+  height: 7px;
+  border-radius: 999px;
+  background: #efe9e1;
+  overflow: hidden;
+}
+.meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--a-accent);
+  opacity: 0.75;
+}
+
+@media (max-width: 560px) {
+  .chart { height: 200px; padding-left: 52px; }
+  .chart-grid, .chart-bars { left: 52px; }
+  .chart-axis { left: 52px; font-size: 0.66rem; }
+  .chart-axis-peak { display: none; }
 }

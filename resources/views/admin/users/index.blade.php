@@ -3,6 +3,7 @@
 @section('title', 'Users')
 
 @section('actions')
+    <a href="{{ route('admin.export.customers') }}" class="a-btn ghost sm">Export CSV</a>
     <a href="{{ route('admin.users.create') }}" class="a-btn sm">Add user</a>
 @endsection
 

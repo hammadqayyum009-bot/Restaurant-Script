@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MenuCategory;
 use App\Models\MenuItem;
+use App\Services\ActivityLogger;
 use App\Services\Uploader;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -12,7 +13,7 @@ use Illuminate\Validation\Rule;
 
 class MenuItemController extends Controller
 {
-    public function __construct(protected Uploader $uploader)
+    public function __construct(protected Uploader $uploader, protected ActivityLogger $activity)
     {
     }
 
@@ -50,6 +51,7 @@ class MenuItemController extends Controller
         $dish = MenuItem::create($data);
 
         $this->handleImage($request, $dish);
+        $this->activity->created($dish, 'dish "'.$dish->name.'"');
 
         return redirect()->route('admin.dishes.index')->with('success', 'Dish created.');
     }
@@ -66,6 +68,7 @@ class MenuItemController extends Controller
     {
         $dish->update($this->validated($request, $dish));
         $this->handleImage($request, $dish);
+        $this->activity->updated($dish, 'dish "'.$dish->name.'"');
 
         return redirect()->route('admin.dishes.index')->with('success', 'Dish updated.');
     }
@@ -73,6 +76,7 @@ class MenuItemController extends Controller
     public function destroy(MenuItem $dish)
     {
         $this->uploader->delete($dish->image);
+        $this->activity->deleted('dish "'.$dish->name.'"', $dish);
         $dish->delete();
 
         return redirect()->route('admin.dishes.index')->with('success', 'Dish deleted.');

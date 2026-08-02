@@ -3,6 +3,8 @@
 @section('title', 'Order '.$order->order_number)
 
 @section('actions')
+    <a href="{{ route('admin.orders.invoice', $order) }}" target="_blank" rel="noopener" class="a-btn ghost sm">Invoice</a>
+    <a href="{{ route('admin.orders.receipt', $order) }}" target="_blank" rel="noopener" class="a-btn ghost sm">Receipt</a>
     <a href="{{ route('admin.orders.index') }}" class="a-btn ghost sm">Back to orders</a>
 @endsection
 

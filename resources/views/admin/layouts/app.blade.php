@@ -106,6 +106,18 @@
             </div>
 
             <div class="a-nav-group">
+                <div class="a-nav-title">Reporting</div>
+                <a href="{{ route('admin.reports.index') }}" class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5V13.5M9.75 19.5V6.75M15 19.5v-9M20.25 19.5V4.5M3 21h18"/></svg>
+                    Sales reports
+                </a>
+                <a href="{{ route('admin.activity.index') }}" class="{{ request()->routeIs('admin.activity.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12h4l2.5-6 4 13 2.5-7h5"/></svg>
+                    Activity log
+                </a>
+            </div>
+
+            <div class="a-nav-group">
                 <div class="a-nav-title">Email</div>
                 <a href="{{ route('admin.email.smtp') }}" class="{{ request()->routeIs('admin.email.smtp') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6.75A2.25 2.25 0 015.25 4.5h13.5A2.25 2.25 0 0121 6.75v10.5a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 17.25V6.75zm2 .25l7 6 7-6"/></svg>

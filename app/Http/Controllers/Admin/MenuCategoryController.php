@@ -4,12 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\MenuCategory;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class MenuCategoryController extends Controller
 {
+    public function __construct(protected ActivityLogger $activity)
+    {
+    }
+
     public function index()
     {
         return view('admin.categories.index', [
@@ -24,8 +29,8 @@ class MenuCategoryController extends Controller
 
     public function store(Request $request)
     {
-        $data = $this->validated($request);
-        MenuCategory::create($data);
+        $category = MenuCategory::create($this->validated($request));
+        $this->activity->created($category, 'category "'.$category->name.'"');
 
         return redirect()->route('admin.categories.index')->with('success', 'Category created.');
     }
@@ -38,6 +43,7 @@ class MenuCategoryController extends Controller
     public function update(Request $request, MenuCategory $category)
     {
         $category->update($this->validated($request, $category));
+        $this->activity->updated($category, 'category "'.$category->name.'"');
 
         return redirect()->route('admin.categories.index')->with('success', 'Category updated.');
     }
@@ -47,6 +53,7 @@ class MenuCategoryController extends Controller
         // Dishes cascade with the category, so say so plainly rather than
         // silently deleting a chunk of the menu.
         $dishes = $category->menuItems()->count();
+        $this->activity->deleted('category "'.$category->name.'" and '.$dishes.' dishes', $category);
         $category->delete();
 
         return redirect()->route('admin.categories.index')

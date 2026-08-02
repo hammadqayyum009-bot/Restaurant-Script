@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Admin\MailController;
 use App\Http\Controllers\Admin\MenuCategoryController;
 use App\Http\Controllers\Admin\MenuItemController;
@@ -10,6 +12,7 @@ use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReservationController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\SettingsController;
@@ -46,6 +49,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // ---- Operations ----
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::get('/orders/{order}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
+        Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
         Route::put('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
         Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
 
@@ -62,6 +67,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
         Route::resource('users', UserController::class)->except('show');
+
+        // ---- Reporting ----
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/activity', [ActivityController::class, 'index'])->name('activity.index');
+        Route::get('/export/orders', [ExportController::class, 'orders'])->name('export.orders');
+        Route::get('/export/reservations', [ExportController::class, 'reservations'])->name('export.reservations');
+        Route::get('/export/customers', [ExportController::class, 'customers'])->name('export.customers');
 
         // ---- Settings ----
         Route::get('/settings/site', [SettingsController::class, 'site'])->name('settings.site');

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use App\Services\Mailer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +12,10 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    public function __construct(protected ActivityLogger $activity)
+    {
+    }
+
     public function index(Request $request)
     {
         $query = User::query()->withCount('orders');
@@ -54,6 +59,7 @@ class UserController extends Controller
         $data['is_active'] = $request->boolean('is_active');
 
         $user = User::create($data);
+        $this->activity->created($user, ($user->is_admin ? 'admin' : 'customer').' "'.$user->name.'"');
 
         if ($request->boolean('send_welcome')) {
             $mailer->dispatchTemplate('welcome', $user->email, $user->name, [
@@ -93,6 +99,7 @@ class UserController extends Controller
         }
 
         $user->update($data);
+        $this->activity->updated($user, 'user "'.$user->name.'"');
 
         return redirect()->route('admin.users.index')->with('success', 'User updated.');
     }
@@ -107,6 +114,7 @@ class UserController extends Controller
             return back()->with('error', 'That is the last admin account — create another one first.');
         }
 
+        $this->activity->deleted('user "'.$user->name.'"', $user);
         $user->delete();
 
         return redirect()->route('admin.users.index')->with('success', 'User deleted.');

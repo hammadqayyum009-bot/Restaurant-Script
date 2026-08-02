@@ -2,6 +2,10 @@
 
 @section('title', 'Orders')
 
+@section('actions')
+    <a href="{{ route('admin.export.orders', request()->only('status', 'type') + ['range' => 'all']) }}" class="a-btn ghost sm">Export CSV</a>
+@endsection
+
 @section('content')
     <div class="a-card">
         <form method="GET" class="a-filters">

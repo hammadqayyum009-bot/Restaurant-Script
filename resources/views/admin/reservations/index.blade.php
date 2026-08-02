@@ -2,6 +2,10 @@
 
 @section('title', 'Table reservations')
 
+@section('actions')
+    <a href="{{ route('admin.export.reservations', ['range' => 'all']) }}" class="a-btn ghost sm">Export CSV</a>
+@endsection
+
 @section('content')
     <div class="a-card">
         <form method="GET" class="a-filters">

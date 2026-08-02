@@ -36,6 +36,10 @@ Sign in at **`/admin`** with the account created during installation. Everything
 | **Ordering settings** | Delivery fee, minimum order, tax, delivery/pickup toggles, cash/card toggles, reservation hours and party size, review moderation — all enforced on the public site |
 | **Admin panel settings** | The panel's own name, short label, logo and favicon — separate from the public site |
 | **My profile** | Each admin changes their own name, email and password |
+| **Sales reports** | Date-ranged revenue, orders, average order value, fees and tax, a daily revenue chart, breakdowns by status/type/payment, and top-selling dishes |
+| **Invoice & receipt** | A4 invoice and 80mm thermal receipt for any order, print-ready from the order screen |
+| **CSV export** | Orders, reservations and customers, honouring the filters on screen |
+| **Activity log** | Who changed what, when, and from which address — filterable by action and admin |
 | **Email** | SMTP setup with a test-send button, editable templates for every automatic email, a composer for sending to selected users or everyone, and a delivery log with the exact error when something fails |
 
 ### Accounts and security
