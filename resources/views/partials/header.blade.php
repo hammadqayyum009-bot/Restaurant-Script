@@ -1,22 +1,51 @@
+@php
+    use App\Http\Controllers\Admin\ContentController;
+
+    $navLinks = json_decode((string) $settings->get('header_nav'), true);
+    if (! is_array($navLinks) || empty($navLinks)) {
+        $navLinks = ContentController::defaultNav();
+    }
+
+    $showCta = $settings->bool('header_show_cta', true);
+    $ctaLabel = $settings->get('header_cta_label', 'Order Online');
+    $ctaUrl = $settings->get('header_cta_url', '/menu');
+    $currentPath = '/'.trim(request()->path(), '/');
+@endphp
+
 <header class="site-header">
     <div class="container">
         <a href="{{ route('home') }}" class="brand">
-            @include('partials.logo')
+            @if (config('site.logo'))
+                <img src="{{ asset(config('site.logo')) }}" alt="{{ config('site.name') }}" class="brand-logo">
+            @else
+                @include('partials.logo')
+            @endif
             <span class="brand-text">
                 <strong>{{ config('site.name') }}</strong>
-                <span>Gulf Cuisine</span>
+                <span>{{ $settings->get('header_brand_subtitle', 'Gulf Cuisine') }}</span>
             </span>
         </a>
 
         <nav class="main-nav" id="main-nav" aria-label="Main navigation">
             <button class="nav-close" id="nav-close" aria-label="Close menu">&times;</button>
             <ul>
-                <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
-                <li><a href="{{ route('menu.index') }}" class="{{ request()->routeIs('menu.*') ? 'active' : '' }}">Menu</a></li>
-                <li><a href="{{ route('contact') }}" class="{{ request()->routeIs('contact') ? 'active' : '' }}">Contact</a></li>
-                <li><a href="{{ route('reservations.create') }}" class="{{ request()->routeIs('reservations.*') ? 'active' : '' }}">Book a Table</a></li>
+                @foreach ($navLinks as $link)
+                    @php $href = \Illuminate\Support\Str::startsWith($link['url'], ['http://', 'https://']) ? $link['url'] : url($link['url']); @endphp
+                    <li>
+                        <a href="{{ $href }}" class="{{ $currentPath === '/'.trim($link['url'], '/') ? 'active' : '' }}">
+                            {{ $link['label'] }}
+                        </a>
+                    </li>
+                @endforeach
                 <li class="nav-cart-link"><a href="{{ route('cart.index') }}" class="{{ request()->routeIs('cart.*') ? 'active' : '' }}">Cart</a></li>
             </ul>
+
+            @if ($showCta && $ctaLabel)
+                <div class="nav-cta">
+                    <a href="{{ \Illuminate\Support\Str::startsWith($ctaUrl, ['http://', 'https://']) ? $ctaUrl : url($ctaUrl) }}"
+                       class="btn btn-primary btn-block">{{ $ctaLabel }}</a>
+                </div>
+            @endif
         </nav>
 
         <div class="header-actions">

@@ -1,0 +1,114 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Services\Mailer;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+
+class UserController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = User::query()->withCount('orders');
+
+        if ($search = trim((string) $request->query('q'))) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->query('role') === 'admin') {
+            $query->where('is_admin', true);
+        } elseif ($request->query('role') === 'customer') {
+            $query->where('is_admin', false);
+        }
+
+        return view('admin.users.index', [
+            'users' => $query->latest()->paginate(20)->withQueryString(),
+            'search' => $search,
+            'role' => $request->query('role'),
+        ]);
+    }
+
+    public function create()
+    {
+        return view('admin.users.form', ['user' => new User(['is_active' => true])]);
+    }
+
+    public function store(Request $request, Mailer $mailer)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['required', 'email', 'max:150', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $data['is_admin'] = $request->boolean('is_admin');
+        $data['is_active'] = $request->boolean('is_active');
+
+        $user = User::create($data);
+
+        if ($request->boolean('send_welcome')) {
+            $mailer->sendTemplate('welcome', $user->email, $user->name, [
+                'name' => $user->name,
+                'email' => $user->email,
+            ]);
+        }
+
+        return redirect()->route('admin.users.index')->with('success', 'User created.');
+    }
+
+    public function edit(User $user)
+    {
+        return view('admin.users.form', ['user' => $user]);
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['required', 'email', 'max:150', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        if (empty($data['password'])) {
+            unset($data['password']);
+        }
+
+        // Never let an admin lock themselves out of the panel they are using.
+        if ($user->id === Auth::id()) {
+            $data['is_admin'] = true;
+            $data['is_active'] = true;
+        } else {
+            $data['is_admin'] = $request->boolean('is_admin');
+            $data['is_active'] = $request->boolean('is_active');
+        }
+
+        $user->update($data);
+
+        return redirect()->route('admin.users.index')->with('success', 'User updated.');
+    }
+
+    public function destroy(User $user)
+    {
+        if ($user->id === Auth::id()) {
+            return back()->with('error', 'You cannot delete the account you are signed in with.');
+        }
+
+        if ($user->is_admin && User::where('is_admin', true)->count() <= 1) {
+            return back()->with('error', 'That is the last admin account — create another one first.');
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.users.index')->with('success', 'User deleted.');
+    }
+}

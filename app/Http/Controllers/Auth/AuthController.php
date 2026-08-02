@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Mailer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -47,7 +48,7 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    public function register(Request $request)
+    public function register(Request $request, Mailer $mailer)
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
@@ -62,6 +63,13 @@ class AuthController extends Controller
             'phone' => $data['phone'] ?? null,
             'password' => Hash::make($data['password']),
         ]);
+
+        if (config('notifications.on_register')) {
+            $mailer->sendTemplate('welcome', $user->email, $user->name, [
+                'name' => $user->name,
+                'email' => $user->email,
+            ]);
+        }
 
         Auth::login($user);
         $request->session()->regenerate();

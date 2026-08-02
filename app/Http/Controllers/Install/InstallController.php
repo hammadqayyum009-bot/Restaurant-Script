@@ -117,7 +117,17 @@ class InstallController extends Controller
             $admin->name = $data['admin_name'];
             $admin->email = $data['admin_email'];
             $admin->password = Hash::make($data['admin_password']);
+            $admin->is_admin = true;
+            $admin->is_active = true;
             $admin->save();
+
+            // The restaurant name typed into the wizard becomes the first saved
+            // setting, so the site is branded before the admin opens the panel.
+            app(\App\Services\Settings::class)->setMany([
+                'site_name' => $data['site_name'] ?? config('site.name'),
+                'mail_from_name' => $data['site_name'] ?? config('site.name'),
+                'notify_admin_email' => $data['admin_email'],
+            ], 'site');
 
             File::put(storage_path('installed.lock'), now()->toDateTimeString());
 

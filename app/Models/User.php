@@ -22,11 +22,24 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'is_admin',
+        'is_active',
+        'last_login_at',
     ];
 
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'email', 'email');
+    }
+
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin;
     }
 
     /**
@@ -48,6 +61,9 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_login_at' => 'datetime',
+            'is_admin' => 'boolean',
+            'is_active' => 'boolean',
             'password' => 'hashed',
         ];
     }

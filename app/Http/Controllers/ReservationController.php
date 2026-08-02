@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reservation;
+use App\Services\Mailer;
 use Illuminate\Http\Request;
 
 class ReservationController extends Controller
@@ -12,7 +13,7 @@ class ReservationController extends Controller
         return view('reservations.create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request, Mailer $mailer)
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
@@ -25,6 +26,23 @@ class ReservationController extends Controller
         ]);
 
         $reservation = Reservation::create($data);
+
+        $vars = [
+            'name' => $reservation->name,
+            'phone' => $reservation->phone,
+            'guests' => (string) $reservation->guests,
+            'date' => $reservation->reservation_date?->format('D, d M Y'),
+            'time' => $reservation->reservation_time,
+            'notes' => $reservation->notes ?: '—',
+        ];
+
+        if ($reservation->email && config('notifications.on_reservation')) {
+            $mailer->sendTemplate('reservation', $reservation->email, $reservation->name, $vars);
+        }
+
+        if (config('notifications.copy_admin_on_reservation') && config('notifications.admin_email')) {
+            $mailer->sendTemplate('admin_reservation', config('notifications.admin_email'), null, $vars);
+        }
 
         return redirect()->route('reservations.success', $reservation->id);
     }

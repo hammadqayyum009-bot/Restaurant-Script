@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\Cart;
+use App\Services\Mailer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -26,7 +27,7 @@ class CheckoutController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, Mailer $mailer)
     {
         if ($this->cart->isEmpty()) {
             return redirect()->route('menu.index')->with('error', 'Your cart is empty.');
@@ -43,7 +44,9 @@ class CheckoutController extends Controller
         ]);
 
         $subtotal = $this->cart->subtotal();
-        $deliveryFee = $data['order_type'] === 'delivery' && $subtotal > 0 ? 10 : 0;
+        $deliveryFee = $data['order_type'] === 'delivery' && $subtotal > 0
+            ? (float) config('shop.delivery_fee')
+            : 0;
 
         $order = Order::create([
             'user_id' => $request->user()?->id,
@@ -73,8 +76,46 @@ class CheckoutController extends Controller
         }
 
         $this->cart->clear();
+        $order->load('items');
+
+        $this->notify($mailer, $order);
 
         return redirect()->route('checkout.success', $order->order_number);
+    }
+
+
+    /**
+     * Emails the customer their confirmation and, when enabled, alerts the
+     * restaurant. Delivery failures are swallowed by the mailer and recorded in
+     * the delivery log — a broken mailbox must never lose an order.
+     */
+    protected function notify(Mailer $mailer, Order $order): void
+    {
+        $itemsHtml = '<ul>';
+        foreach ($order->items as $item) {
+            $itemsHtml .= '<li>'.e($item->quantity.' × '.$item->name).' — '
+                .e(config('site.currency').' '.number_format((float) $item->line_total, 2)).'</li>';
+        }
+        $itemsHtml .= '</ul>';
+
+        $vars = [
+            'name' => $order->customer_name,
+            'phone' => $order->phone,
+            'order_number' => $order->order_number,
+            'total' => number_format((float) $order->total, 2),
+            'order_type' => ucfirst($order->order_type),
+            'payment_method' => $order->payment_method === 'cash' ? 'Cash on delivery' : 'Card on delivery',
+            'address' => $order->address,
+            'order_items' => $itemsHtml,
+        ];
+
+        if ($order->email && config('notifications.on_order')) {
+            $mailer->sendTemplate('order_placed', $order->email, $order->customer_name, $vars);
+        }
+
+        if (config('notifications.copy_admin_on_order') && config('notifications.admin_email')) {
+            $mailer->sendTemplate('admin_order', config('notifications.admin_email'), null, $vars);
+        }
     }
 
     public function success(string $orderNumber)

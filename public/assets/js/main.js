@@ -41,12 +41,12 @@
     function open() {
       nav.classList.add("is-open");
       scrim && scrim.classList.add("is-open");
-      document.body.style.overflow = "hidden";
+      document.documentElement.classList.add("scroll-locked");
     }
     function closeNav() {
       nav.classList.remove("is-open");
       scrim && scrim.classList.remove("is-open");
-      document.body.style.overflow = "";
+      document.documentElement.classList.remove("scroll-locked");
     }
     toggle.addEventListener("click", open);
     close && close.addEventListener("click", closeNav);
@@ -63,12 +63,12 @@
     function open() {
       drawer.classList.add("is-open");
       scrim && scrim.classList.add("is-open");
-      document.body.style.overflow = "hidden";
+      document.documentElement.classList.add("scroll-locked");
     }
     function close() {
       drawer.classList.remove("is-open");
       scrim && scrim.classList.remove("is-open");
-      document.body.style.overflow = "";
+      document.documentElement.classList.remove("scroll-locked");
     }
     openers.forEach(function (el) {
       el.addEventListener("click", function (e) {

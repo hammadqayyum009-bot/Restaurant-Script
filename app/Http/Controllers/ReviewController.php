@@ -15,8 +15,15 @@ class ReviewController extends Controller
             'comment' => ['required', 'string', 'max:600'],
         ]);
 
+        $data['is_approved'] = (bool) config('shop.reviews_auto_approve');
+
         Review::create($data);
 
-        return back()->with('success', 'Thank you for your review!')->withFragment('reviews');
+        return back()->with(
+            'success',
+            $data['is_approved']
+                ? 'Thank you for your review!'
+                : 'Thank you! Your review will appear once we have checked it.'
+        )->withFragment('reviews');
     }
 }

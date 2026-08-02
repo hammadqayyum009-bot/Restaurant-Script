@@ -32,6 +32,12 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 
+/* The nav and cart drawers are parked off the right edge. Without this they
+   widen the document and every mobile page scrolls sideways into them. */
+html, body { overflow-x: hidden; max-width: 100%; }
+/* Set while a drawer is open so the page behind it cannot scroll. */
+html.scroll-locked, html.scroll-locked body { overflow: hidden; }
+
 body {
   margin: 0;
   font-family: "Poppins", "Segoe UI", Tahoma, sans-serif;
@@ -123,7 +129,10 @@ button { font-family: inherit; cursor: pointer; }
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 100;
+  /* Sticky + z-index makes this a stacking context, so the nav drawer inside it
+     cannot out-stack the scrim on its own — the header itself has to sit above
+     the scrim (110) for the drawer to stay clickable. */
+  z-index: 130;
   background: rgba(32, 21, 18, 0.97);
   backdrop-filter: blur(6px);
   border-bottom: 1px solid rgba(201, 162, 75, 0.25);
@@ -150,11 +159,13 @@ button { font-family: inherit; cursor: pointer; }
   background: var(--ink-900);
   padding: 90px 28px 28px;
   transform: translateX(100%);
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, visibility 0.3s ease;
   z-index: 120;
   overflow-y: auto;
+  /* Keeps the closed drawer out of hit-testing and off the scroll extent. */
+  visibility: hidden;
 }
-.main-nav.is-open { transform: translateX(0); box-shadow: var(--shadow-strong); }
+.main-nav.is-open { transform: translateX(0); visibility: visible; box-shadow: var(--shadow-strong); }
 .main-nav ul { display: flex; flex-direction: column; gap: 6px; }
 .main-nav a {
   display: block;
@@ -175,6 +186,9 @@ button { font-family: inherit; cursor: pointer; }
   transition: opacity 0.3s ease;
   z-index: 110;
 }
+/* The cart drawer is a body-level element, so its scrim has to clear the
+   header to keep tap-outside-to-close working across the whole screen. */
+#cart-scrim { z-index: 150; }
 .nav-scrim.is-open { opacity: 1; visibility: visible; }
 
 .nav-close {
@@ -261,6 +275,7 @@ button { font-family: inherit; cursor: pointer; }
     padding: 0;
     transform: none;
     overflow: visible;
+    visibility: visible;
   }
   .main-nav ul { flex-direction: row; align-items: center; gap: 28px; }
   .main-nav a { border-bottom: none; padding: 6px 0; position: relative; }
@@ -285,6 +300,11 @@ button { font-family: inherit; cursor: pointer; }
   background:
     linear-gradient(180deg, rgba(32,21,18,0.55), rgba(32,21,18,0.88)),
     url('https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1740&q=80') center/cover no-repeat fixed;
+}
+/* Fixed attachment is unreliable on mobile browsers — it stretches or freezes
+   the backdrop while scrolling. */
+@media (max-width: 900px) {
+  .hero { background-attachment: scroll; min-height: 0; }
 }
 .hero .container { position: relative; z-index: 2; padding-block: 90px 60px; }
 .hero .eyebrow {
@@ -485,12 +505,13 @@ button { font-family: inherit; cursor: pointer; }
   background: var(--cream-050);
   z-index: 200;
   transform: translateX(100%);
-  transition: transform 0.32s ease;
+  transition: transform 0.32s ease, visibility 0.32s ease;
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-strong);
+  visibility: hidden;
 }
-.cart-drawer.is-open { transform: translateX(0); }
+.cart-drawer.is-open { transform: translateX(0); visibility: visible; }
 .cart-drawer-head {
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px; background: var(--maroon-950); color: var(--gold-400);
