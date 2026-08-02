@@ -32,16 +32,35 @@ class Uploader
 
     public function store(UploadedFile $file, string $folder): string
     {
+        $extension = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'jpg');
+        $name = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+        $name = ($name !== '' ? Str::limit($name, 40, '') : 'file').'-'.Str::random(8).'.'.$extension;
+
+        return $this->move($file, $folder, $name);
+    }
+
+    /**
+     * Same as store(), but the filename carries nothing derived from the
+     * original upload — not even a slug of it. Used where the original
+     * filename must never be trusted or reflected back at all (e.g. the
+     * billing module's seller logo, which appears on a legal document).
+     */
+    public function storeRandom(UploadedFile $file, string $folder): string
+    {
+        $extension = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'jpg');
+        $name = Str::random(40).'.'.$extension;
+
+        return $this->move($file, $folder, $name);
+    }
+
+    protected function move(UploadedFile $file, string $folder, string $name): string
+    {
         $folder = trim($folder, '/');
         $directory = public_path('uploads/'.$folder);
 
         if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
-
-        $extension = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'jpg');
-        $name = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
-        $name = ($name !== '' ? Str::limit($name, 40, '') : 'file').'-'.Str::random(8).'.'.$extension;
 
         $destination = $directory.'/'.$name;
         $file->move($directory, $name);

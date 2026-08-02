@@ -22,12 +22,19 @@ class Settings
 
     public function available(): bool
     {
-        if ($this->tableExists === null) {
-            try {
-                $this->tableExists = Schema::hasTable('settings');
-            } catch (Throwable) {
-                $this->tableExists = false;
-            }
+        // Only the positive result is memoised. A negative result is cheap to
+        // re-check and must not be cached forever: this singleton is resolved
+        // once at boot, which — under a per-test migrator (RefreshDatabase) —
+        // can run before the table exists yet. Caching `false` there would
+        // wrongly disable every settings write for the rest of that request.
+        if ($this->tableExists === true) {
+            return true;
+        }
+
+        try {
+            $this->tableExists = Schema::hasTable('settings');
+        } catch (Throwable) {
+            $this->tableExists = false;
         }
 
         return $this->tableExists;

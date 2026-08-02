@@ -1,0 +1,89 @@
+/*
+ * Billing & Documents module — print stylesheet shell.
+ *
+ * Rule (Section B): logical CSS properties only. No margin-left/margin-right,
+ * no padding-left/padding-right, no [dir="rtl"] override blocks. The document
+ * itself sets dir="rtl" or dir="ltr" on its root element and text-align:start
+ * / margin-inline-* follow that automatically — one stylesheet, both
+ * directions, no duplication.
+ *
+ * Shell only for Batch 1: fonts + variables + print rules. Document layout
+ * (header, line table, totals, QR block) is built in Batch 2 alongside the
+ * print view that uses it.
+ */
+
+@font-face {
+    font-family: "Noto Naskh Arabic";
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("../fonts/noto-naskh-arabic-arabic.woff2") format("woff2");
+    unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF,
+        U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
+
+@font-face {
+    font-family: "Noto Naskh Arabic";
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("../fonts/noto-naskh-arabic-latin.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+        U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+    --doc-ink: #201512;
+    --doc-soft: #6b5a52;
+    --doc-line: #ddd4c9;
+    --doc-accent: #6f1b28;
+    --doc-bg-soft: #f4f1ec;
+    --doc-font-ar: "Noto Naskh Arabic", "Segoe UI", Tahoma, sans-serif;
+    --doc-font-en: ui-sans-serif, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+.doc {
+    box-sizing: border-box;
+    margin: 0 auto;
+    color: var(--doc-ink);
+    background: #fff;
+    font-family: var(--doc-font-en);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.doc[dir="rtl"] {
+    font-family: var(--doc-font-ar);
+}
+
+.doc * {
+    box-sizing: border-box;
+}
+
+.doc .doc-block {
+    border-inline-start: 3px solid var(--doc-accent);
+    padding-inline-start: 12px;
+    margin-block-end: 14px;
+}
+
+.doc .doc-text-end {
+    text-align: end;
+}
+
+.doc .doc-text-start {
+    text-align: start;
+}
+
+@media print {
+    @page {
+        margin: 14mm 12mm;
+    }
+
+    html, body {
+        background: #fff;
+    }
+
+    .doc {
+        box-shadow: none;
+    }
+}

@@ -155,6 +155,12 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 3.75h3l.6 2.4 2.1.9 2.2-1.1 2.1 2.1-1.1 2.2.9 2.1 2.4.6v3l-2.4.6-.9 2.1 1.1 2.2-2.1 2.1-2.2-1.1-2.1.9-.6 2.4h-3"/><circle cx="12" cy="12" r="2.6"/></svg>
                     Admin panel
                 </a>
+                @can('manage-billing')
+                    <a href="{{ route('admin.settings.billing') }}" class="{{ request()->routeIs('admin.settings.billing') ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 3.75h12a1.5 1.5 0 011.5 1.5v13.5l-3-1.8-2.25 1.8-2.25-1.8-2.25 1.8-2.25-1.8-3 1.8V5.25A1.5 1.5 0 016 3.75zM8.25 8.25h7.5M8.25 11.25h7.5M8.25 14.25h4.5"/></svg>
+                        Billing &amp; documents
+                    </a>
+                @endcan
                 <a href="{{ route('home') }}" target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6h4.5v4.5M18 6l-7.5 7.5M16.5 13.5v5.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V9a1.5 1.5 0 011.5-1.5h5.25"/></svg>
                     View website

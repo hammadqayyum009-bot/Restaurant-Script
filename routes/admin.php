@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ActivityController;
+use App\Http\Controllers\Admin\Billing\BillingSettingsController;
 use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExportController;
@@ -84,6 +85,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/settings/seo', [SettingsController::class, 'saveSeo'])->name('settings.seo.save');
         Route::get('/settings/shop', [SettingsController::class, 'shop'])->name('settings.shop');
         Route::put('/settings/shop', [SettingsController::class, 'saveShop'])->name('settings.shop.save');
+
+        // ---- Billing & documents (Batch 1: settings only) ----
+        Route::middleware('can:manage-billing')->group(function () {
+            Route::get('/settings/billing', [BillingSettingsController::class, 'edit'])->name('settings.billing');
+            Route::put('/settings/billing', [BillingSettingsController::class, 'update'])->name('settings.billing.save');
+        });
 
         // ---- Email ----
         Route::get('/email/smtp', [MailController::class, 'smtp'])->name('email.smtp');
