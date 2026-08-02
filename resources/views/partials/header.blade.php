@@ -20,9 +20,12 @@
             @else
                 @include('partials.logo')
             @endif
+            @php $brandSubtitle = $settings->get('header_brand_subtitle'); @endphp
             <span class="brand-text">
                 <strong>{{ config('site.name') }}</strong>
-                <span>{{ $settings->get('header_brand_subtitle', 'Gulf Cuisine') }}</span>
+                @if ($brandSubtitle)
+                    <span>{{ $brandSubtitle }}</span>
+                @endif
             </span>
         </a>
 

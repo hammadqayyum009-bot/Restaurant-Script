@@ -145,8 +145,9 @@ button { font-family: inherit; cursor: pointer; }
   gap: 12px;
 }
 
-.brand { display: flex; align-items: center; gap: 10px; color: var(--cream-100); }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--cream-100); min-width: 0; }
 .brand svg { width: 42px; height: 42px; flex-shrink: 0; }
+.brand-logo { width: 42px; height: 42px; object-fit: contain; flex-shrink: 0; }
 .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
 .brand-text strong { font-family: "Playfair Display", serif; font-size: 1.2rem; color: var(--gold-400); }
 .brand-text span { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-300); }
@@ -208,17 +209,6 @@ button { font-family: inherit; cursor: pointer; }
 
 .header-actions { display: flex; align-items: center; gap: 6px; }
 
-@media (max-width: 420px) {
-  .header-actions { gap: 4px; }
-  .icon-btn { width: 38px; height: 38px; }
-  .icon-btn svg { width: 17px; height: 17px; }
-  .currency-select { height: 38px; padding: 0 6px 0 6px; gap: 2px; }
-  .currency-ico { width: 13px; height: 13px; }
-  .currency-select select { font-size: 0.62rem; }
-  .hamburger { width: 38px; height: 38px; }
-  .brand-text strong { font-size: 1rem; }
-  .brand svg { width: 36px; height: 36px; }
-}
 
 .icon-btn {
   position: relative;
@@ -542,6 +532,7 @@ button { font-family: inherit; cursor: pointer; }
 .qty-control { display: inline-flex; align-items: center; gap: 6px; }
 .qty-control button:not(.qty-delete) { width: 28px; height: 28px; background: var(--cream-100); border: 1px solid rgba(61,15,22,0.15); border-radius: 8px; font-weight: 700; color: var(--maroon-900); }
 .qty-control span { width: 22px; text-align: center; font-size: 0.85rem; }
+
 .qty-delete {
   width: 30px; height: 30px; flex-shrink: 0;
   display: inline-flex; align-items: center; justify-content: center;
@@ -607,7 +598,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 
 /* ---------- Footer ---------- */
 .site-footer { background: var(--ink-900); color: var(--ink-300); }
-.footer-top { padding: 60px 0 30px; }
+.footer-top { padding-block: 60px 30px; }
 .footer-grid { display: grid; gap: 34px; }
 @media (min-width: 720px) { .footer-grid { grid-template-columns: 1.4fr 1fr 1fr 1.2fr; } }
 .footer-grid h4 { color: var(--gold-400); font-size: 1rem; margin-bottom: 16px; }
@@ -629,7 +620,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 .contact-line svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--gold-500); margin-top: 2px; }
 .footer-bottom {
   border-top: 1px solid rgba(255,255,255,0.08);
-  padding: 20px 0;
+  padding-block: 20px;
   font-size: 0.82rem;
   display: flex;
   flex-direction: column;
@@ -848,9 +839,10 @@ textarea.form-control { resize: vertical; min-height: 90px; }
   aspect-ratio: 3/4;
   box-shadow: var(--shadow-soft);
 }
-.gallery-item:first-child { grid-column: span 2; grid-row: span 2; aspect-ratio: 1/1; }
+/* The feature tile only earns its extra space once there are four columns to
+   flow the rest into; in the two-column phone layout it left a hole. */
 @media (min-width: 720px) {
-  .gallery-item:first-child { aspect-ratio: 3/4; }
+  .gallery-item:first-child { grid-column: span 2; grid-row: span 2; aspect-ratio: 3/4; }
 }
 .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
 .gallery-item:hover img { transform: scale(1.08); }
@@ -894,3 +886,117 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 .star-picker input:checked ~ label,
 .star-picker label:hover,
 .star-picker label:hover ~ label { color: var(--gold-500); }
+
+
+/* =========================================================
+   Mobile refinements (<= 560px)
+
+   Phones lay this out at roughly 320-430 CSS pixels. The desktop
+   scale overflows there — the header controls alone ran 7px past a
+   360px viewport — so the whole system is stepped down here: tighter
+   gutters, smaller controls, and type sized for the width rather
+   than shrunk from a desktop figure.
+   ========================================================= */
+@media (max-width: 560px) {
+  :root { --header-h: 62px; }
+
+  .container { padding-inline: 14px; }
+
+  .section { padding: 38px 0; }
+  .section--tight { padding: 24px 0; }
+  .section-heading { margin-bottom: 26px; }
+  .section-heading .eyebrow { font-size: 0.66rem; letter-spacing: 0.16em; margin-bottom: 7px; }
+  .section-heading h2 { font-size: clamp(1.35rem, 6.5vw, 1.85rem); }
+  .section-heading p { font-size: 0.88rem; }
+
+  /* ---- Header: brand plus four controls must fit inside 320px ---- */
+  .site-header .container { gap: 8px; }
+  .brand { gap: 8px; }
+  .brand svg, .brand-logo { width: 34px; height: 34px; }
+  .brand-text { min-width: 0; }
+  .brand-text strong { font-size: 0.86rem; line-height: 1.15; }
+  .brand-text span { font-size: 0.56rem; }
+
+  .header-actions { gap: 5px; flex-shrink: 0; }
+  .icon-btn { width: 34px; height: 34px; }
+  .icon-btn svg { width: 16px; height: 16px; }
+  .cart-badge { min-width: 17px; height: 17px; font-size: 0.58rem; top: -3px; right: -3px; border-width: 1.5px; }
+  .currency-select { height: 34px; padding: 0 4px; gap: 0; }
+  .currency-ico { display: none; }
+  .currency-select select { font-size: 0.66rem; }
+  .hamburger { width: 34px; height: 34px; }
+
+  .main-nav { padding: 76px 22px 24px; }
+  .main-nav a { padding: 11px 4px; font-size: 0.95rem; }
+  .nav-close { top: 18px; right: 20px; }
+
+  /* ---- Hero ---- */
+  .hero { min-height: 0; }
+  .hero .container { padding-block: 52px 42px; }
+  .hero .eyebrow { font-size: 0.64rem; letter-spacing: 0.14em; margin-bottom: 12px; }
+  .hero h1 { font-size: clamp(1.6rem, 7.4vw, 2.15rem); }
+  .hero p.lead { font-size: 0.92rem; margin-bottom: 22px; }
+  .hero-cta { gap: 10px; }
+  .hero-cta .btn { flex: 1 1 auto; padding: 11px 18px; font-size: 0.85rem; }
+  .hero-stats { gap: 8px; }
+  .hero-stats div { padding: 10px 4px; }
+  .hero-stats strong { font-size: 1.15rem; }
+  .hero-stats span { font-size: 0.58rem; letter-spacing: 0.05em; }
+
+  .strip .track { font-size: 0.82rem; }
+
+  /* ---- Dish cards ---- */
+  .dish-body { padding: 12px 12px 14px; gap: 6px; }
+  .dish-body h3 { font-size: 0.92rem; }
+  .dish-body p { font-size: 0.78rem; }
+  .dish-foot { flex-wrap: wrap; gap: 8px; }
+  .price { font-size: 0.96rem; }
+  .add-to-cart-btn { font-size: 0.74rem; padding: 8px 12px; }
+  .dish-tag, .dish-origin { font-size: 0.58rem; padding: 3px 8px; }
+
+  .cat-tabs a { font-size: 0.78rem; padding: 7px 13px; }
+
+  /* ---- Cart drawer and cart page ---- */
+  .cart-drawer { width: min(340px, 92vw); }
+  .cart-drawer-head { padding: 14px 16px; }
+  .cart-drawer-head h3 { font-size: 1rem; }
+  .cart-drawer-body { padding: 12px 16px; }
+  .cart-drawer-foot { padding: 14px 16px; }
+  .cart-line { gap: 10px; padding: 12px 0; }
+  .cart-line img { width: 52px; height: 52px; }
+  .cart-line-info h4 { font-size: 0.85rem; }
+  .cart-line-meta { gap: 6px; margin-top: 5px; }
+  .cart-line-meta .price { font-size: 0.86rem; }
+  .qty-control { gap: 5px; }
+  .qty-control button:not(.qty-delete) { width: 26px; height: 26px; }
+  .qty-control span { width: 20px; font-size: 0.8rem; }
+  .qty-delete { width: 28px; height: 28px; }
+  .qty-delete svg { width: 14px; height: 14px; }
+  .cart-summary-box { padding: 18px 16px; }
+
+  /* ---- Reviews ---- */
+  .review-card { padding: 16px; }
+  .review-comment { font-size: 0.86rem; }
+
+  /* ---- Footer ---- */
+  .footer-top { padding-block: 38px 22px; }
+  .footer-grid { gap: 26px; }
+  .footer-grid h4 { font-size: 0.92rem; margin-bottom: 12px; }
+  .footer-grid ul li { margin-bottom: 7px; }
+  .footer-grid ul a { font-size: 0.85rem; }
+  .footer-about p { font-size: 0.85rem; }
+  .footer-brand svg, .footer-brand .brand-logo { width: 32px; height: 32px; }
+  .footer-brand strong { font-size: 1.02rem; }
+  .social-row a { width: 34px; height: 34px; }
+  .contact-line { font-size: 0.85rem; margin-bottom: 10px; }
+  .footer-bottom { font-size: 0.75rem; padding-block: 16px; }
+  .legal-links { flex-wrap: wrap; justify-content: center; gap: 8px 14px; }
+
+  .whatsapp-float { width: 48px; height: 48px; bottom: 16px; left: 16px; }
+  .whatsapp-float svg { width: 24px; height: 24px; }
+
+  /* ---- Page hero and forms ---- */
+  .page-hero { padding: 44px 0 30px; }
+  .page-hero h1 { font-size: clamp(1.5rem, 7vw, 2rem); }
+  .form-control { font-size: 0.9rem; }
+}

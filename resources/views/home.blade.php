@@ -57,7 +57,7 @@
                 <h2>{{ $settings->get('home_featured_heading', 'Our Signature Dishes') }}</h2>
                 <p>{{ $settings->get('home_featured_intro', 'Handpicked favourites loved by our guests across the Gulf — grilled over charcoal and slow-cooked with authentic spice blends.') }}</p>
             </div>
-            <div class="grid grid-3">
+            <div class="grid menu-grid">
                 @forelse ($featured as $item)
                     <div class="dish-card">
                         <div class="dish-media">

@@ -48,7 +48,8 @@
             <div class="a-field">
                 <label for="header_brand_subtitle">Text under the restaurant name</label>
                 <input type="text" id="header_brand_subtitle" name="header_brand_subtitle" class="a-input" maxlength="60"
-                       value="{{ old('header_brand_subtitle', $settings->get('header_brand_subtitle', 'Gulf Cuisine')) }}">
+                       value="{{ old('header_brand_subtitle', $settings->get('header_brand_subtitle')) }}">
+                <span class="a-hint">Leave blank to show just the restaurant name.</span>
             </div>
 
             <div class="a-form-actions">
