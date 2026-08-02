@@ -39,16 +39,21 @@ class DocumentPrintController extends Controller
         // app's own locale (which stays English everywhere else — the admin
         // panel and storefront are not localised). __() in the print view
         // resolves against whatever locale is active when it renders, so it
-        // is forced here for the render and restored immediately after.
+        // is forced here for the render and restored immediately after —
+        // inside a finally, so a render error (a bad template, a missing
+        // translation key) still restores English rather than leaving the
+        // process-wide locale stuck on Arabic for whatever runs next.
         $previousLocale = App::getLocale();
         App::setLocale('ar');
 
-        $html = view('documents.print', [
-            'document' => $document,
-            'qrDataUri' => $qrDataUri,
-        ])->render();
-
-        App::setLocale($previousLocale);
+        try {
+            $html = view('documents.print', [
+                'document' => $document,
+                'qrDataUri' => $qrDataUri,
+            ])->render();
+        } finally {
+            App::setLocale($previousLocale);
+        }
 
         return response($html);
     }

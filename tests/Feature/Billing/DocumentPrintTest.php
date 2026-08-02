@@ -71,6 +71,41 @@ class DocumentPrintTest extends TestCase
         }
     }
 
+    /**
+     * Regression test for the follow-up gap: the original fix set the locale
+     * back with a plain statement after render() — if render() threw (a bad
+     * template, a missing translation key), that restore line never ran,
+     * leaving the locale stuck on Arabic for whatever ran next. Forces a real
+     * exception during rendering via a view composer, rather than asserting
+     * only the happy path.
+     */
+    public function test_the_locale_is_restored_even_when_rendering_the_print_view_throws(): void
+    {
+        $order = \Database\Factories\OrderFactory::new()->create(['subtotal' => 100, 'delivery_fee' => 0, 'tax' => 0, 'total' => 100]);
+        \Database\Factories\OrderItemFactory::new()->create(['order_id' => $order->id, 'price' => 100, 'quantity' => 1, 'line_total' => 100]);
+
+        $admin = User::factory()->create(['is_admin' => true, 'is_active' => true]);
+        $document = app(DocumentIssuer::class)->createDraftFromOrder($order, 'simplified_tax_invoice');
+        $document = app(DocumentIssuer::class)->issue($document, $admin);
+
+        \Illuminate\Support\Facades\View::composer('documents.print', function () {
+            throw new \RuntimeException('forced failure to prove the locale restore runs even on error');
+        });
+
+        $this->withoutExceptionHandling();
+        $threw = false;
+
+        try {
+            $this->actingAs($admin)->get(route('admin.billing.print', $document));
+        } catch (\RuntimeException $e) {
+            $threw = true;
+            $this->assertStringContainsString('forced failure', $e->getMessage());
+        }
+
+        $this->assertTrue($threw, 'The forced exception must actually have propagated for this test to prove anything.');
+        $this->assertSame('en', App::getLocale(), 'The locale must be restored even though rendering threw.');
+    }
+
     public function test_a_draft_cannot_be_printed(): void
     {
         $order = \Database\Factories\OrderFactory::new()->create(['subtotal' => 100, 'delivery_fee' => 0, 'tax' => 0, 'total' => 100]);

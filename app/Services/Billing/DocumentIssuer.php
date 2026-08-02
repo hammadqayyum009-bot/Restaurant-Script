@@ -172,15 +172,38 @@ class DocumentIssuer
      * already open on this connection — as RefreshDatabase keeps one open
      * for the whole test, to roll back between tests without re-migrating —
      * this falls back to DB::transaction()'s ordinary (savepoint) nesting
-     * instead. That's fine for that case: RefreshDatabase's tests run
-     * sequentially, not under real concurrency, so there is no herd for
-     * BEGIN IMMEDIATE to prevent.
+     * instead. That fallback is deliberately restricted to
+     * app()->runningUnitTests() (APP_ENV=testing): RefreshDatabase's tests
+     * run sequentially, not under real concurrency, so there is no herd for
+     * BEGIN IMMEDIATE to prevent there.
+     *
+     * Outside tests, the current call path (DocumentController::issue() ->
+     * DocumentIssuer::issue(), with nothing wrapping it in an outer
+     * transaction) means transactionLevel() is always 0 here, so BEGIN
+     * IMMEDIATE always fires in production as shipped today. But if a future
+     * change ever nested this call inside another DB::transaction() on
+     * SQLite, silently falling back would quietly remove the protection this
+     * whole fix exists for. So outside testing, that combination throws
+     * instead of degrading silently — loud failure over a false guarantee.
      */
     protected function transactional(\Closure $callback): mixed
     {
         $connection = DB::connection();
 
-        if ($connection->getDriverName() !== 'sqlite' || $connection->transactionLevel() > 0) {
+        if ($connection->getDriverName() !== 'sqlite') {
+            return DB::transaction($callback);
+        }
+
+        if ($connection->transactionLevel() > 0) {
+            if (! app()->runningUnitTests()) {
+                throw new RuntimeException(
+                    'DocumentIssuer::issue() was called from inside an existing transaction on SQLite outside '.
+                    'the test harness. BEGIN IMMEDIATE cannot run there, and falling back silently would remove '.
+                    'the concurrency protection this method exists for — refusing instead of risking a duplicate '.
+                    'or lost document number.',
+                );
+            }
+
             return DB::transaction($callback);
         }
 
