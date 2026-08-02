@@ -38,7 +38,7 @@ You have two options, depending on what your host allows:
 
 1. Visit your domain in a browser. You'll be redirected automatically to `/install`.
 2. **Welcome** — click "Start Installation".
-3. **Requirements** — the wizard checks your PHP version and required extensions (all standard on cPanel/LiteSpeed hosting) and that `storage/` and `bootstrap/cache/` are writable. If a folder isn't writable, use File Manager to `chmod` it to `775`.
+3. **Requirements** — the wizard checks your PHP version and required extensions (all standard on cPanel/LiteSpeed hosting) and that `storage/` and `bootstrap/cache/` are writable. If a folder isn't writable, use File Manager to `chmod` it to `775`. Do the same for `public/uploads/` — that is where logos, favicons and dish photos uploaded from the admin panel are saved.
 4. **Database & Restaurant Setup** — enter your MySQL credentials from Step 2 (or choose SQLite), your restaurant's name, phone, WhatsApp number, email and address, and create your admin account.
 5. Click **Install Website**. The wizard will write your `.env` file, run all database migrations, seed your menu with sample Gulf-cuisine dishes and legal pages, and create your admin account.
 6. **Done!** Your restaurant website is now live.
@@ -56,5 +56,7 @@ The installer locks itself after a successful run (`storage/installed.lock`) so 
 ## Troubleshooting
 
 - **Blank page / 500 error**: check `storage/logs/laravel.log`. Usually caused by `storage/` or `bootstrap/cache/` not being writable — `chmod -R 775` both folders.
+- **Image upload fails in the admin panel**: `chmod -R 775 public/uploads`.
+- **Emails are not arriving**: open **Admin → Email → Delivery log**. Every attempt is recorded there with the exact error from your mail server.
 - **"No application encryption key"**: this shouldn't happen since a key ships pre-generated, but if you see it, run the installer again or manually add a `base64:` key to `APP_KEY` in `.env`.
 - **Database connection errors during install**: double-check the database name/username include your cPanel username prefix (e.g. `cpaneluser_restaurant`, `cpaneluser_dbuser`), which cPanel adds automatically.
