@@ -80,6 +80,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/settings/site', [SettingsController::class, 'saveSite'])->name('settings.site.save');
         Route::get('/settings/panel', [SettingsController::class, 'panel'])->name('settings.panel');
         Route::put('/settings/panel', [SettingsController::class, 'savePanel'])->name('settings.panel.save');
+        Route::get('/settings/seo', [SettingsController::class, 'seo'])->name('settings.seo');
+        Route::put('/settings/seo', [SettingsController::class, 'saveSeo'])->name('settings.seo.save');
         Route::get('/settings/shop', [SettingsController::class, 'shop'])->name('settings.shop');
         Route::put('/settings/shop', [SettingsController::class, 'saveShop'])->name('settings.shop.save');
 

@@ -231,6 +231,7 @@ class ContentController extends Controller
             ['label' => 'About Us', 'url' => '/about'],
             ['label' => 'Contact', 'url' => '/contact'],
             ['label' => 'My Cart', 'url' => '/cart'],
+            ['label' => 'Track Order', 'url' => '/track'],
         ];
     }
 

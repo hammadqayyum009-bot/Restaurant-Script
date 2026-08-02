@@ -12,6 +12,9 @@ See **[INSTALL.md](INSTALL.md)** for full deployment instructions.
 - **Shopping cart** — add to cart from any dish card, adjust quantity, remove items, all via AJAX with an off-canvas cart drawer and dedicated cart page — no page reloads.
 - **Checkout & orders** — delivery/pickup, cash/card on delivery, order stored in the database with a unique order number and a confirmation page, plus a "confirm on WhatsApp" shortcut.
 - **Footer legal pages** — Terms & Conditions, Privacy Policy, Cookies Policy, Refund & Cancellation Policy, and FAQ, all fully written and editable from the database (`pages` table).
+- **Menu search** — find a dish by name, description or origin, and filter by spice level and maximum price, with shareable URLs.
+- **Guest order tracking** — check an order's progress at `/track` with the order number plus the phone or email it was placed with; no account needed.
+- **Built for search** — canonical URLs, Open Graph and Twitter cards so shared links render a proper preview, JSON-LD Restaurant and Menu structured data for Google, and a `sitemap.xml` and `robots.txt` generated from the live menu and pages.
 - **One-click installer** (`/install`) — checks server requirements, configures the database (MySQL or SQLite), writes `.env`, runs migrations & seeders, creates your admin account, and locks itself once complete.
 - **Vendor dependencies included** — `vendor/` is committed, so shared hosting accounts without Composer/SSH access can deploy by simply uploading the files.
 
@@ -40,7 +43,16 @@ Sign in at **`/admin`** with the account created during installation. Everything
 | **Invoice & receipt** | A4 invoice and 80mm thermal receipt for any order, print-ready from the order screen |
 | **CSV export** | Orders, reservations and customers, honouring the filters on screen |
 | **Activity log** | Who changed what, when, and from which address — filterable by action and admin |
+| **Search &amp; sharing** | Search description, cuisine and price range, the image used on WhatsApp/social link previews, a search-engine visibility switch and the Google verification code |
 | **Email** | SMTP setup with a test-send button, editable templates for every automatic email, a composer for sending to selected users or everyone, and a delivery log with the exact error when something fails |
+
+### Search engines and sharing
+
+`/sitemap.xml` and `/robots.txt` are generated from the live menu, categories and pages — nothing to upload or keep in sync. Submit the sitemap URL in Google Search Console.
+
+Every page carries Restaurant structured data (address, phone, opening hours, cuisine, price range, and the star rating from published reviews); the menu page adds the full dish list with prices, so Google can surface individual dishes. Open Graph and Twitter tags mean a link pasted into WhatsApp shows a proper card — set the image under **Admin → Search & sharing**.
+
+The visibility switch on that screen turns the whole site `noindex` and blocks crawlers in `robots.txt`, which is worth doing while the menu is still being set up.
 
 ### Accounts and security
 

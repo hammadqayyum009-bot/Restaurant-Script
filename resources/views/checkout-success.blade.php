@@ -31,6 +31,7 @@
             </div>
 
             <div style="margin-top:26px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                <a href="{{ route('track.show') }}" class="btn btn-outline on-light">Track this order</a>
                 <a href="{{ route('home') }}" class="btn btn-outline on-light">Back to Home</a>
                 <a href="{{ route('menu.index') }}" class="btn btn-primary">Order More</a>
             </div>

@@ -147,6 +147,10 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 7.5h16.5l-1.2 11.25a1.5 1.5 0 01-1.5 1.35H6.45a1.5 1.5 0 01-1.5-1.35L3.75 7.5zM8.25 7.5V6a3.75 3.75 0 017.5 0v1.5"/></svg>
                     Ordering
                 </a>
+                <a href="{{ route('admin.settings.seo') }}" class="{{ request()->routeIs('admin.settings.seo') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="6.5"/><path stroke-linecap="round" d="M20.5 20.5l-4.7-4.7"/></svg>
+                    Search &amp; sharing
+                </a>
                 <a href="{{ route('admin.settings.panel') }}" class="{{ request()->routeIs('admin.settings.panel') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 3.75h3l.6 2.4 2.1.9 2.2-1.1 2.1 2.1-1.1 2.2.9 2.1 2.4.6v3l-2.4.6-.9 2.1 1.1 2.2-2.1 2.1-2.2-1.1-2.1.9-.6 2.4h-3"/><circle cx="12" cy="12" r="2.6"/></svg>
                     Admin panel

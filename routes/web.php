@@ -8,10 +8,12 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Install\InstallController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\OrderTrackingController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('install')->name('install.')->group(function () {
@@ -21,6 +23,9 @@ Route::prefix('install')->name('install.')->group(function () {
     Route::post('/database', [InstallController::class, 'databaseStore'])->name('database.store');
     Route::get('/finish', [InstallController::class, 'finish'])->name('finish');
 });
+
+Route::get('/sitemap.xml', [SitemapController::class, 'sitemap'])->name('sitemap');
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 
 Route::middleware('installed')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -39,6 +44,9 @@ Route::middleware('installed')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/success/{orderNumber}', [CheckoutController::class, 'success'])->name('checkout.success');
+
+    Route::get('/track', [OrderTrackingController::class, 'show'])->name('track.show');
+    Route::post('/track', [OrderTrackingController::class, 'find'])->name('track.find');
 
     Route::get('/pages/{slug}', [PageController::class, 'show'])->name('page.show');
 

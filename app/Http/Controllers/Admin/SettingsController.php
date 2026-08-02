@@ -80,6 +80,33 @@ class SettingsController extends Controller
         return back()->with('success', 'Admin panel settings saved.');
     }
 
+    /* ---------------- Search engines & sharing ---------------- */
+
+    public function seo()
+    {
+        return view('admin.settings.seo');
+    }
+
+    public function saveSeo(Request $request)
+    {
+        $data = $request->validate([
+            'site_meta_description' => ['nullable', 'string', 'max:300'],
+            'seo_cuisine' => ['nullable', 'string', 'max:80'],
+            'seo_price_range' => ['nullable', 'string', 'max:10'],
+            'seo_google_verification' => ['nullable', 'string', 'max:120'],
+            'share_image' => ['nullable', 'image', 'max:3072'],
+        ]);
+
+        $data['seo_indexable'] = $request->boolean('seo_indexable') ? '1' : '0';
+
+        $this->settings->setMany($data, 'seo');
+        $this->handleImage($request, 'share_image', 'seo_share_image', 'branding');
+
+        $this->activity->settings('SEO');
+
+        return back()->with('success', 'Search engine settings saved.');
+    }
+
     /* ---------------- Ordering, delivery, bookings ---------------- */
 
     public function shop()
