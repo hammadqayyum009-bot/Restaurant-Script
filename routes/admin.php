@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\Billing\BillingSettingsController;
+use App\Http\Controllers\Admin\Billing\DocumentController;
+use App\Http\Controllers\Admin\Billing\DocumentPrintController;
 use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExportController;
@@ -68,6 +70,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
         Route::resource('users', UserController::class)->except('show');
+
+        // ---- Billing & documents (Batch 2: order-linked issuing) ----
+        Route::middleware('can:manage-billing')->group(function () {
+            Route::get('/orders/{order}/billing/create', [DocumentController::class, 'createFromOrder'])->name('billing.from-order.create');
+            Route::post('/orders/{order}/billing', [DocumentController::class, 'storeFromOrder'])->name('billing.from-order.store');
+
+            Route::get('/billing/documents', [DocumentController::class, 'index'])->name('billing.index');
+            Route::get('/billing/documents/{document}', [DocumentController::class, 'show'])->name('billing.show');
+            Route::put('/billing/documents/{document}', [DocumentController::class, 'update'])->name('billing.update');
+            Route::delete('/billing/documents/{document}', [DocumentController::class, 'destroy'])->name('billing.destroy');
+            Route::post('/billing/documents/{document}/issue', [DocumentController::class, 'issue'])->name('billing.issue');
+            Route::post('/billing/documents/{document}/archive', [DocumentController::class, 'archive'])->name('billing.archive');
+            Route::get('/billing/documents/{document}/print', [DocumentPrintController::class, 'show'])->name('billing.print');
+        });
 
         // ---- Reporting ----
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');

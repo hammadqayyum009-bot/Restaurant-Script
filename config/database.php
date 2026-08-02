@@ -37,7 +37,14 @@ return [
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-            'busy_timeout' => null,
+            // A concurrent writer waits up to 5s for SQLite's file lock instead
+            // of failing immediately with "database is locked" — surfaced by
+            // the billing module's numbering concurrency test, which showed
+            // real writers being refused the lock outright with the framework
+            // default (no timeout). Safe for every existing caller: it only
+            // makes SQLite wait longer before an error it would have thrown
+            // anyway, never changes what succeeds today.
+            'busy_timeout' => env('DB_SQLITE_BUSY_TIMEOUT', 5000),
             'journal_mode' => null,
             'synchronous' => null,
         ],

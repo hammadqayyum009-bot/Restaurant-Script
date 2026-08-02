@@ -5,6 +5,9 @@
 @section('actions')
     <a href="{{ route('admin.orders.invoice', $order) }}" target="_blank" rel="noopener" class="a-btn ghost sm">Invoice</a>
     <a href="{{ route('admin.orders.receipt', $order) }}" target="_blank" rel="noopener" class="a-btn ghost sm">Receipt</a>
+    @can('manage-billing')
+        <a href="{{ route('admin.billing.from-order.create', $order) }}" class="a-btn ghost sm">Tax invoice</a>
+    @endcan
     <a href="{{ route('admin.orders.index') }}" class="a-btn ghost sm">Back to orders</a>
 @endsection
 

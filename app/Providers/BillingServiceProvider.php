@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\BillingDocument;
 use App\Models\User;
+use App\Policies\BillingDocumentPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -17,5 +19,7 @@ class BillingServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define('manage-billing', fn (User $user): bool => $user->isAdmin());
+
+        Gate::policy(BillingDocument::class, BillingDocumentPolicy::class);
     }
 }
