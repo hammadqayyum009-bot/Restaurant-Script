@@ -9,13 +9,14 @@ class Order extends Model
 {
     protected $fillable = [
         'user_id', 'order_number', 'customer_name', 'phone', 'email', 'address',
-        'order_type', 'notes', 'subtotal', 'delivery_fee', 'total',
+        'order_type', 'notes', 'subtotal', 'delivery_fee', 'tax', 'total',
         'payment_method', 'status',
     ];
 
     protected $casts = [
         'subtotal' => 'decimal:2',
         'delivery_fee' => 'decimal:2',
+        'tax' => 'decimal:2',
         'total' => 'decimal:2',
     ];
 

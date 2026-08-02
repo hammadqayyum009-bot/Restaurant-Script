@@ -43,6 +43,12 @@
                             <td colspan="3" class="num a-muted">Delivery fee</td>
                             <td class="num">{{ config('site.currency') }} {{ number_format((float) $order->delivery_fee, 2) }}</td>
                         </tr>
+                        @if ($order->tax > 0)
+                            <tr>
+                                <td colspan="3" class="num a-muted">Tax</td>
+                                <td class="num">{{ config('site.currency') }} {{ number_format((float) $order->tax, 2) }}</td>
+                            </tr>
+                        @endif
                         <tr>
                             <td colspan="3" class="num"><strong>Total</strong></td>
                             <td class="num"><strong>{{ config('site.currency') }} {{ number_format((float) $order->total, 2) }}</strong></td>

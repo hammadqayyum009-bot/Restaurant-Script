@@ -34,6 +34,7 @@
                 $pendingOrders = \App\Models\Order::where('status', 'pending')->count();
                 $pendingReservations = \App\Models\Reservation::where('status', 'pending')->count();
                 $pendingReviews = \App\Models\Review::where('is_approved', false)->count();
+                $unreadMessages = \App\Models\ContactMessage::where('is_read', false)->count();
             @endphp
 
             <div class="a-nav-group">
@@ -60,6 +61,11 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.5l2.2 4.46 4.92.72-3.56 3.47.84 4.9-4.4-2.31-4.4 2.31.84-4.9L4.36 8.68l4.92-.72 2.2-4.46z"/></svg>
                     Reviews
                     @if ($pendingReviews) <span class="a-pill">{{ $pendingReviews }}</span> @endif
+                </a>
+                <a href="{{ route('admin.messages.index') }}" class="{{ request()->routeIs('admin.messages.*') ? 'active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.5a8.4 8.4 0 01-9 8.2 9 9 0 01-3.8-.8L3 20.5l1.7-4.9A8.1 8.1 0 013.5 11 8.4 8.4 0 0112 3a8.4 8.4 0 019 8.5z"/></svg>
+                    Messages
+                    @if ($unreadMessages) <span class="a-pill">{{ $unreadMessages }}</span> @endif
                 </a>
                 <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.5a6 6 0 00-12 0M9 11a3.75 3.75 0 100-7.5A3.75 3.75 0 009 11zm12 8.5a5.25 5.25 0 00-4.5-5.19M16.5 11a3.75 3.75 0 000-7.5"/></svg>
@@ -151,6 +157,7 @@
             <h1>@yield('title', 'Dashboard')</h1>
             <div class="a-topbar-actions">
                 @yield('actions')
+                <a href="{{ route('admin.profile') }}" class="a-btn ghost sm">{{ Str::before(auth()->user()->name, ' ') }}</a>
                 <form method="POST" action="{{ route('admin.logout') }}">
                     @csrf
                     <button type="submit" class="a-btn ghost sm">Sign out</button>

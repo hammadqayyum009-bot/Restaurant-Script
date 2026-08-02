@@ -36,6 +36,14 @@
         </div>
     </div>
 
+    @if ($messagesUnread)
+        <div class="a-alert warn">
+            <div>{{ $messagesUnread }} unread message{{ $messagesUnread === 1 ? '' : 's' }} from the contact form.
+                <a href="{{ route('admin.messages.index', ['filter' => 'unread']) }}">Read them</a>
+            </div>
+        </div>
+    @endif
+
     @if ($reviewsPending)
         <div class="a-alert warn">
             <div>{{ $reviewsPending }} review{{ $reviewsPending === 1 ? '' : 's' }} waiting for approval.

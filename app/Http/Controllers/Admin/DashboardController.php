@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ContactMessage;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\Reservation;
@@ -27,6 +28,7 @@ class DashboardController extends Controller
             'reservationsUpcoming' => Reservation::whereDate('reservation_date', '>=', $today)
                 ->whereIn('status', ['pending', 'confirmed'])->count(),
             'reviewsPending' => Review::where('is_approved', false)->count(),
+            'messagesUnread' => ContactMessage::where('is_read', false)->count(),
             'usersTotal' => User::where('is_admin', false)->count(),
             'dishesTotal' => MenuItem::count(),
             'dishesUnavailable' => MenuItem::where('is_available', false)->count(),

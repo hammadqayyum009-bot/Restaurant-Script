@@ -36,7 +36,10 @@
                     </div>
                     <button type="submit" class="btn btn-primary btn-block">Sign In</button>
                 </form>
-                <p style="text-align:center; margin-top:18px; font-size:.9rem; color:var(--ink-500);">
+                <p style="text-align:center; margin-top:16px; font-size:.9rem;">
+                    <a href="{{ route('password.request') }}" style="color:var(--maroon-800);">Forgot your password?</a>
+                </p>
+                <p style="text-align:center; margin-top:8px; font-size:.9rem; color:var(--ink-500);">
                     Don't have an account? <a href="{{ route('register') }}" style="color:var(--maroon-800); font-weight:600;">Create one</a>
                 </p>
             </div>

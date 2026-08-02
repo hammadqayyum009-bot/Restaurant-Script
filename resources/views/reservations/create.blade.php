@@ -45,12 +45,18 @@
                         </div>
                         <div class="form-group">
                             <label for="reservation_time">Time</label>
-                            <input type="time" class="form-control" id="reservation_time" name="reservation_time" value="{{ old('reservation_time', '19:00') }}" required>
+                            <input type="time" class="form-control" id="reservation_time" name="reservation_time"
+                                   value="{{ old('reservation_time', $ordering->reservationOpensAt()) }}" required>
+                            <span class="form-hint">Bookings between {{ $ordering->reservationOpensAt() }} and {{ $ordering->reservationClosesAt() }}.</span>
+                            @error('reservation_time')<span class="error-text">{{ $message }}</span>@enderror
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="guests">Number of Guests</label>
-                        <input type="number" class="form-control" id="guests" name="guests" min="1" max="30" value="{{ old('guests', 2) }}" required>
+                        <input type="number" class="form-control" id="guests" name="guests" min="1"
+                               max="{{ $ordering->maxGuests() }}" value="{{ old('guests', 2) }}" required>
+                        <span class="form-hint">Up to {{ $ordering->maxGuests() }} guests per booking.</span>
+                        @error('guests')<span class="error-text">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group">
                         <label for="notes">Special Requests (optional)</label>

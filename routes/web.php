@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Install\InstallController;
 use App\Http\Controllers\MenuController;
@@ -24,6 +26,7 @@ Route::middleware('installed')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/about', [HomeController::class, 'about'])->name('about');
     Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+    Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
     Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
 
@@ -50,6 +53,11 @@ Route::middleware('installed')->group(function () {
         Route::post('/login', [AuthController::class, 'login']);
         Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
         Route::post('/register', [AuthController::class, 'register']);
+
+        Route::get('/forgot-password', [PasswordResetController::class, 'showRequest'])->name('password.request');
+        Route::post('/forgot-password', [PasswordResetController::class, 'sendLink'])->name('password.email');
+        Route::get('/reset-password/{token}', [PasswordResetController::class, 'showReset'])->name('password.reset');
+        Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.update');
     });
 
     Route::middleware('auth')->group(function () {

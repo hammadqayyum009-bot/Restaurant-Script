@@ -9,6 +9,10 @@ class ReviewController extends Controller
 {
     public function store(Request $request)
     {
+        if (! config('shop.reviews_enabled')) {
+            return back()->with('error', 'Reviews are turned off at the moment.')->withFragment('reviews');
+        }
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:80'],
             'rating' => ['required', 'integer', 'min:1', 'max:5'],

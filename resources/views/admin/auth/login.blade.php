@@ -50,7 +50,10 @@
             <button type="submit" class="a-btn block">Sign in</button>
         </form>
 
-        <p class="a-login-foot"><a href="{{ route('home') }}">&larr; Back to {{ config('site.name') }}</a></p>
+        <p class="a-login-foot">
+            <a href="{{ route('password.request') }}">Forgot your password?</a>
+        </p>
+        <p class="a-login-foot" style="margin-top:8px;"><a href="{{ route('home') }}">&larr; Back to {{ config('site.name') }}</a></p>
     </div>
 </div>
 </body>

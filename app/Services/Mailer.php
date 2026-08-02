@@ -51,6 +51,18 @@ class Mailer
             'body' => "<p>A new order has come in.</p>\n<p><strong>{{order_number}}</strong><br>{{name}} — {{phone}}<br>{{order_type}} · {{payment_method}}</p>\n{{order_items}}\n<p><strong>Total: {{currency}} {{total}}</strong></p>\n<p>Address: {{address}}</p>",
             'vars' => ['order_number', 'name', 'phone', 'total', 'currency', 'order_type', 'payment_method', 'address', 'order_items'],
         ],
+        'password_reset' => [
+            'label' => 'Password reset link',
+            'subject' => 'Reset your {{site_name}} password',
+            'body' => "<p>Hi {{name}},</p>\n<p>We received a request to reset your password. Use the link below — it works for {{expires_in}}.</p>\n<p><a href=\"{{reset_url}}\">Reset my password</a></p>\n<p>If you did not ask for this, you can ignore this email; nothing has changed.</p>",
+            'vars' => ['name', 'reset_url', 'expires_in', 'site_name'],
+        ],
+        'contact_message' => [
+            'label' => 'Contact form message (admin copy)',
+            'subject' => 'New message from {{name}} — {{site_name}}',
+            'body' => "<p><strong>{{name}}</strong> sent a message through the website.</p>\n<p>Email: {{email}}<br>Phone: {{phone}}</p>\n<p>{{message}}</p>",
+            'vars' => ['name', 'email', 'phone', 'message', 'site_name'],
+        ],
         'admin_reservation' => [
             'label' => 'New reservation alert (admin copy)',
             'subject' => 'New table request — {{date}} {{time}}',
@@ -71,6 +83,21 @@ class Mailer
     public function templateBody(string $key): string
     {
         return (string) $this->settings->get('tpl_'.$key.'_body', self::TEMPLATES[$key]['body'] ?? '');
+    }
+
+    /**
+     * Queues one of the editable templates to go out once the response has
+     * been returned to the browser. Shared hosting has no queue worker, so
+     * this runs in the same request — it just stops a slow SMTP handshake from
+     * holding up a checkout or a booking.
+     *
+     * @param  array<string, string|null>  $vars
+     */
+    public function dispatchTemplate(string $key, string $toEmail, ?string $toName, array $vars): void
+    {
+        dispatch(function () use ($key, $toEmail, $toName, $vars) {
+            $this->sendTemplate($key, $toEmail, $toName, $vars);
+        })->afterResponse();
     }
 
     /**

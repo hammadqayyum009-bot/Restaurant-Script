@@ -45,17 +45,29 @@
                     <div class="form-group">
                         <label>Order Type</label>
                         <div class="radio-cards">
-                            <label><input type="radio" name="order_type" value="delivery" checked> Delivery</label>
-                            <label><input type="radio" name="order_type" value="pickup"> Pickup</label>
+                            @foreach ($orderTypes as $i => $type)
+                                <label>
+                                    <input type="radio" name="order_type" value="{{ $type }}"
+                                           {{ old('order_type', $orderTypes[0]) === $type ? 'checked' : '' }}>
+                                    {{ $ordering->orderTypeLabel($type) }}
+                                </label>
+                            @endforeach
                         </div>
+                        @error('order_type')<span class="error-text">{{ $message }}</span>@enderror
                     </div>
 
                     <div class="form-group">
                         <label>Payment Method</label>
                         <div class="radio-cards">
-                            <label><input type="radio" name="payment_method" value="cash" checked> Cash on Delivery</label>
-                            <label><input type="radio" name="payment_method" value="card"> Card on Delivery</label>
+                            @foreach ($payments as $method)
+                                <label>
+                                    <input type="radio" name="payment_method" value="{{ $method }}"
+                                           {{ old('payment_method', $payments[0]) === $method ? 'checked' : '' }}>
+                                    {{ $ordering->paymentLabel($method) }}
+                                </label>
+                            @endforeach
                         </div>
+                        @error('payment_method')<span class="error-text">{{ $message }}</span>@enderror
                     </div>
 
                     <div class="form-group">
@@ -70,8 +82,25 @@
                         @foreach ($items as $line)
                             <div class="summary-row"><span>{{ $line['quantity'] }} &times; {{ $line['name'] }}</span><span class="js-price" data-aed="{{ $line['price'] * $line['quantity'] }}">{{ config('site.currency') }} {{ number_format($line['price'] * $line['quantity'], 2) }}</span></div>
                         @endforeach
-                        <div class="summary-row total"><span>Subtotal</span><span class="js-price" data-aed="{{ $subtotal }}">{{ config('site.currency') }} {{ number_format($subtotal, 2) }}</span></div>
-                        <p style="font-size:0.82rem; color:var(--ink-500); margin-top:6px;">A flat delivery fee of {{ config('site.currency') }} 10 applies for delivery orders.</p>
+                        <div class="summary-row"><span>Subtotal</span><span class="js-price" data-aed="{{ $subtotal }}">{{ config('site.currency') }} {{ number_format($subtotal, 2) }}</span></div>
+
+                        @if ($ordering->taxPercent() > 0)
+                            <div class="summary-row">
+                                <span>Tax ({{ rtrim(rtrim(number_format($ordering->taxPercent(), 2), '0'), '.') }}%)</span>
+                                <span class="js-price" data-aed="{{ $totals['tax'] }}">{{ config('site.currency') }} {{ number_format($totals['tax'], 2) }}</span>
+                            </div>
+                        @endif
+
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span class="js-price" data-aed="{{ $totals['total'] }}">{{ config('site.currency') }} {{ number_format($totals['total'], 2) }}</span>
+                        </div>
+
+                        @if (in_array('delivery', $orderTypes, true) && config('shop.delivery_fee') > 0)
+                            <p style="font-size:0.82rem; color:var(--ink-500); margin-top:6px;">
+                                A delivery fee of {{ config('site.currency') }} {{ number_format((float) config('shop.delivery_fee'), 2) }} is added to delivery orders.
+                            </p>
+                        @endif
                         <button type="submit" class="btn btn-primary btn-block" style="margin-top:16px;">Place Order</button>
                     </div>
                 </div>

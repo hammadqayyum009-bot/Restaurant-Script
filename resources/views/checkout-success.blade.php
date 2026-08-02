@@ -17,7 +17,12 @@
                 @foreach ($order->items as $item)
                     <div class="summary-row"><span>{{ $item->quantity }} &times; {{ $item->name }}</span><span>{{ config('site.currency') }} {{ number_format($item->line_total, 2) }}</span></div>
                 @endforeach
-                <div class="summary-row"><span>Delivery Fee</span><span>{{ config('site.currency') }} {{ number_format($order->delivery_fee, 2) }}</span></div>
+                @if ($order->delivery_fee > 0)
+                    <div class="summary-row"><span>Delivery Fee</span><span>{{ config('site.currency') }} {{ number_format($order->delivery_fee, 2) }}</span></div>
+                @endif
+                @if ($order->tax > 0)
+                    <div class="summary-row"><span>Tax</span><span>{{ config('site.currency') }} {{ number_format($order->tax, 2) }}</span></div>
+                @endif
                 <div class="summary-row total"><span>Total</span><span>{{ config('site.currency') }} {{ number_format($order->total, 2) }}</span></div>
                 <p style="font-size:0.85rem; color:var(--ink-500); margin-top:14px;">
                     {{ $order->order_type === 'delivery' ? 'Delivering to: '.$order->address : 'Pickup order' }}<br>

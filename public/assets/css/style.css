@@ -592,6 +592,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 .radio-cards label:has(input:checked) { color: var(--maroon-900); }
 .radio-cards label:has(input:checked) { border-color: var(--gold-500); background: var(--gold-100); }
 .error-text { color: var(--danger); font-size: 0.82rem; margin-top: 4px; display: block; }
+.form-hint { color: var(--ink-500); font-size: 0.8rem; margin-top: 4px; display: block; }
 .alert { padding: 14px 18px; border-radius: var(--radius-sm); margin-bottom: 20px; font-size: 0.92rem; }
 .alert-success { background: #e5f4ea; color: var(--success); border: 1px solid #bfe3cb; }
 .alert-error { background: #fbe9e7; color: var(--danger); border: 1px solid #f3c6c0; }

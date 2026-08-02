@@ -26,21 +26,29 @@ Sign in at **`/admin`** with the account created during installation. Everything
 | **Reservations** | Confirm, seat or cancel table requests; the guest is emailed on each change |
 | **Reviews** | Publish or hide guest reviews; optionally auto-publish |
 | **Users** | Add, edit, suspend and delete customers and admins; send a welcome email on creation |
+| **Messages** | Inbox for the website contact form, with unread badge, reply-by-email and delete |
 | **Dishes & Categories** | Full CRUD with photo upload (or an image URL), availability toggles, signature-dish flag, ordering |
 | **Header & menu** | Navigation links, header button, brand subtitle |
 | **Home page** | Hero copy and photo, stats, scrolling strip, signature/story/category/CTA sections, three feature points |
 | **Footer** | About text, column headings, explore and legal link lists, copyright line |
 | **Pages** | Create and edit standalone pages (terms, privacy, FAQ, anything else) |
 | **Website settings** | Restaurant name, tagline, logo, favicon, contact details, currency, opening hours, social links |
-| **Ordering settings** | Delivery fee, minimum order, tax, delivery/pickup toggles, cash/card toggles, reservation hours and party size, review moderation |
+| **Ordering settings** | Delivery fee, minimum order, tax, delivery/pickup toggles, cash/card toggles, reservation hours and party size, review moderation — all enforced on the public site |
 | **Admin panel settings** | The panel's own name, short label, logo and favicon — separate from the public site |
+| **My profile** | Each admin changes their own name, email and password |
 | **Email** | SMTP setup with a test-send button, editable templates for every automatic email, a composer for sending to selected users or everyone, and a delivery log with the exact error when something fails |
+
+### Accounts and security
+
+Customers and admins can both reset a forgotten password from the sign-in screen; the link is delivered through the same Mailer, so it appears in the delivery log like any other message and its wording is editable. Both sign-in forms are rate limited to five attempts per minute per email and IP.
 
 ### Email
 
 SMTP details are stored in the database, not in `.env`, so they can be changed from the panel at any time. Automatic emails cover: new account, order placed, order status changed, table booked, and table status changed — plus admin copies of new orders and bookings. Each one can be switched off individually, and every send (successful or not) is recorded under **Delivery log**.
 
-Uploaded logos, favicons and dish photos are written to `public/uploads/`, so no `storage:link` symlink is needed on shared hosting.
+Transactional email is sent after the response is returned, so a slow SMTP host never holds up a checkout — and no queue worker is needed on shared hosting.
+
+Uploaded logos, favicons and dish photos are written to `public/uploads/`, so no `storage:link` symlink is needed on shared hosting. Images are downscaled on upload (600px for branding, 1600px for dishes, 1920px for page imagery) with transparency preserved, so a phone photo does not become a multi-megabyte page weight.
 
 ## Tech Stack
 

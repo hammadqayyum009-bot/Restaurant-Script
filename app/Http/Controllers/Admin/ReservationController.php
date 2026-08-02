@@ -49,7 +49,7 @@ class ReservationController extends Controller
         $reservation->update($data);
 
         if ($changed && $reservation->email && config('notifications.on_reservation')) {
-            $mailer->sendTemplate('reservation_status', $reservation->email, $reservation->name, [
+            $mailer->dispatchTemplate('reservation_status', $reservation->email, $reservation->name, [
                 'name' => $reservation->name,
                 'guests' => (string) $reservation->guests,
                 'date' => $reservation->reservation_date?->format('D, d M Y'),

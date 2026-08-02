@@ -26,7 +26,9 @@
             <p class="lead">{{ $settings->get('home_hero_lead', 'Charcoal grills, slow-cooked Mandi and fragrant Machboos — authentic Gulf flavours, cooked fresh daily and served with genuine Arabian hospitality.') }}</p>
             <div class="hero-cta">
                 <a href="{{ route('menu.index') }}" class="btn btn-primary">{{ $settings->get('home_hero_primary_label', 'View Menu') }}</a>
-                <a href="{{ route('reservations.create') }}" class="btn btn-outline">{{ $settings->get('home_hero_secondary_label', 'Book a Table') }}</a>
+                @if (config('shop.reservations_enabled'))
+                    <a href="{{ route('reservations.create') }}" class="btn btn-outline">{{ $settings->get('home_hero_secondary_label', 'Book a Table') }}</a>
+                @endif
             </div>
             <div class="hero-stats">
                 <div><strong>{{ $settings->get('home_stat1_value', '15+') }}</strong><span>{{ $settings->get('home_stat1_label', 'Years Serving') }}</span></div>
@@ -202,6 +204,7 @@
                 @endforelse
             </div>
 
+            @if (config('shop.reviews_enabled'))
             <div class="cart-summary-box" style="max-width:560px; margin:36px auto 0;">
                 <h3>Leave a Review</h3>
                 @if (session('success'))
@@ -230,6 +233,7 @@
                     <button type="submit" class="btn btn-primary btn-block">Submit Review</button>
                 </form>
             </div>
+            @endif
         </div>
     </section>
 

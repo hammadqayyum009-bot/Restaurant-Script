@@ -56,7 +56,7 @@ class UserController extends Controller
         $user = User::create($data);
 
         if ($request->boolean('send_welcome')) {
-            $mailer->sendTemplate('welcome', $user->email, $user->name, [
+            $mailer->dispatchTemplate('welcome', $user->email, $user->name, [
                 'name' => $user->name,
                 'email' => $user->email,
             ]);

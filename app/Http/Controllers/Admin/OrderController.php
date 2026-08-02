@@ -58,7 +58,7 @@ class OrderController extends Controller
         $order->update($data);
 
         if ($changed && $order->email && config('notifications.on_order_status')) {
-            $mailer->sendTemplate('order_status', $order->email, $order->customer_name, [
+            $mailer->dispatchTemplate('order_status', $order->email, $order->customer_name, [
                 'name' => $order->customer_name,
                 'order_number' => $order->order_number,
                 'status' => str_replace('_', ' ', $order->status),

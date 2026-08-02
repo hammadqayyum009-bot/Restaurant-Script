@@ -6,12 +6,14 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\Cart;
 use App\Services\Mailer;
+use App\Services\Ordering;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class CheckoutController extends Controller
 {
-    public function __construct(protected Cart $cart)
+    public function __construct(protected Cart $cart, protected Ordering $ordering)
     {
     }
 
@@ -21,9 +23,27 @@ class CheckoutController extends Controller
             return redirect()->route('menu.index')->with('error', 'Your cart is empty. Add some delicious dishes first!');
         }
 
+        $subtotal = $this->cart->subtotal();
+
+        if (! $this->ordering->meetsMinimum($subtotal)) {
+            return redirect()->route('cart.index')->with('error', $this->minimumMessage($subtotal));
+        }
+
+        $orderTypes = $this->ordering->orderTypes();
+        $payments = $this->ordering->paymentMethods();
+
+        if (empty($orderTypes) || empty($payments)) {
+            return redirect()->route('menu.index')
+                ->with('error', 'Online ordering is closed at the moment. Please call us to place your order.');
+        }
+
         return view('checkout', [
             'items' => $this->cart->contents(),
-            'subtotal' => $this->cart->subtotal(),
+            'subtotal' => $subtotal,
+            'orderTypes' => $orderTypes,
+            'payments' => $payments,
+            'ordering' => $this->ordering,
+            'totals' => $this->ordering->totals($subtotal, $orderTypes[0]),
         ]);
     }
 
@@ -33,20 +53,29 @@ class CheckoutController extends Controller
             return redirect()->route('menu.index')->with('error', 'Your cart is empty.');
         }
 
+        $subtotal = $this->cart->subtotal();
+
+        if (! $this->ordering->meetsMinimum($subtotal)) {
+            return redirect()->route('cart.index')->with('error', $this->minimumMessage($subtotal));
+        }
+
+        $orderTypes = $this->ordering->orderTypes();
+        $payments = $this->ordering->paymentMethods();
+
         $data = $request->validate([
             'customer_name' => ['required', 'string', 'max:120'],
             'phone' => ['required', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:150'],
             'address' => ['required', 'string', 'max:500'],
-            'order_type' => ['required', 'in:delivery,pickup'],
-            'payment_method' => ['required', 'in:cash,card'],
+            'order_type' => ['required', Rule::in($orderTypes)],
+            'payment_method' => ['required', Rule::in($payments)],
             'notes' => ['nullable', 'string', 'max:500'],
+        ], [
+            'order_type.in' => 'That order type is not available right now.',
+            'payment_method.in' => 'That payment method is not available right now.',
         ]);
 
-        $subtotal = $this->cart->subtotal();
-        $deliveryFee = $data['order_type'] === 'delivery' && $subtotal > 0
-            ? (float) config('shop.delivery_fee')
-            : 0;
+        $totals = $this->ordering->totals($subtotal, $data['order_type']);
 
         $order = Order::create([
             'user_id' => $request->user()?->id,
@@ -57,9 +86,10 @@ class CheckoutController extends Controller
             'address' => $data['address'],
             'order_type' => $data['order_type'],
             'notes' => $data['notes'] ?? null,
-            'subtotal' => $subtotal,
-            'delivery_fee' => $deliveryFee,
-            'total' => $subtotal + $deliveryFee,
+            'subtotal' => $totals['subtotal'],
+            'delivery_fee' => $totals['delivery_fee'],
+            'tax' => $totals['tax'],
+            'total' => $totals['total'],
             'payment_method' => $data['payment_method'],
             'status' => 'pending',
         ]);
@@ -84,6 +114,13 @@ class CheckoutController extends Controller
     }
 
 
+    protected function minimumMessage(float $subtotal): string
+    {
+        return 'Minimum order is '.config('site.currency').' '
+            .number_format($this->ordering->minimumOrder(), 2)
+            .'. Your cart is '.config('site.currency').' '.number_format($subtotal, 2).'.';
+    }
+
     /**
      * Emails the customer their confirmation and, when enabled, alerts the
      * restaurant. Delivery failures are swallowed by the mailer and recorded in
@@ -103,6 +140,7 @@ class CheckoutController extends Controller
             'phone' => $order->phone,
             'order_number' => $order->order_number,
             'total' => number_format((float) $order->total, 2),
+            'tax' => number_format((float) $order->tax, 2),
             'order_type' => ucfirst($order->order_type),
             'payment_method' => $order->payment_method === 'cash' ? 'Cash on delivery' : 'Card on delivery',
             'address' => $order->address,
@@ -110,11 +148,11 @@ class CheckoutController extends Controller
         ];
 
         if ($order->email && config('notifications.on_order')) {
-            $mailer->sendTemplate('order_placed', $order->email, $order->customer_name, $vars);
+            $mailer->dispatchTemplate('order_placed', $order->email, $order->customer_name, $vars);
         }
 
         if (config('notifications.copy_admin_on_order') && config('notifications.admin_email')) {
-            $mailer->sendTemplate('admin_order', config('notifications.admin_email'), null, $vars);
+            $mailer->dispatchTemplate('admin_order', config('notifications.admin_email'), null, $vars);
         }
     }
 

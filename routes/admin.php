@@ -6,8 +6,10 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MailController;
 use App\Http\Controllers\Admin\MenuCategoryController;
 use App\Http\Controllers\Admin\MenuItemController;
+use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ReservationController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\SettingsController;
@@ -24,6 +26,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile');
+        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
         // ---- Menu ----
         Route::resource('categories', MenuCategoryController::class)->except('show');
@@ -47,6 +52,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
         Route::put('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus'])->name('reservations.status');
         Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+
+        Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+        Route::put('/messages/{message}/read', [MessageController::class, 'toggleRead'])->name('messages.read');
+        Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
 
         Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
         Route::put('/reviews/{review}/approve', [ReviewController::class, 'approve'])->name('reviews.approve');

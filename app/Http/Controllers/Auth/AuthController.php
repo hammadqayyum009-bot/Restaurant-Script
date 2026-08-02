@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Concerns\ThrottlesLogins;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Mailer;
@@ -12,6 +13,8 @@ use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
+    use ThrottlesLogins;
+
     public function showLogin()
     {
         if (Auth::check()) {
@@ -28,12 +31,17 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        $this->ensureIsNotRateLimited($request, 'login');
+
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            $this->recordFailedAttempt($request, 'login');
+
             return back()->withErrors([
                 'email' => 'These credentials do not match our records.',
             ])->onlyInput('email');
         }
 
+        $this->clearAttempts($request, 'login');
         $request->session()->regenerate();
 
         return redirect()->intended(route('profile.show'))->with('success', 'Welcome back, '.Auth::user()->name.'!');
@@ -65,7 +73,7 @@ class AuthController extends Controller
         ]);
 
         if (config('notifications.on_register')) {
-            $mailer->sendTemplate('welcome', $user->email, $user->name, [
+            $mailer->dispatchTemplate('welcome', $user->email, $user->name, [
                 'name' => $user->name,
                 'email' => $user->email,
             ]);
