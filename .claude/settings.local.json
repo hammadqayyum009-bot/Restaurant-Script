@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "mcp__Claude_Code_Remote__list_environments"
+      "mcp__Claude_Code_Remote__list_environments",
+      "Bash(git reset *)",
+      "Bash(rm -rf vendor/chillerlan/php-qrcode/.git vendor/chillerlan/php-settings-container/.git)",
+      "Bash(git add *)"
     ]
   }
 }
