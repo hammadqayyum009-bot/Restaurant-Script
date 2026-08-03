@@ -20,7 +20,9 @@ class StoreOrderDocumentRequest extends FormRequest
         $isStandard = $this->input('document_type') === 'standard_tax_invoice';
 
         return [
-            'document_type' => ['required', Rule::in(['simplified_tax_invoice', 'standard_tax_invoice'])],
+            'document_type' => ['required', Rule::in([
+                'simplified_tax_invoice', 'standard_tax_invoice', 'quotation', 'proforma', 'delivery_note',
+            ])],
 
             // A standard (B2B) tax invoice must carry the buyer's own VAT
             // registration — a simplified (B2C) one does not ask for it.

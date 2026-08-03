@@ -74,12 +74,30 @@ class Money
     }
 
     /**
-     * Converts integer minor units back to a decimal display string. Used for
-     * display and for round-trip tests — never for storage.
+     * Converts integer minor units back to a decimal display string, looking
+     * the exponent up from current config('billing.currencies').
+     *
+     * Do NOT use this to render an already-issued BillingDocument — its
+     * exponent must come from the value snapshotted on the row
+     * (currency_exponent) at issue time via toDecimalFromExponent(), not
+     * from whatever config('billing.currencies') says today. Config can
+     * change after a document is issued; the document must not shift when it
+     * does. This currency-code form exists for cases with no document row to
+     * snapshot from yet (draft previews, standalone totals before the first
+     * save, tests working directly in a known currency).
      */
     public static function toDecimal(int $minor, string $currency): string
     {
-        $exponent = self::exponent($currency);
+        return self::toDecimalFromExponent($minor, self::exponent($currency));
+    }
+
+    /**
+     * Same conversion, but from an already-known exponent — no config lookup
+     * at all. This is what renders a BillingDocument's stored amounts, using
+     * $document->currency_exponent, exactly the snapshot rule above.
+     */
+    public static function toDecimalFromExponent(int $minor, int $exponent): string
+    {
         $negative = $minor < 0;
         $magnitude = (string) abs($minor);
 

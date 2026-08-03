@@ -48,6 +48,7 @@ return array(
     'App\\Http\\Middleware\\EnsureAdmin' => $baseDir . '/app/Http/Middleware/EnsureAdmin.php',
     'App\\Http\\Middleware\\EnsureInstalled' => $baseDir . '/app/Http/Middleware/EnsureInstalled.php',
     'App\\Http\\Requests\\Billing\\StoreOrderDocumentRequest' => $baseDir . '/app/Http/Requests/Billing/StoreOrderDocumentRequest.php',
+    'App\\Http\\Requests\\Billing\\StoreStandaloneDocumentRequest' => $baseDir . '/app/Http/Requests/Billing/StoreStandaloneDocumentRequest.php',
     'App\\Http\\Requests\\Billing\\UpdateBillingSettingsRequest' => $baseDir . '/app/Http/Requests/Billing/UpdateBillingSettingsRequest.php',
     'App\\Http\\Requests\\Billing\\UpdateDraftDocumentRequest' => $baseDir . '/app/Http/Requests/Billing/UpdateDraftDocumentRequest.php',
     'App\\Models\\ActivityLog' => $baseDir . '/app/Models/ActivityLog.php',

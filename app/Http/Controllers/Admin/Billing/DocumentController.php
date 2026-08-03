@@ -6,10 +6,12 @@ use App\Exceptions\Billing\NumberAllocationFailedException;
 use App\Exceptions\Billing\ReconciliationFailedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Billing\StoreOrderDocumentRequest;
+use App\Http\Requests\Billing\StoreStandaloneDocumentRequest;
 use App\Http\Requests\Billing\UpdateDraftDocumentRequest;
 use App\Models\BillingDocument;
 use App\Models\Order;
 use App\Services\ActivityLogger;
+use App\Services\Billing\BillingSettings;
 use App\Services\Billing\DocumentIssuer;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -37,6 +39,41 @@ class DocumentController extends Controller
         return view('admin.billing.index', [
             'documents' => $documents,
             'showArchived' => $showArchived,
+        ]);
+    }
+
+    public function create()
+    {
+        $this->authorize('create', BillingDocument::class);
+
+        return view('admin.billing.create', [
+            'currencies' => array_keys(config('billing.currencies')),
+            'defaultCurrency' => app(BillingSettings::class)->defaultCurrency(),
+        ]);
+    }
+
+    public function store(StoreStandaloneDocumentRequest $request)
+    {
+        $this->authorize('create', BillingDocument::class);
+
+        $document = $this->issuer->createDraftStandalone($request->validated());
+
+        return redirect()->route('admin.billing.show', $document)->with('success', 'Draft created. Review it, then issue when ready.');
+    }
+
+    public function edit(BillingDocument $document)
+    {
+        $this->authorize('update', $document);
+
+        if ($document->order_id !== null) {
+            return redirect()->route('admin.billing.show', $document);
+        }
+
+        $document->loadMissing('lines');
+
+        return view('admin.billing.edit', [
+            'document' => $document,
+            'currencies' => array_keys(config('billing.currencies')),
         ]);
     }
 
@@ -68,7 +105,10 @@ class DocumentController extends Controller
         $preview = null;
         $reconciliationError = null;
 
-        if ($document->isDraft() && $document->order) {
+        // Order-linked: nothing to preview once the order itself is gone
+        // (order_id nullOnDelete — see the snapshot tests). Standalone: its
+        // own lines are always there to preview, order or no order.
+        if ($document->isDraft() && ($document->order_id === null || $document->order)) {
             try {
                 $preview = $this->issuer->preview($document);
             } catch (ReconciliationFailedException $e) {
@@ -87,7 +127,17 @@ class DocumentController extends Controller
 
     public function update(UpdateDraftDocumentRequest $request, BillingDocument $document)
     {
-        $document->update($request->validated());
+        $data = $request->validated();
+
+        if ($request->isStandalone()) {
+            $lines = $data['lines'];
+            unset($data['lines']);
+
+            $document->update($data);
+            $this->issuer->replaceDraftLines($document, $lines);
+        } else {
+            $document->update($data);
+        }
 
         $this->activity->log('updated', 'Edited a billing document draft', $document);
 
@@ -113,7 +163,7 @@ class DocumentController extends Controller
     {
         $this->authorize('delete', $document);
 
-        $label = $document->document_type.' draft for order #'.$document->order_number;
+        $label = $document->document_type.' draft'.($document->order_number ? ' for order #'.$document->order_number : ' (standalone)');
         $document->delete();
 
         $this->activity->log('deleted', 'Deleted '.$label);

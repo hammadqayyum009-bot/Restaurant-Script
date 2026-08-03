@@ -11,6 +11,8 @@
                 <button type="submit" class="a-btn ghost sm">Archive</button>
             </form>
         @endif
+    @elseif ($document->order_id === null)
+        <a href="{{ route('admin.billing.edit', $document) }}" class="a-btn ghost sm">Edit</a>
     @endif
     <a href="{{ route('admin.billing.index') }}" class="a-btn ghost sm">Back to documents</a>
 @endsection
@@ -33,8 +35,11 @@
 
                 <div class="a-row cols-2">
                     <div>
-                        <div class="a-muted">Order</div>
-                        <div><strong>{{ $document->order_number ?? '—' }}</strong></div>
+                        <div class="a-muted">{{ $document->order_number ? 'Order' : 'Source' }}</div>
+                        <div><strong>{{ $document->order_number ?? 'Standalone' }}</strong></div>
+                        @if ($document->valid_until)
+                            <div class="a-muted" style="font-size:0.8rem;">Valid until {{ $document->valid_until->format('d M Y') }}</div>
+                        @endif
                     </div>
                     <div>
                         <div class="a-muted">Buyer</div>
@@ -65,9 +70,9 @@
                                     <tr>
                                         <td>{{ $line->name_en }}</td>
                                         <td class="num">{{ number_format($line->quantity_milli / 1000, $line->quantity_milli % 1000 === 0 ? 0 : 3) }}</td>
-                                        <td class="num">{{ \App\Services\Billing\Money::toDecimal($line->line_net_minor, $document->currency) }}</td>
-                                        <td class="num">{{ \App\Services\Billing\Money::toDecimal($line->line_vat_minor, $document->currency) }}</td>
-                                        <td class="num"><strong>{{ \App\Services\Billing\Money::toDecimal($line->line_total_minor, $document->currency) }}</strong></td>
+                                        <td class="num">{{ \App\Services\Billing\Money::toDecimalFromExponent($line->line_net_minor, $document->currency_exponent) }}</td>
+                                        <td class="num">{{ \App\Services\Billing\Money::toDecimalFromExponent($line->line_vat_minor, $document->currency_exponent) }}</td>
+                                        <td class="num"><strong>{{ \App\Services\Billing\Money::toDecimalFromExponent($line->line_total_minor, $document->currency_exponent) }}</strong></td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -76,12 +81,12 @@
 
                     @php $totals = $document->isIssued() ? $document : (object) $preview; @endphp
                     <div class="a-stack" style="margin-top:12px; align-items:flex-end;">
-                        <div>Subtotal: <strong>{{ \App\Services\Billing\Money::toDecimal($totals->subtotal_net_minor, $document->currency) }}</strong></div>
-                        <div>VAT: <strong>{{ \App\Services\Billing\Money::toDecimal($totals->vat_total_minor, $document->currency) }}</strong></div>
+                        <div>Subtotal: <strong>{{ \App\Services\Billing\Money::toDecimalFromExponent($totals->subtotal_net_minor, $document->currency_exponent) }}</strong></div>
+                        <div>VAT: <strong>{{ \App\Services\Billing\Money::toDecimalFromExponent($totals->vat_total_minor, $document->currency_exponent) }}</strong></div>
                         @if (($totals->rounding_adjustment_minor ?? 0) !== 0)
-                            <div>Rounding: <strong>{{ \App\Services\Billing\Money::toDecimal($totals->rounding_adjustment_minor, $document->currency) }}</strong></div>
+                            <div>Rounding: <strong>{{ \App\Services\Billing\Money::toDecimalFromExponent($totals->rounding_adjustment_minor, $document->currency_exponent) }}</strong></div>
                         @endif
-                        <div style="font-size:1.1rem;">Grand total: <strong>{{ $document->currency }} {{ \App\Services\Billing\Money::toDecimal($totals->grand_total_minor, $document->currency) }}</strong></div>
+                        <div style="font-size:1.1rem;">Grand total: <strong>{{ $document->currency }} {{ \App\Services\Billing\Money::toDecimalFromExponent($totals->grand_total_minor, $document->currency_exponent) }}</strong></div>
                     </div>
                 @endif
             </div>

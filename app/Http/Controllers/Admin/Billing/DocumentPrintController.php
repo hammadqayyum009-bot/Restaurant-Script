@@ -29,11 +29,17 @@ class DocumentPrintController extends Controller
 
         $document->loadMissing('lines');
 
+        // Only tax invoices carry a QR payload (DocumentIssuer::TAX_INVOICE_TYPES)
+        // — a quotation, proforma or delivery note is not a ZATCA tax document
+        // and qr_payload is null for those, so there is nothing to render here.
+        //
         // Base64-encoded into a data: URI so the print view can use plain
         // {{ }} escaping — a base64 string contains none of the characters
         // {{ }} would touch, so nothing is lost, and no {!! !!} is needed to
         // put an <svg> on the page.
-        $qrDataUri = 'data:image/svg+xml;base64,'.base64_encode(ZatcaQr::svg((string) $document->qr_payload));
+        $qrDataUri = $document->qr_payload
+            ? 'data:image/svg+xml;base64,'.base64_encode(ZatcaQr::svg($document->qr_payload))
+            : null;
 
         // Documents are always Arabic-primary (Section B), regardless of the
         // app's own locale (which stays English everywhere else — the admin

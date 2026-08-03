@@ -3,6 +3,7 @@
 @section('title', 'Billing documents')
 
 @section('actions')
+    <a href="{{ route('admin.billing.create') }}" class="a-btn sm">New document</a>
     @if ($showArchived)
         <a href="{{ route('admin.billing.index') }}" class="a-btn ghost sm">Hide archived</a>
     @else
@@ -61,7 +62,7 @@
                                 </td>
                                 <td class="num">
                                     @if ($document->isIssued())
-                                        <strong>{{ $document->currency }} {{ \App\Services\Billing\Money::toDecimal($document->grand_total_minor, $document->currency) }}</strong>
+                                        <strong>{{ $document->currency }} {{ \App\Services\Billing\Money::toDecimalFromExponent($document->grand_total_minor, $document->currency_exponent) }}</strong>
                                     @else
                                         <span class="a-muted">—</span>
                                     @endif

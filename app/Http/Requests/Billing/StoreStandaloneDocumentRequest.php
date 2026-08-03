@@ -6,29 +6,17 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /**
- * Drafts are the only billing documents that can be updated at all — see
- * App\Policies\BillingDocumentPolicy::update(), which denies this once a
- * document is issued.
- *
- * Deliberately one route, one FormRequest, branching on whether the draft is
- * order-linked or standalone (order_id null) — not two separate update
- * routes — so the route surface stays exactly what Batch 2 already shipped.
- * An order-linked draft has nothing of its own to edit but notes: its lines
- * only exist from the moment it's issued (built fresh from the order by
- * Reconciler). A standalone draft has no order behind it at all, so its
- * buyer details and line items are the only source of truth and must be
- * editable here.
+ * A document created with no underlying order — a catering quote, a proforma
+ * for a B2B customer, a delivery note for an off-platform sale. Tax invoices
+ * are deliberately excluded here: they stay order-linked only (see
+ * StoreOrderDocumentRequest), since a tax invoice with nothing behind it to
+ * reconcile against has no real-world grounding in this app's model.
  */
-class UpdateDraftDocumentRequest extends FormRequest
+class StoreStandaloneDocumentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user()?->can('update', $this->route('document'));
-    }
-
-    public function isStandalone(): bool
-    {
-        return $this->route('document')?->order_id === null;
+        return (bool) $this->user()?->can('manage-billing');
     }
 
     /**
@@ -36,14 +24,8 @@ class UpdateDraftDocumentRequest extends FormRequest
      */
     public function rules(): array
     {
-        if (! $this->isStandalone()) {
-            return [
-                'notes_en' => ['nullable', 'string', 'max:600'],
-                'notes_ar' => ['nullable', 'string', 'max:600'],
-            ];
-        }
-
         return [
+            'document_type' => ['required', Rule::in(['quotation', 'proforma', 'delivery_note'])],
             'currency' => ['required', 'string', Rule::in(array_keys(config('billing.currencies')))],
             'valid_until' => ['nullable', 'date', 'after_or_equal:today'],
 
@@ -55,9 +37,6 @@ class UpdateDraftDocumentRequest extends FormRequest
             'buyer_email' => ['nullable', 'email', 'max:160'],
             'buyer_address_en' => ['nullable', 'string', 'max:600'],
             'buyer_address_ar' => ['nullable', 'string', 'max:600'],
-
-            'notes_en' => ['nullable', 'string', 'max:600'],
-            'notes_ar' => ['nullable', 'string', 'max:600'],
 
             'lines' => ['required', 'array', 'min:1'],
             'lines.*.name_en' => ['required', 'string', 'max:200'],

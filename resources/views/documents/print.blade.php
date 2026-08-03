@@ -20,7 +20,7 @@
 
         @if ($document->buyer_name_en || $document->buyer_name_ar)
             <div class="doc-block">
-                <div style="font-size:0.78rem; color:var(--doc-soft);">{{ __('documents.buyer') }} / Buyer</div>
+                <div style="font-size:0.78rem; color:var(--doc-soft);">{{ __('documents.buyer') }} / {{ __('documents.buyer', [], 'en') }}</div>
                 <div style="font-weight:700;">{{ $document->buyer_name_ar ?: $document->buyer_name_en }}</div>
                 @if ($document->buyer_name_ar && $document->buyer_name_en)
                     <div style="font-size:0.86rem; color:var(--doc-soft);">{{ $document->buyer_name_en }}</div>
@@ -33,7 +33,10 @@
 
         @include('documents.partials.lines', ['document' => $document])
         @include('documents.partials.totals', ['document' => $document])
-        @include('documents.partials.qr', ['document' => $document, 'qrDataUri' => $qrDataUri])
+
+        @if ($qrDataUri)
+            @include('documents.partials.qr', ['document' => $document, 'qrDataUri' => $qrDataUri])
+        @endif
 
         @if ($document->footer_ar || $document->footer_en)
             <div style="margin-block-start:20px; padding-block-start:14px; border-block-start:1px solid var(--doc-line); font-size:0.78rem; color:var(--doc-soft);">

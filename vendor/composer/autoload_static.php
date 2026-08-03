@@ -522,6 +522,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'App\\Http\\Middleware\\EnsureAdmin' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureAdmin.php',
         'App\\Http\\Middleware\\EnsureInstalled' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureInstalled.php',
         'App\\Http\\Requests\\Billing\\StoreOrderDocumentRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Billing/StoreOrderDocumentRequest.php',
+        'App\\Http\\Requests\\Billing\\StoreStandaloneDocumentRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Billing/StoreStandaloneDocumentRequest.php',
         'App\\Http\\Requests\\Billing\\UpdateBillingSettingsRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Billing/UpdateBillingSettingsRequest.php',
         'App\\Http\\Requests\\Billing\\UpdateDraftDocumentRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Billing/UpdateDraftDocumentRequest.php',
         'App\\Models\\ActivityLog' => __DIR__ . '/../..' . '/app/Models/ActivityLog.php',

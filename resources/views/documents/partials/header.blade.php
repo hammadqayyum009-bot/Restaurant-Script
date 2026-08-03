@@ -8,11 +8,11 @@
 
         @if ($document->seller_vat_number)
             <div style="font-size:0.82rem; margin-block-start:6px;">
-                {{ __('documents.vat_number') }} / VAT No.: <strong>{{ $document->seller_vat_number }}</strong>
+                {{ __('documents.vat_number') }} / {{ __('documents.vat_number', [], 'en') }}: <strong>{{ $document->seller_vat_number }}</strong>
             </div>
         @endif
         @if ($document->seller_cr_number)
-            <div style="font-size:0.82rem;">{{ __('documents.cr_number') }} / C.R.: {{ $document->seller_cr_number }}</div>
+            <div style="font-size:0.82rem;">{{ __('documents.cr_number') }} / {{ __('documents.cr_number', [], 'en') }}: {{ $document->seller_cr_number }}</div>
         @endif
         @if ($document->seller_address_ar || $document->seller_address_en)
             <div style="font-size:0.8rem; color:var(--doc-soft); margin-block-start:4px;">
@@ -26,7 +26,7 @@
             {{ __('documents.'.$document->document_type) }}
         </div>
         <div style="font-size:0.9rem; color:var(--doc-soft);">
-            {{ $document->document_type === 'simplified_tax_invoice' ? 'Simplified Tax Invoice' : 'Tax Invoice' }}
+            {{ __('documents.'.$document->document_type, [], 'en') }}
         </div>
 
         <div style="margin-block-start:10px; font-size:0.86rem;">

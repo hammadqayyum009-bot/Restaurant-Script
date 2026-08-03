@@ -71,12 +71,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('users', UserController::class)->except('show');
 
-        // ---- Billing & documents (Batch 2: order-linked issuing) ----
+        // ---- Billing & documents ----
         Route::middleware('can:manage-billing')->group(function () {
             Route::get('/orders/{order}/billing/create', [DocumentController::class, 'createFromOrder'])->name('billing.from-order.create');
             Route::post('/orders/{order}/billing', [DocumentController::class, 'storeFromOrder'])->name('billing.from-order.store');
 
             Route::get('/billing/documents', [DocumentController::class, 'index'])->name('billing.index');
+            // Static segments (create) must be declared before the {document}
+            // wildcard, or Laravel would try to model-bind "create" as an id.
+            Route::get('/billing/documents/create', [DocumentController::class, 'create'])->name('billing.create');
+            Route::post('/billing/documents', [DocumentController::class, 'store'])->name('billing.store');
+            Route::get('/billing/documents/{document}/edit', [DocumentController::class, 'edit'])->name('billing.edit');
             Route::get('/billing/documents/{document}', [DocumentController::class, 'show'])->name('billing.show');
             Route::put('/billing/documents/{document}', [DocumentController::class, 'update'])->name('billing.update');
             Route::delete('/billing/documents/{document}', [DocumentController::class, 'destroy'])->name('billing.destroy');

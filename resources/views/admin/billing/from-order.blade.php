@@ -31,6 +31,30 @@
                             <small>For a VAT-registered business buyer (B2B). Requires their VAT number.</small>
                         </span>
                     </label>
+                    <label class="a-check">
+                        <input type="radio" name="document_type" value="quotation"
+                               onchange="document.getElementById('buyer-vat-fields').style.display='none'">
+                        <span>
+                            <strong>Quotation</strong>
+                            <small>A non-binding price quote for this order. No QR code — not a tax invoice.</small>
+                        </span>
+                    </label>
+                    <label class="a-check">
+                        <input type="radio" name="document_type" value="proforma"
+                               onchange="document.getElementById('buyer-vat-fields').style.display='none'">
+                        <span>
+                            <strong>Proforma Invoice</strong>
+                            <small>A preliminary bill before the sale is final. No QR code — not a tax invoice.</small>
+                        </span>
+                    </label>
+                    <label class="a-check">
+                        <input type="radio" name="document_type" value="delivery_note"
+                               onchange="document.getElementById('buyer-vat-fields').style.display='none'">
+                        <span>
+                            <strong>Delivery Note</strong>
+                            <small>What's being delivered for this order. No QR code — not a tax invoice.</small>
+                        </span>
+                    </label>
                 </div>
 
                 <div class="a-card">
