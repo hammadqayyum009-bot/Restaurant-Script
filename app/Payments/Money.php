@@ -7,18 +7,18 @@ namespace App\Payments;
 use InvalidArgumentException;
 
 /**
- * The Payments module's own decimal-to-minor-units conversion, reading
- * config('payments.currency_exponents'). Deliberately not a reuse of
- * App\Services\Billing\Money — that class is billing's, reads
- * config('billing.currencies'), and this module must not depend on billing's
- * config section to do its own money math. The conversion algorithm is the
- * same well-tested shape; the config source is what's kept separate.
+ * The Payments module's own decimal-to-minor-units conversion. Reads
+ * config('currencies') — the exponent table shared with
+ * App\Services\Billing\Money, so an order's invoice and its payment
+ * transaction can never round differently. Deliberately not a reuse of
+ * Billing's Money class itself: the conversion algorithm is small, stable,
+ * and fine to duplicate; only the currency-exponent facts need one owner.
  */
 class Money
 {
     public static function exponent(string $currency): int
     {
-        $exponent = config('payments.currency_exponents')[$currency] ?? null;
+        $exponent = config('currencies')[$currency] ?? null;
 
         if ($exponent === null) {
             throw new InvalidArgumentException("Unknown currency code: {$currency}");

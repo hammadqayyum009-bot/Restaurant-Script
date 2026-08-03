@@ -3,22 +3,11 @@
 return [
     /**
      * Minor-unit exponent per currency code. Money::toMinor()/toDecimal() read
-     * this — never assume 2. KWD, BHD and OMR use 3; JPY uses 0.
+     * this — never assume 2. Sourced from config/currencies.php, the shared
+     * table also read by the Payments module, so the two can never drift
+     * apart on how many decimal places a currency uses.
      */
-    'currencies' => [
-        'SAR' => 2,
-        'AED' => 2,
-        'QAR' => 2,
-        'USD' => 2,
-        'EUR' => 2,
-        'GBP' => 2,
-        'EGP' => 2,
-        'PKR' => 2,
-        'KWD' => 3,
-        'BHD' => 3,
-        'OMR' => 3,
-        'JPY' => 0,
-    ],
+    'currencies' => require __DIR__.'/currencies.php',
 
     'document_types' => [
         'quotation',

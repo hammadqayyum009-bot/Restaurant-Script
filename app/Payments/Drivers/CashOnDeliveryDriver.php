@@ -41,7 +41,7 @@ class CashOnDeliveryDriver implements PaymentDriver
     /** @return string[] */
     public function supportedCurrencies(): array
     {
-        return array_keys(config('payments.currency_exponents'));
+        return array_keys(config('currencies'));
     }
 
     public function isConfigured(PaymentMethod $method): bool
