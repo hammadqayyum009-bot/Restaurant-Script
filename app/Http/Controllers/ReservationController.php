@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ThrottlesPublicSubmissions;
 use App\Models\Reservation;
 use App\Services\Mailer;
 use App\Services\Ordering;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 
 class ReservationController extends Controller
 {
+    use ThrottlesPublicSubmissions;
+
     public function __construct(protected Ordering $ordering)
     {
     }
@@ -25,6 +29,8 @@ class ReservationController extends Controller
 
     public function store(Request $request, Mailer $mailer)
     {
+        $this->ensurePublicSubmissionIsNotRateLimited($request, 'email', 'reservations');
+
         if (! $this->ordering->reservationsEnabled()) {
             return redirect()->route('home')
                 ->with('error', 'Table bookings are closed at the moment. Please call us instead.');
@@ -68,7 +74,13 @@ class ReservationController extends Controller
             $mailer->dispatchTemplate('admin_reservation', config('notifications.admin_email'), null, $vars);
         }
 
-        return redirect()->route('reservations.success', $reservation->id);
+        // Signed, not a plain ID-keyed route: this page shows the guest's
+        // name, phone, date and headcount, and the auto-increment ID is
+        // trivially walkable — a signature is what actually restricts this
+        // to whoever was just handed the link, not the URL shape alone.
+        return redirect()->to(
+            URL::temporarySignedRoute('reservations.success', now()->addHours(24), ['reservation' => $reservation->id])
+        );
     }
 
     public function success(Reservation $reservation)

@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ThrottlesPublicSubmissions;
 use App\Models\Review;
 use Illuminate\Http\Request;
 
 class ReviewController extends Controller
 {
+    use ThrottlesPublicSubmissions;
+
     public function store(Request $request)
     {
         if (! config('shop.reviews_enabled')) {
             return back()->with('error', 'Reviews are turned off at the moment.')->withFragment('reviews');
         }
+
+        $this->ensurePublicSubmissionIsNotRateLimited($request, 'name', 'reviews');
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:80'],

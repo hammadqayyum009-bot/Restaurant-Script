@@ -8,6 +8,7 @@ use App\Services\ActivityLogger;
 use App\Services\Mailer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -78,16 +79,32 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        $isSelf = $user->id === Auth::id();
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:150', Rule::unique('users', 'email')->ignore($user->id)],
             'phone' => ['nullable', 'string', 'max:30'],
+            'current_password' => $isSelf ? ['nullable', 'required_with:password', 'string'] : ['nullable'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+        ], [
+            'current_password.required_with' => 'Enter your current password to set a new one.',
         ]);
 
         if (empty($data['password'])) {
             unset($data['password']);
+        } elseif ($isSelf) {
+            // Only self-edit is gated this way — an admin resetting a
+            // different (locked-out, forgotten-password) user's password
+            // legitimately has no way to know that other user's current
+            // password, and isn't the one whose session could be riding on
+            // this request. See ProfileController::update() for the
+            // equivalent check on the route this mirrors.
+            if (! Hash::check($data['current_password'] ?? '', $user->password)) {
+                return back()->withInput()->withErrors(['current_password' => 'That is not your current password.']);
+            }
         }
+        unset($data['current_password']);
 
         // Never let an admin lock themselves out of the panel they are using.
         if ($user->id === Auth::id()) {

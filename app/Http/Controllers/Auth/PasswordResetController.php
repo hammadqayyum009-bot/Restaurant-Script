@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Concerns\ThrottlesPublicSubmissions;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Mailer;
@@ -18,6 +19,8 @@ use Illuminate\Support\Str;
  */
 class PasswordResetController extends Controller
 {
+    use ThrottlesPublicSubmissions;
+
     protected const TOKEN_LIFETIME_MINUTES = 60;
 
     public function showRequest()
@@ -27,6 +30,8 @@ class PasswordResetController extends Controller
 
     public function sendLink(Request $request, Mailer $mailer)
     {
+        $this->ensurePublicSubmissionIsNotRateLimited($request, 'email', 'forgot-password');
+
         $data = $request->validate(['email' => ['required', 'email']]);
 
         // No SMTP configured yet — the exact same condition

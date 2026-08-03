@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Concerns\ThrottlesLogins;
+use App\Http\Controllers\Concerns\ThrottlesPublicSubmissions;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Mailer;
@@ -14,6 +15,7 @@ use Illuminate\Validation\Rules\Password;
 class AuthController extends Controller
 {
     use ThrottlesLogins;
+    use ThrottlesPublicSubmissions;
 
     public function showLogin()
     {
@@ -67,6 +69,8 @@ class AuthController extends Controller
 
     public function register(Request $request, Mailer $mailer)
     {
+        $this->ensurePublicSubmissionIsNotRateLimited($request, 'email', 'register');
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:150', 'unique:users,email'],

@@ -510,6 +510,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'App\\Http\\Controllers\\CartController' => __DIR__ . '/../..' . '/app/Http/Controllers/CartController.php',
         'App\\Http\\Controllers\\CheckoutController' => __DIR__ . '/../..' . '/app/Http/Controllers/CheckoutController.php',
         'App\\Http\\Controllers\\Concerns\\ThrottlesLogins' => __DIR__ . '/../..' . '/app/Http/Controllers/Concerns/ThrottlesLogins.php',
+        'App\\Http\\Controllers\\Concerns\\ThrottlesPublicSubmissions' => __DIR__ . '/../..' . '/app/Http/Controllers/Concerns/ThrottlesPublicSubmissions.php',
         'App\\Http\\Controllers\\ContactController' => __DIR__ . '/../..' . '/app/Http/Controllers/ContactController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
         'App\\Http\\Controllers\\HomeController' => __DIR__ . '/../..' . '/app/Http/Controllers/HomeController.php',

@@ -147,12 +147,15 @@ class CheckoutController extends Controller
             'order_items' => $itemsHtml,
         ];
 
+        // order_items is a pre-built <ul> (each item already escaped where
+        // it's assembled above) — it must render as the list it is, not get
+        // HTML-escaped a second time into visible tag text.
         if ($order->email && config('notifications.on_order')) {
-            $mailer->dispatchTemplate('order_placed', $order->email, $order->customer_name, $vars);
+            $mailer->dispatchTemplate('order_placed', $order->email, $order->customer_name, $vars, rawKeys: ['order_items']);
         }
 
         if (config('notifications.copy_admin_on_order') && config('notifications.admin_email')) {
-            $mailer->dispatchTemplate('admin_order', config('notifications.admin_email'), null, $vars);
+            $mailer->dispatchTemplate('admin_order', config('notifications.admin_email'), null, $vars, rawKeys: ['order_items']);
         }
     }
 

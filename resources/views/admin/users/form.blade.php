@@ -29,6 +29,18 @@
                 @error('email')<span class="a-error">{{ $message }}</span>@enderror
             </div>
 
+            @php $isSelf = $user->exists && $user->id === auth()->id(); @endphp
+
+            @if ($isSelf)
+                <div class="a-field">
+                    <label for="current_password">Current password</label>
+                    <input type="password" id="current_password" name="current_password"
+                           class="a-input @error('current_password') has-error @enderror" autocomplete="current-password">
+                    @error('current_password')<span class="a-error">{{ $message }}</span>@enderror
+                    <span class="a-hint">Only needed if you're setting a new password below.</span>
+                </div>
+            @endif
+
             <div class="a-row cols-2">
                 <div class="a-field">
                     <label for="password">{{ $user->exists ? 'New password' : 'Password' }}</label>
@@ -44,8 +56,6 @@
                            autocomplete="new-password" {{ $user->exists ? '' : 'required' }}>
                 </div>
             </div>
-
-            @php $isSelf = $user->exists && $user->id === auth()->id(); @endphp
 
             <label class="a-check">
                 <input type="checkbox" name="is_admin" value="1" {{ old('is_admin', $user->is_admin ?? false) ? 'checked' : '' }}

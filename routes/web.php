@@ -52,7 +52,8 @@ Route::middleware('installed')->group(function () {
 
     Route::get('/reservations/book', [ReservationController::class, 'create'])->name('reservations.create');
     Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
-    Route::get('/reservations/success/{reservation}', [ReservationController::class, 'success'])->name('reservations.success');
+    Route::get('/reservations/success/{reservation}', [ReservationController::class, 'success'])
+        ->name('reservations.success')->middleware('signed');
 
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 

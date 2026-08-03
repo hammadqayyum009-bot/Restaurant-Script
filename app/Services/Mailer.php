@@ -95,11 +95,14 @@ class Mailer
      * @param  array<int, string>  $sensitiveKeys  Keys in $vars (e.g. a
      *     password-reset link) that must never reach email_logs.body in the
      *     clear — see sendTemplate().
+     * @param  array<int, string>  $rawKeys  Keys in $vars that are already
+     *     safe, pre-built HTML (e.g. an order's line-item list) and must not
+     *     be escaped a second time — see sendTemplate().
      */
-    public function dispatchTemplate(string $key, string $toEmail, ?string $toName, array $vars, array $sensitiveKeys = []): void
+    public function dispatchTemplate(string $key, string $toEmail, ?string $toName, array $vars, array $sensitiveKeys = [], array $rawKeys = []): void
     {
-        dispatch(function () use ($key, $toEmail, $toName, $vars, $sensitiveKeys) {
-            $this->sendTemplate($key, $toEmail, $toName, $vars, $sensitiveKeys);
+        dispatch(function () use ($key, $toEmail, $toName, $vars, $sensitiveKeys, $rawKeys) {
+            $this->sendTemplate($key, $toEmail, $toName, $vars, $sensitiveKeys, $rawKeys);
         })->afterResponse();
     }
 
@@ -112,8 +115,13 @@ class Mailer
      *     actual email sent to the recipient is never touched by this. Used
      *     for one-time secrets (a password-reset link) that have no reason
      *     to sit in the delivery log the way an order confirmation does.
+     * @param  array<int, string>  $rawKeys  Any key here is substituted into
+     *     the body as-is, not HTML-escaped. Every var is plain text by
+     *     default — this is only for a var that is itself already-safe,
+     *     deliberately-built HTML (an order's <ul> of line items), never for
+     *     anything that came from a customer-supplied field.
      */
-    public function sendTemplate(string $key, string $toEmail, ?string $toName, array $vars, array $sensitiveKeys = []): bool
+    public function sendTemplate(string $key, string $toEmail, ?string $toName, array $vars, array $sensitiveKeys = [], array $rawKeys = []): bool
     {
         if (! array_key_exists($key, self::TEMPLATES)) {
             return false;
@@ -131,10 +139,12 @@ class Mailer
         return $this->send(
             $toEmail,
             $toName,
+            // The subject line is plain text, not HTML — escaping it would
+            // put literal &amp; where a customer's inbox should show &.
             $this->replace($this->templateSubject($key), $vars),
-            $this->replace($this->templateBody($key), $vars),
+            $this->replace($this->templateBody($key), $vars, $rawKeys, escape: true),
             $key,
-            $sensitiveKeys ? $this->replace($this->templateBody($key), $loggedVars) : null,
+            $sensitiveKeys ? $this->replace($this->templateBody($key), $loggedVars, $rawKeys, escape: true) : null,
         );
     }
 
@@ -177,11 +187,23 @@ class Mailer
 
     /**
      * @param  array<string, string|null>  $vars
+     * @param  array<int, string>  $rawKeys  Keys exempt from $escape — see
+     *     sendTemplate().
+     * @param  bool  $escape  HTML-escape every value not in $rawKeys before
+     *     substituting it. Off by default: a subject line is plain text, not
+     *     HTML, and escaping it would be wrong, not just unnecessary — only
+     *     an HTML body context should ever pass true.
      */
-    public function replace(string $text, array $vars): string
+    public function replace(string $text, array $vars, array $rawKeys = [], bool $escape = false): string
     {
         foreach ($vars as $key => $value) {
-            $text = str_replace('{{'.$key.'}}', (string) $value, $text);
+            $replacement = (string) $value;
+
+            if ($escape && ! in_array($key, $rawKeys, true)) {
+                $replacement = e($replacement);
+            }
+
+            $text = str_replace('{{'.$key.'}}', $replacement, $text);
         }
 
         // Anything the caller did not supply is dropped rather than left raw.

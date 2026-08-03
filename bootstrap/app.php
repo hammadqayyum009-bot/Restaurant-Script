@@ -18,5 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // A guessed or expired reservations.success link (signed route) —
+        // same friendly redirect-with-message pattern used elsewhere for a
+        // rejected storefront request, rather than a bare framework 403.
+        $exceptions->render(function (\Illuminate\Routing\Exceptions\InvalidSignatureException $e, $request) {
+            return redirect()->route('home')
+                ->with('error', 'That confirmation link is invalid or has expired.');
+        });
     })->create();
