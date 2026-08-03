@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\Billing\BillingSettingsController;
+use App\Http\Controllers\Admin\Billing\CreditNoteController;
 use App\Http\Controllers\Admin\Billing\DocumentController;
 use App\Http\Controllers\Admin\Billing\DocumentPrintController;
 use App\Http\Controllers\Admin\ContentController;
@@ -88,6 +89,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/billing/documents/{document}/issue', [DocumentController::class, 'issue'])->name('billing.issue');
             Route::post('/billing/documents/{document}/archive', [DocumentController::class, 'archive'])->name('billing.archive');
             Route::get('/billing/documents/{document}/print', [DocumentPrintController::class, 'show'])->name('billing.print');
+            Route::get('/billing/documents/{document}/credit-notes/create', [CreditNoteController::class, 'create'])->name('billing.credit.create');
+            Route::post('/billing/documents/{document}/credit-notes', [CreditNoteController::class, 'store'])->name('billing.credit.store');
         });
 
         // ---- Reporting ----

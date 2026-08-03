@@ -480,12 +480,14 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
     );
 
     public static $classMap = array (
+        'App\\Exceptions\\Billing\\CreditLimitExceededException' => __DIR__ . '/../..' . '/app/Exceptions/Billing/CreditLimitExceededException.php',
         'App\\Exceptions\\Billing\\NumberAllocationFailedException' => __DIR__ . '/../..' . '/app/Exceptions/Billing/NumberAllocationFailedException.php',
         'App\\Exceptions\\Billing\\ReconciliationFailedException' => __DIR__ . '/../..' . '/app/Exceptions/Billing/ReconciliationFailedException.php',
         'App\\Exceptions\\Billing\\TlvValueTooLongException' => __DIR__ . '/../..' . '/app/Exceptions/Billing/TlvValueTooLongException.php',
         'App\\Http\\Controllers\\Admin\\ActivityController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/ActivityController.php',
         'App\\Http\\Controllers\\Admin\\AuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/AuthController.php',
         'App\\Http\\Controllers\\Admin\\Billing\\BillingSettingsController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/Billing/BillingSettingsController.php',
+        'App\\Http\\Controllers\\Admin\\Billing\\CreditNoteController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/Billing/CreditNoteController.php',
         'App\\Http\\Controllers\\Admin\\Billing\\DocumentController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/Billing/DocumentController.php',
         'App\\Http\\Controllers\\Admin\\Billing\\DocumentPrintController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/Billing/DocumentPrintController.php',
         'App\\Http\\Controllers\\Admin\\ContentController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/ContentController.php',
@@ -521,6 +523,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'App\\Http\\Controllers\\SitemapController' => __DIR__ . '/../..' . '/app/Http/Controllers/SitemapController.php',
         'App\\Http\\Middleware\\EnsureAdmin' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureAdmin.php',
         'App\\Http\\Middleware\\EnsureInstalled' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureInstalled.php',
+        'App\\Http\\Requests\\Billing\\StoreCreditNoteRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Billing/StoreCreditNoteRequest.php',
         'App\\Http\\Requests\\Billing\\StoreOrderDocumentRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Billing/StoreOrderDocumentRequest.php',
         'App\\Http\\Requests\\Billing\\StoreStandaloneDocumentRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Billing/StoreStandaloneDocumentRequest.php',
         'App\\Http\\Requests\\Billing\\UpdateBillingSettingsRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Billing/UpdateBillingSettingsRequest.php',
@@ -546,6 +549,8 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'App\\Providers\\BillingServiceProvider' => __DIR__ . '/../..' . '/app/Providers/BillingServiceProvider.php',
         'App\\Services\\ActivityLogger' => __DIR__ . '/../..' . '/app/Services/ActivityLogger.php',
         'App\\Services\\Billing\\BillingSettings' => __DIR__ . '/../..' . '/app/Services/Billing/BillingSettings.php',
+        'App\\Services\\Billing\\Concerns\\AllocatesDocumentNumbersSafely' => __DIR__ . '/../..' . '/app/Services/Billing/Concerns/AllocatesDocumentNumbersSafely.php',
+        'App\\Services\\Billing\\CreditNoteIssuer' => __DIR__ . '/../..' . '/app/Services/Billing/CreditNoteIssuer.php',
         'App\\Services\\Billing\\DocumentIssuer' => __DIR__ . '/../..' . '/app/Services/Billing/DocumentIssuer.php',
         'App\\Services\\Billing\\DocumentNumberer' => __DIR__ . '/../..' . '/app/Services/Billing/DocumentNumberer.php',
         'App\\Services\\Billing\\HijriDate' => __DIR__ . '/../..' . '/app/Services/Billing/HijriDate.php',

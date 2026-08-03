@@ -47,4 +47,18 @@ class BillingDocumentPolicy
     {
         return $user->can('manage-billing');
     }
+
+    /**
+     * A credit note can only be issued against something that was itself
+     * legally issued — never a draft (test 53) and never another credit note
+     * (test 54, since a credit note corrects an invoice, not another
+     * correction). fully_credited is excluded too: there is nothing left to
+     * credit once the whole document has already been credited.
+     */
+    public function credit(User $user, BillingDocument $document): bool
+    {
+        return $user->can('manage-billing')
+            && $document->document_type !== 'credit_note'
+            && in_array($document->status, [BillingDocument::STATUS_ISSUED, BillingDocument::STATUS_PARTIALLY_CREDITED], true);
+    }
 }

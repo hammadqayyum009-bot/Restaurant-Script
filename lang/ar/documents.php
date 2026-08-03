@@ -16,6 +16,8 @@ return [
     'cr_number' => 'رقم السجل التجاري',
     'document_number' => 'رقم المستند',
     'order_number' => 'رقم الطلب',
+    'credited_against' => 'إشعار دائن بخصوص',
+    'credit_reason' => 'سبب الإشعار الدائن',
     'issue_date' => 'تاريخ الإصدار',
     'hijri_date' => 'التاريخ الهجري',
     'phone' => 'الهاتف',

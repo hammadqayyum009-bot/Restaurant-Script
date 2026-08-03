@@ -35,6 +35,13 @@
                 <div>{{ __('documents.order_number') }}: <strong class="doc-mono">{{ $document->order_number }}</strong></div>
             @endif
             <div>{{ __('documents.issue_date') }}: <strong>{{ optional($document->issue_date)->format('d/m/Y') }}</strong></div>
+            @if ($document->document_type === 'credit_note' && $document->parentDocument)
+                <div>
+                    {{ __('documents.credited_against') }} / {{ __('documents.credited_against', [], 'en') }}:
+                    <strong class="doc-mono">{{ $document->parentDocument->document_number }}</strong>
+                    ({{ optional($document->parentDocument->issue_date)->format('d/m/Y') }})
+                </div>
+            @endif
             @if ($document->hijri_date)
                 <div>{{ __('documents.hijri_date') }}: <strong>{{ $document->hijri_date }}</strong></div>
             @endif

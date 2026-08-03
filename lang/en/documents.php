@@ -16,6 +16,8 @@ return [
     'cr_number' => 'C.R. No.',
     'document_number' => 'Document No.',
     'order_number' => 'Order No.',
+    'credited_against' => 'Credit Note Against',
+    'credit_reason' => 'Reason for Credit',
     'issue_date' => 'Issue Date',
     'hijri_date' => 'Hijri Date',
     'phone' => 'Phone',

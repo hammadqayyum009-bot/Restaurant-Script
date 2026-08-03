@@ -27,7 +27,7 @@ class DocumentPrintController extends Controller
                 ->with('error', 'Issue the document before printing it.');
         }
 
-        $document->loadMissing('lines');
+        $document->loadMissing('lines', 'parentDocument');
 
         // Only tax invoices carry a QR payload (DocumentIssuer::TAX_INVOICE_TYPES)
         // — a quotation, proforma or delivery note is not a ZATCA tax document

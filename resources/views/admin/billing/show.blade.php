@@ -5,6 +5,9 @@
 @section('actions')
     @if ($document->isIssued())
         <a href="{{ route('admin.billing.print', $document) }}" target="_blank" rel="noopener" class="a-btn ghost sm">Print</a>
+        @can('credit', $document)
+            <a href="{{ route('admin.billing.credit.create', $document) }}" class="a-btn ghost sm">Issue credit note</a>
+        @endcan
         @if (! $document->archived_at)
             <form method="POST" action="{{ route('admin.billing.archive', $document) }}" style="display:inline;">
                 @csrf
@@ -28,6 +31,32 @@
                 @if ($reconciliationError)
                     <div class="a-alert err">{{ $reconciliationError }}</div>
                 @endif
+            @endif
+
+            @if ($document->document_type === 'credit_note' && $document->parentDocument)
+                <div class="a-alert warn">
+                    Credited against
+                    <a href="{{ route('admin.billing.show', $document->parentDocument) }}">{{ $document->parentDocument->document_number }}</a>
+                    (issued {{ optional($document->parentDocument->issue_date)->format('d M Y') }}).
+                    @if ($document->credit_reason)
+                        Reason: {{ $document->credit_reason }}
+                    @endif
+                </div>
+            @endif
+
+            @if ($document->creditNotes->isNotEmpty())
+                <div class="a-card">
+                    <div class="a-card-head"><h2>Credit notes</h2></div>
+                    <div class="a-stack" style="font-size:0.86rem;">
+                        @foreach ($document->creditNotes as $creditNote)
+                            <div>
+                                <a href="{{ route('admin.billing.show', $creditNote) }}">{{ $creditNote->document_number }}</a>
+                                &middot; {{ $creditNote->currency }} {{ \App\Services\Billing\Money::toDecimalFromExponent($creditNote->grand_total_minor, $creditNote->currency_exponent) }}
+                                &middot; {{ optional($creditNote->issue_date)->format('d M Y') }}
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             @endif
 
             <div class="a-card">

@@ -116,7 +116,7 @@ class DocumentController extends Controller
             }
         }
 
-        $document->loadMissing('lines', 'events.user', 'order');
+        $document->loadMissing('lines', 'events.user', 'order', 'parentDocument', 'creditNotes');
 
         return view('admin.billing.show', [
             'document' => $document,

@@ -6,12 +6,14 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Exceptions\\Billing\\CreditLimitExceededException' => $baseDir . '/app/Exceptions/Billing/CreditLimitExceededException.php',
     'App\\Exceptions\\Billing\\NumberAllocationFailedException' => $baseDir . '/app/Exceptions/Billing/NumberAllocationFailedException.php',
     'App\\Exceptions\\Billing\\ReconciliationFailedException' => $baseDir . '/app/Exceptions/Billing/ReconciliationFailedException.php',
     'App\\Exceptions\\Billing\\TlvValueTooLongException' => $baseDir . '/app/Exceptions/Billing/TlvValueTooLongException.php',
     'App\\Http\\Controllers\\Admin\\ActivityController' => $baseDir . '/app/Http/Controllers/Admin/ActivityController.php',
     'App\\Http\\Controllers\\Admin\\AuthController' => $baseDir . '/app/Http/Controllers/Admin/AuthController.php',
     'App\\Http\\Controllers\\Admin\\Billing\\BillingSettingsController' => $baseDir . '/app/Http/Controllers/Admin/Billing/BillingSettingsController.php',
+    'App\\Http\\Controllers\\Admin\\Billing\\CreditNoteController' => $baseDir . '/app/Http/Controllers/Admin/Billing/CreditNoteController.php',
     'App\\Http\\Controllers\\Admin\\Billing\\DocumentController' => $baseDir . '/app/Http/Controllers/Admin/Billing/DocumentController.php',
     'App\\Http\\Controllers\\Admin\\Billing\\DocumentPrintController' => $baseDir . '/app/Http/Controllers/Admin/Billing/DocumentPrintController.php',
     'App\\Http\\Controllers\\Admin\\ContentController' => $baseDir . '/app/Http/Controllers/Admin/ContentController.php',
@@ -47,6 +49,7 @@ return array(
     'App\\Http\\Controllers\\SitemapController' => $baseDir . '/app/Http/Controllers/SitemapController.php',
     'App\\Http\\Middleware\\EnsureAdmin' => $baseDir . '/app/Http/Middleware/EnsureAdmin.php',
     'App\\Http\\Middleware\\EnsureInstalled' => $baseDir . '/app/Http/Middleware/EnsureInstalled.php',
+    'App\\Http\\Requests\\Billing\\StoreCreditNoteRequest' => $baseDir . '/app/Http/Requests/Billing/StoreCreditNoteRequest.php',
     'App\\Http\\Requests\\Billing\\StoreOrderDocumentRequest' => $baseDir . '/app/Http/Requests/Billing/StoreOrderDocumentRequest.php',
     'App\\Http\\Requests\\Billing\\StoreStandaloneDocumentRequest' => $baseDir . '/app/Http/Requests/Billing/StoreStandaloneDocumentRequest.php',
     'App\\Http\\Requests\\Billing\\UpdateBillingSettingsRequest' => $baseDir . '/app/Http/Requests/Billing/UpdateBillingSettingsRequest.php',
@@ -72,6 +75,8 @@ return array(
     'App\\Providers\\BillingServiceProvider' => $baseDir . '/app/Providers/BillingServiceProvider.php',
     'App\\Services\\ActivityLogger' => $baseDir . '/app/Services/ActivityLogger.php',
     'App\\Services\\Billing\\BillingSettings' => $baseDir . '/app/Services/Billing/BillingSettings.php',
+    'App\\Services\\Billing\\Concerns\\AllocatesDocumentNumbersSafely' => $baseDir . '/app/Services/Billing/Concerns/AllocatesDocumentNumbersSafely.php',
+    'App\\Services\\Billing\\CreditNoteIssuer' => $baseDir . '/app/Services/Billing/CreditNoteIssuer.php',
     'App\\Services\\Billing\\DocumentIssuer' => $baseDir . '/app/Services/Billing/DocumentIssuer.php',
     'App\\Services\\Billing\\DocumentNumberer' => $baseDir . '/app/Services/Billing/DocumentNumberer.php',
     'App\\Services\\Billing\\HijriDate' => $baseDir . '/app/Services/Billing/HijriDate.php',

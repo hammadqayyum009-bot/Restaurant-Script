@@ -34,6 +34,13 @@
         @include('documents.partials.lines', ['document' => $document])
         @include('documents.partials.totals', ['document' => $document])
 
+        @if ($document->document_type === 'credit_note' && $document->credit_reason)
+            <div class="doc-block">
+                <div style="font-size:0.78rem; color:var(--doc-soft);">{{ __('documents.credit_reason') }} / {{ __('documents.credit_reason', [], 'en') }}</div>
+                <div>{{ $document->credit_reason }}</div>
+            </div>
+        @endif
+
         @if ($qrDataUri)
             @include('documents.partials.qr', ['document' => $document, 'qrDataUri' => $qrDataUri])
         @endif
