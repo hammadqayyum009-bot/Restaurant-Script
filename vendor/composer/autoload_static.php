@@ -521,6 +521,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'App\\Http\\Controllers\\ReservationController' => __DIR__ . '/../..' . '/app/Http/Controllers/ReservationController.php',
         'App\\Http\\Controllers\\ReviewController' => __DIR__ . '/../..' . '/app/Http/Controllers/ReviewController.php',
         'App\\Http\\Controllers\\SitemapController' => __DIR__ . '/../..' . '/app/Http/Controllers/SitemapController.php',
+        'App\\Http\\Middleware\\EnsureActiveAccount' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureActiveAccount.php',
         'App\\Http\\Middleware\\EnsureAdmin' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureAdmin.php',
         'App\\Http\\Middleware\\EnsureInstalled' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureInstalled.php',
         'App\\Http\\Requests\\Billing\\StoreCreditNoteRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Billing/StoreCreditNoteRequest.php',

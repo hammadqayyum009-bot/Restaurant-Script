@@ -17,6 +17,15 @@
                     <div class="alert alert-success">{{ session('success') }}</div>
                 @endif
 
+                @if (session('dev_reset_url'))
+                    <div class="alert alert-success" style="margin-top:10px;">
+                        <strong>No outgoing mail server is configured yet</strong> — showing the link here instead, for testing. Once SMTP is set up in the admin panel, this will disappear and the real email will be used.
+                        <div style="margin-top:8px; word-break:break-all;">
+                            <a href="{{ session('dev_reset_url') }}">{{ session('dev_reset_url') }}</a>
+                        </div>
+                    </div>
+                @endif
+
                 @if ($errors->any())
                     <div class="alert alert-error">
                         @foreach ($errors->all() as $error)

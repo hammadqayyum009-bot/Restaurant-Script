@@ -92,11 +92,14 @@ class Mailer
      * holding up a checkout or a booking.
      *
      * @param  array<string, string|null>  $vars
+     * @param  array<int, string>  $sensitiveKeys  Keys in $vars (e.g. a
+     *     password-reset link) that must never reach email_logs.body in the
+     *     clear — see sendTemplate().
      */
-    public function dispatchTemplate(string $key, string $toEmail, ?string $toName, array $vars): void
+    public function dispatchTemplate(string $key, string $toEmail, ?string $toName, array $vars, array $sensitiveKeys = []): void
     {
-        dispatch(function () use ($key, $toEmail, $toName, $vars) {
-            $this->sendTemplate($key, $toEmail, $toName, $vars);
+        dispatch(function () use ($key, $toEmail, $toName, $vars, $sensitiveKeys) {
+            $this->sendTemplate($key, $toEmail, $toName, $vars, $sensitiveKeys);
         })->afterResponse();
     }
 
@@ -104,8 +107,13 @@ class Mailer
      * Renders and sends one of the editable templates.
      *
      * @param  array<string, string|null>  $vars
+     * @param  array<int, string>  $sensitiveKeys  Any key here is replaced
+     *     with a placeholder before the body is written to email_logs — the
+     *     actual email sent to the recipient is never touched by this. Used
+     *     for one-time secrets (a password-reset link) that have no reason
+     *     to sit in the delivery log the way an order confirmation does.
      */
-    public function sendTemplate(string $key, string $toEmail, ?string $toName, array $vars): bool
+    public function sendTemplate(string $key, string $toEmail, ?string $toName, array $vars, array $sensitiveKeys = []): bool
     {
         if (! array_key_exists($key, self::TEMPLATES)) {
             return false;
@@ -113,19 +121,31 @@ class Mailer
 
         $vars = array_merge($this->baseVars(), $vars);
 
+        $loggedVars = $vars;
+        foreach ($sensitiveKeys as $sensitiveKey) {
+            if (array_key_exists($sensitiveKey, $loggedVars)) {
+                $loggedVars[$sensitiveKey] = '[redacted]';
+            }
+        }
+
         return $this->send(
             $toEmail,
             $toName,
             $this->replace($this->templateSubject($key), $vars),
             $this->replace($this->templateBody($key), $vars),
-            $key
+            $key,
+            $sensitiveKeys ? $this->replace($this->templateBody($key), $loggedVars) : null,
         );
     }
 
     /**
      * Sends an already-rendered message and records the attempt either way.
+     *
+     * @param  string|null  $loggedBody  What to write to email_logs.body
+     *     instead of $body, when the two must differ (a redacted secret).
+     *     Never affects what is actually sent — that is always $body.
      */
-    public function send(string $toEmail, ?string $toName, string $subject, string $body, string $type = 'manual'): bool
+    public function send(string $toEmail, ?string $toName, string $subject, string $body, string $type = 'manual', ?string $loggedBody = null): bool
     {
         $html = View::make('emails.layout', [
             'subject' => $subject,
@@ -136,7 +156,7 @@ class Mailer
             'to_email' => $toEmail,
             'to_name' => $toName,
             'subject' => $subject,
-            'body' => $body,
+            'body' => $loggedBody ?? $body,
             'type' => $type,
         ];
 

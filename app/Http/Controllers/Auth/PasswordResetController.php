@@ -30,6 +30,7 @@ class PasswordResetController extends Controller
         $data = $request->validate(['email' => ['required', 'email']]);
 
         $user = User::where('email', $data['email'])->first();
+        $devResetUrl = null;
 
         if ($user && $user->is_active) {
             $token = Str::random(64);
@@ -39,16 +40,37 @@ class PasswordResetController extends Controller
                 ['token' => Hash::make($token), 'created_at' => now()]
             );
 
+            $resetUrl = route('password.reset', ['token' => $token, 'email' => $user->email]);
+
+            // No SMTP configured yet — the exact same condition
+            // AppServiceProvider::applySettings() uses to decide whether to
+            // switch the mailer off the 'log' default. Nothing is actually
+            // delivered in that mode, so the link is never put in the mailed
+            // body at all (only the placeholder is) — there is nothing for
+            // storage/logs/laravel.log or any other log to ever capture. The
+            // real, working link goes to the screen instead, for this one
+            // response only. The moment SMTP is configured, mail.default
+            // becomes 'smtp' and this stops on its own.
+            $usingLogDriver = config('mail.default') === 'log';
+
             $mailer->dispatchTemplate('password_reset', $user->email, $user->name, [
                 'name' => $user->name,
-                'reset_url' => route('password.reset', ['token' => $token, 'email' => $user->email]),
+                'reset_url' => $usingLogDriver
+                    ? 'Shown on screen — no outgoing mail server is configured yet.'
+                    : $resetUrl,
                 'expires_in' => self::TOKEN_LIFETIME_MINUTES.' minutes',
-            ]);
+            ], sensitiveKeys: ['reset_url']);
+
+            if ($usingLogDriver) {
+                $devResetUrl = $resetUrl;
+            }
         }
 
         // The same response either way, so the form cannot be used to discover
         // which email addresses have accounts.
-        return back()->with('success', 'If that email has an account, a reset link is on its way.');
+        $response = back()->with('success', 'If that email has an account, a reset link is on its way.');
+
+        return $devResetUrl ? $response->with('dev_reset_url', $devResetUrl) : $response;
     }
 
     public function showReset(Request $request, string $token)

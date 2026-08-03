@@ -47,6 +47,7 @@ return array(
     'App\\Http\\Controllers\\ReservationController' => $baseDir . '/app/Http/Controllers/ReservationController.php',
     'App\\Http\\Controllers\\ReviewController' => $baseDir . '/app/Http/Controllers/ReviewController.php',
     'App\\Http\\Controllers\\SitemapController' => $baseDir . '/app/Http/Controllers/SitemapController.php',
+    'App\\Http\\Middleware\\EnsureActiveAccount' => $baseDir . '/app/Http/Middleware/EnsureActiveAccount.php',
     'App\\Http\\Middleware\\EnsureAdmin' => $baseDir . '/app/Http/Middleware/EnsureAdmin.php',
     'App\\Http\\Middleware\\EnsureInstalled' => $baseDir . '/app/Http/Middleware/EnsureInstalled.php',
     'App\\Http\\Requests\\Billing\\StoreCreditNoteRequest' => $baseDir . '/app/Http/Requests/Billing/StoreCreditNoteRequest.php',

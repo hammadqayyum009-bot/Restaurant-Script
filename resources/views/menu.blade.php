@@ -105,5 +105,5 @@
 @endsection
 
 @push('schema')
-<script type="application/ld+json">{!! json_encode(app(\App\Services\Seo::class)->menuSchema(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+<script type="application/ld+json">{!! json_encode(app(\App\Services\Seo::class)->menuSchema(), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
 @endpush

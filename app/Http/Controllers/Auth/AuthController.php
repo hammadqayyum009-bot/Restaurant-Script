@@ -41,6 +41,15 @@ class AuthController extends Controller
             ])->onlyInput('email');
         }
 
+        if (! Auth::user()->is_active) {
+            Auth::logout();
+            $this->recordFailedAttempt($request, 'login');
+
+            return back()->withErrors([
+                'email' => 'This account is no longer active.',
+            ])->onlyInput('email');
+        }
+
         $this->clearAttempts($request, 'login');
         $request->session()->regenerate();
 

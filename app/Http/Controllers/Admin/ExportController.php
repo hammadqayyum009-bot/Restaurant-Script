@@ -148,12 +148,30 @@ class ExportController extends Controller
             fputcsv($handle, $headings);
 
             $rows(function (array $row) use ($handle) {
-                fputcsv($handle, $row);
+                fputcsv($handle, array_map([$this, 'neutralizeFormula'], $row));
             });
 
             fclose($handle);
         }, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
+    }
+
+    /**
+     * Every field written here can originate from a public, unauthenticated
+     * form (checkout, reservation, registration) — a value starting with
+     * =, +, -, or @ is a formula to Excel/Sheets, executed the moment an
+     * admin opens the export. Prefixing it with a single quote is the
+     * standard mitigation: it forces the cell to be read as literal text,
+     * and both Excel and Sheets hide that leading quote in the opened cell,
+     * so the value an admin sees is unchanged.
+     */
+    protected function neutralizeFormula(mixed $value): mixed
+    {
+        if (! is_string($value) || $value === '') {
+            return $value;
+        }
+
+        return preg_match('/^\s*[=+\-@]/', $value) ? "'".$value : $value;
     }
 }

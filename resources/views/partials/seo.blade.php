@@ -37,5 +37,5 @@
 
 {{-- Structured data: the Restaurant node on every page, plus whatever the
      current page adds (the full menu on /menu). --}}
-<script type="application/ld+json">{!! json_encode($seo->restaurantSchema(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+<script type="application/ld+json">{!! json_encode($seo->restaurantSchema(), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
 @stack('schema')
