@@ -5,23 +5,24 @@ namespace Tests\Feature\Security;
 use App\Models\EmailLog;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
  * Regression test: the plaintext password-reset token used to end up in
  * email_logs.body (Mailer::send() logged the fully-rendered body, reset URL
  * and all, unconditionally — the hashing in password_reset_tokens never
- * protected this second copy) and, whenever no SMTP was configured yet
- * (mail.default stays 'log', the shipped default), a second copy landed in
- * storage/logs/laravel.log via Laravel's own log mail transport.
+ * protected this second copy).
  *
- * The fix redacts email_logs.body always, and — when no mail driver is
- * configured — never puts the real token in the mailed body at all, showing
- * it on screen for that one response instead. There is nothing left for
- * *any* log to capture in that mode, which is what the second test proves
- * without needing to touch the filesystem: the same value that would have
- * been handed to any log-based transport (the mailed body) is exactly what
- * email_logs.body records, and it contains no token either.
+ * The first fix attempt for the "no SMTP configured" case showed the real
+ * link on screen instead of emailing it — which is worse than the original
+ * bug: password reset's whole security model depends on the link only ever
+ * reaching the account owner's inbox, and an on-screen link hands it to
+ * whoever submits the form, for any email address, account-takeover style.
+ * The corrected behavior: when there is no way to actually deliver the
+ * link (mail.default is still 'log'), the feature simply refuses to run —
+ * no token generated, nothing shown, nothing logged — rather than degrading
+ * into something insecure.
  */
 class PasswordResetLogTest extends TestCase
 {
@@ -43,40 +44,54 @@ class PasswordResetLogTest extends TestCase
 
         $this->assertNotNull($log);
         // Any real reset link necessarily contains this path segment — its
-        // absence proves no working link (token or otherwise) leaked into
-        // the log, without needing to know the random token value itself.
+        // absence proves no working link leaked into the log, without
+        // needing to know the random token value itself.
         $this->assertStringNotContainsString('/reset-password/', $log->body, 'The reset link must never appear in the delivery log.');
         $this->assertStringContainsString('[redacted]', $log->body);
     }
 
-    public function test_no_mail_driver_configured_the_link_is_shown_on_screen_and_never_logged_anywhere(): void
+    public function test_normal_behavior_resumes_once_smtp_is_configured(): void
+    {
+        config(['mail.default' => 'smtp']);
+        $user = $this->activeUser();
+
+        $response = $this->post(route('password.email'), ['email' => $user->email]);
+
+        $response->assertSessionHas('success');
+        $response->assertSessionMissing('errors');
+        $this->assertSame(1, DB::table('password_reset_tokens')->where('email', $user->email)->count(), 'A real, usable token must still be generated and stored once SMTP is configured.');
+        $this->assertNotNull(EmailLog::where('to_email', $user->email)->first(), 'The reset email must still be dispatched.');
+    }
+
+    public function test_no_mail_driver_configured_password_reset_is_unavailable_for_a_real_account(): void
     {
         config(['mail.default' => 'log']);
         $user = $this->activeUser();
 
         $response = $this->post(route('password.email'), ['email' => $user->email]);
 
-        $response->assertSessionHas('dev_reset_url');
-        $devUrl = session('dev_reset_url');
-        $this->assertStringContainsString('/reset-password/', $devUrl, 'The on-screen link must actually be usable.');
-
-        // The exact value handed to Mail::html() — and therefore to
-        // whatever the 'log' mail transport itself would write to
-        // storage/logs/laravel.log — is the same body persisted here. If it
-        // contains no working link, nothing downstream of it can either.
-        $log = EmailLog::where('to_email', $user->email)->latest()->first();
-        $this->assertNotNull($log);
-        $this->assertStringNotContainsString('/reset-password/', $log->body);
+        $response->assertSessionHasErrors('email');
+        $this->assertStringContainsString("isn't available", session('errors')->first('email'));
+        $this->assertSame(0, DB::table('password_reset_tokens')->where('email', $user->email)->count(), 'No token should be generated if nothing can deliver it.');
+        $this->assertSame(0, EmailLog::count(), 'Nothing should be dispatched, so nothing should be logged.');
+        $this->assertStringNotContainsString('/reset-password/', $response->getContent() ?? '', 'No reset link may appear anywhere in the response.');
     }
 
-    public function test_a_nonexistent_email_produces_the_same_response_with_no_log_entry(): void
+    public function test_no_mail_driver_configured_produces_an_identical_response_for_a_nonexistent_email(): void
     {
         config(['mail.default' => 'log']);
+        $realUser = $this->activeUser();
 
-        $response = $this->post(route('password.email'), ['email' => 'nobody@example.com']);
+        $realResponse = $this->post(route('password.email'), ['email' => $realUser->email]);
+        $realResponse->assertSessionHasErrors('email');
+        $realMessage = session('errors')->first('email');
 
-        $response->assertSessionMissing('dev_reset_url');
-        $response->assertSessionHas('success');
+        $fakeResponse = $this->post(route('password.email'), ['email' => 'definitely-nobody@example.com']);
+        $fakeResponse->assertSessionHasErrors('email');
+        $fakeMessage = session('errors')->first('email');
+
+        $this->assertSame($realMessage, $fakeMessage, 'The response must be identical whether or not the email belongs to a real account.');
+        $this->assertSame(0, DB::table('password_reset_tokens')->count());
         $this->assertSame(0, EmailLog::count());
     }
 }

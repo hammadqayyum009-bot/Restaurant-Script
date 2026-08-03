@@ -29,8 +29,22 @@ class PasswordResetController extends Controller
     {
         $data = $request->validate(['email' => ['required', 'email']]);
 
+        // No SMTP configured yet — the exact same condition
+        // AppServiceProvider::applySettings() uses to decide whether to
+        // switch the mailer off the 'log' default. Password reset only
+        // works because the link reaches the account owner's own inbox and
+        // nowhere else; with no way to actually deliver it, the feature
+        // does not degrade to something else (showing the link, logging
+        // it) — it simply refuses to run. No token is generated or stored,
+        // and the response is identical for a real or a fake email either
+        // way, so this stays enumeration-safe in this mode too.
+        if (config('mail.default') === 'log') {
+            return back()->withErrors([
+                'email' => "Password reset isn't available yet. Please contact the restaurant.",
+            ]);
+        }
+
         $user = User::where('email', $data['email'])->first();
-        $devResetUrl = null;
 
         if ($user && $user->is_active) {
             $token = Str::random(64);
@@ -40,37 +54,16 @@ class PasswordResetController extends Controller
                 ['token' => Hash::make($token), 'created_at' => now()]
             );
 
-            $resetUrl = route('password.reset', ['token' => $token, 'email' => $user->email]);
-
-            // No SMTP configured yet — the exact same condition
-            // AppServiceProvider::applySettings() uses to decide whether to
-            // switch the mailer off the 'log' default. Nothing is actually
-            // delivered in that mode, so the link is never put in the mailed
-            // body at all (only the placeholder is) — there is nothing for
-            // storage/logs/laravel.log or any other log to ever capture. The
-            // real, working link goes to the screen instead, for this one
-            // response only. The moment SMTP is configured, mail.default
-            // becomes 'smtp' and this stops on its own.
-            $usingLogDriver = config('mail.default') === 'log';
-
             $mailer->dispatchTemplate('password_reset', $user->email, $user->name, [
                 'name' => $user->name,
-                'reset_url' => $usingLogDriver
-                    ? 'Shown on screen — no outgoing mail server is configured yet.'
-                    : $resetUrl,
+                'reset_url' => route('password.reset', ['token' => $token, 'email' => $user->email]),
                 'expires_in' => self::TOKEN_LIFETIME_MINUTES.' minutes',
             ], sensitiveKeys: ['reset_url']);
-
-            if ($usingLogDriver) {
-                $devResetUrl = $resetUrl;
-            }
         }
 
         // The same response either way, so the form cannot be used to discover
         // which email addresses have accounts.
-        $response = back()->with('success', 'If that email has an account, a reset link is on its way.');
-
-        return $devResetUrl ? $response->with('dev_reset_url', $devResetUrl) : $response;
+        return back()->with('success', 'If that email has an account, a reset link is on its way.');
     }
 
     public function showReset(Request $request, string $token)
