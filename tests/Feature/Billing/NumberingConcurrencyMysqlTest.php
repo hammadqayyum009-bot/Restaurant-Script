@@ -89,6 +89,24 @@ class NumberingConcurrencyMysqlTest extends TestCase
             'APP_ENV' => 'testing',
         ];
 
+        // This class deliberately extends bare PHPUnit\Framework\TestCase, not
+        // Laravel's Illuminate\Foundation\Testing\TestCase — it orchestrates
+        // child worker processes rather than running inside the app's own
+        // RefreshDatabase/sqlite test setup, so nothing else in the suite ever
+        // boots a facade root for it. Config::set()/DB::connection() below need
+        // one. Same bootstrap the worker script (Support/concurrency_worker.php)
+        // already does for itself, one process down.
+        $app = require $base.'/bootstrap/app.php';
+        $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+
+        // Kernel::bootstrap() installs Laravel's own error/exception handlers
+        // (HandleExceptions) globally. This test only needed the boot for
+        // facades/container/config, not for those handlers to stay installed
+        // over PHPUnit's own — restoring immediately keeps this test from
+        // leaking global state into whatever PHPUnit runs next.
+        restore_error_handler();
+        restore_exception_handler();
+
         Config::set('database.connections.concurrency_mysql', [
             'driver' => 'mysql',
             'host' => $config['host'],
