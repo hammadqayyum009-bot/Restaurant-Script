@@ -54,7 +54,39 @@ treated as "site currency at the time" (undeterminable exactly, but bounded by
 `created_at`). That is a change to an existing table and existing checkout
 code, outside this module's approved scope — it would need its own contract.
 
-## 3. Overlap with the existing invoice/receipt printouts
+## 3. Credit notes recompute a line's amount, they do not copy it
+
+`App\Services\Billing\Reconciler::reconcileOrder()` tolerates a small
+component/total mismatch (up to 1 minor unit per line — `$componentDelta`)
+before refusing to issue, and closes it via `distribute()` (largest-remainder),
+which can nudge an individual order-linked line's stored `line_net_minor`/
+`line_vat_minor`/`line_total_minor` by ±1 minor unit so the document's lines
+sum to exactly `orders.total` (rule D2). That adjustment lives on the issued
+line's stored totals only — `unit_price_minor` stays the raw, un-adjusted
+per-unit price from the order item.
+
+`App\Services\Billing\CreditNoteIssuer::computeCreditLines()` does not read a
+line's stored, possibly-adjusted totals; it recomputes the credited amount
+fresh from `unit_price_minor` × credited quantity via `VatCalculator::forLine()`
+(the same approach `computeStandaloneTotals()` uses, deliberately kept
+consistent rather than adding a second amount-calculation path). For the rare
+line that actually received a ±1 minor unit `distribute()` adjustment, crediting
+that line at its full original quantity can therefore differ from what that
+line actually contributed to the document total by that same 1 minor unit.
+
+**In practice:** the document-level amount guard (`remainingAmountMinor()`)
+is what this actually surfaces as — crediting 100% of every line on such a
+document in one credit note could be rejected with "exceeds the remaining
+creditable balance" over a 1 minor-unit difference, even though the intent
+(credit the whole invoice) is entirely legitimate. It never produces a
+*silent* over-credit; the guard would refuse first. This only arises when the
+underlying order's components didn't already sum exactly to its total (the
+same narrow condition `$componentDelta` exists to tolerate in the first
+place), so it is expected to be uncommon. Standalone documents are unaffected
+— they have no `distribute()` step, since their lines are their own total by
+definition.
+
+## 4. Overlap with the existing invoice/receipt printouts
 
 `admin/orders/{order}/invoice` and `admin/orders/{order}/receipt`
 (`App\Http\Controllers\Admin\OrderController`,
