@@ -128,9 +128,15 @@ submitted:
 - **Document-level:** the credited amount (`grand_total_minor`) can never
   exceed the original document's own `grand_total_minor`.
 
-See `documentation/billing-known-limitations.md` §3 for a narrow edge case
-where the document-level guard can reject a legitimate full-document credit
-by exactly 1 minor unit, and why.
+A full-document credit (every line, at its full remaining quantity) always
+succeeds and credits exactly `grand_total_minor` — `computeCreditLines()`
+reads each line's own remaining *stored* amount for a full-quantity credit
+rather than recomputing it from `unit_price_minor`, so it is exact even for a
+line `Reconciler::distribute()` had to nudge by a minor unit to make the
+document sum to `orders.total` exactly (rule D2). Only a genuine partial
+credit (less than a line's full remaining quantity) involves its own
+proportional split, with the same ordinary integer rounding as VAT
+calculations anywhere else in the module.
 
 ## Authorization
 
@@ -179,7 +185,7 @@ POST /admin/billing/documents/{document}/credit-notes          billing.credit.st
 
 These are entirely separate from the pre-existing
 `admin/orders/{order}/invoice` and `admin/orders/{order}/receipt` routes
-(`OrderController`) — see `documentation/billing-known-limitations.md` §4.
+(`OrderController`) — see `documentation/billing-known-limitations.md` §3.
 
 ## Bilingual print rendering
 

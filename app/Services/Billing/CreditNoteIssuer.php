@@ -205,8 +205,31 @@ class CreditNoteIssuer
                 );
             }
 
-            $amountMinor = (int) round($originalLine->unit_price_minor * $requestedQtyMilli / 1000);
-            $calc = VatCalculator::forLine($amountMinor, $originalLine->vat_rate_bp, $originalLine->vat_category, $original->prices_include_vat);
+            $remainingAmounts = $this->remainingLineAmounts($originalLine);
+
+            if ($requestedQtyMilli === $remainingQtyMilli) {
+                // Crediting everything left on this line: use what is actually
+                // left of the line's own stored, already-issued totals — never
+                // recompute from unit_price_minor. A recompute can disagree by
+                // a minor unit with a line that Reconciler::distribute() had to
+                // nudge to make the document sum to orders.total exactly
+                // (rule D2), which is exactly what let a legitimate
+                // full-document credit be wrongly rejected — see
+                // documentation/billing-known-limitations.md history. Copying
+                // the remainder instead makes a full credit exact by
+                // construction, not by coincidence.
+                $net = $remainingAmounts['net'];
+                $vat = $remainingAmounts['vat'];
+                $gross = $remainingAmounts['total'];
+            } else {
+                // A genuine partial credit: proportionally share what is left
+                // of the line's stored net/vat, not the original per-unit
+                // price — same reasoning as above, just scaled instead of
+                // taken whole.
+                $net = (int) round($remainingAmounts['net'] * $requestedQtyMilli / $remainingQtyMilli);
+                $vat = (int) round($remainingAmounts['vat'] * $requestedQtyMilli / $remainingQtyMilli);
+                $gross = $net + $vat;
+            }
 
             $computedLines[] = [
                 'source_line_id' => $originalLine->id,
@@ -214,9 +237,9 @@ class CreditNoteIssuer
                 'name_ar' => $originalLine->name_ar,
                 'quantity_milli' => $requestedQtyMilli,
                 'unit_price_minor' => $originalLine->unit_price_minor,
-                'line_net_minor' => $calc['net'],
-                'line_vat_minor' => $calc['vat'],
-                'line_total_minor' => $calc['gross'],
+                'line_net_minor' => $net,
+                'line_vat_minor' => $vat,
+                'line_total_minor' => $gross,
                 'vat_rate_bp' => $originalLine->vat_rate_bp,
                 'vat_category' => $originalLine->vat_category,
                 'is_delivery_fee' => $originalLine->is_delivery_fee,
@@ -256,6 +279,30 @@ class CreditNoteIssuer
             ->sum('quantity_milli');
 
         return max(0, $line->quantity_milli - $credited);
+    }
+
+    /**
+     * How much of this original line's own stored net/VAT/total has never
+     * been credited by any prior credit note — the actual, already-issued
+     * amounts (which may carry a Reconciler::distribute() rounding
+     * adjustment for this specific line), not a fresh recompute from
+     * unit_price_minor.
+     *
+     * @return array{net: int, vat: int, total: int}
+     */
+    public function remainingLineAmounts(BillingDocumentLine $line): array
+    {
+        $credited = BillingDocumentLine::query()
+            ->where('source_line_id', $line->id)
+            ->whereHas('document', fn ($q) => $q->where('parent_document_id', $line->document_id)->where('document_type', 'credit_note'))
+            ->selectRaw('COALESCE(SUM(line_net_minor), 0) as net, COALESCE(SUM(line_vat_minor), 0) as vat, COALESCE(SUM(line_total_minor), 0) as total')
+            ->first();
+
+        return [
+            'net' => max(0, $line->line_net_minor - (int) $credited->net),
+            'vat' => max(0, $line->line_vat_minor - (int) $credited->vat),
+            'total' => max(0, $line->line_total_minor - (int) $credited->total),
+        ];
     }
 
     /**

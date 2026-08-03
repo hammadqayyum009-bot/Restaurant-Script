@@ -295,4 +295,67 @@ class CreditNoteTest extends TestCase
         $original->refresh();
         $this->assertSame(BillingDocument::STATUS_PARTIALLY_CREDITED, $original->status);
     }
+
+    /**
+     * Regression test for documentation/billing-known-limitations.md §3
+     * (now fixed). Builds an order whose raw components (items + delivery +
+     * tax) do NOT sum exactly to its recorded total — the same narrow,
+     * tolerated mismatch (up to 1 minor unit per line) that makes
+     * Reconciler::distribute() nudge an individual line's stored amount away
+     * from a naive unit_price_minor × quantity recompute, to make the
+     * document's lines sum to orders.total exactly (rule D2).
+     *
+     * Before the fix, CreditNoteIssuer recomputed each credit line fresh
+     * from unit_price_minor, so a full-document credit against a document
+     * with an affected line could be rejected by the amount guard over a
+     * 1 minor-unit difference that was never a real over-credit — just two
+     * different ways of computing the same line disagreeing by a unit. The
+     * fix reads the line's own remaining stored amount instead, so a full
+     * credit is exact by construction. This test must fail if that
+     * regresses.
+     */
+    public function test_a_full_credit_note_succeeds_exactly_even_when_a_line_carries_a_reconciler_rounding_adjustment(): void
+    {
+        $admin = $this->admin();
+
+        // Natural components: one item line (19.99 x 2 = 39.98) + delivery
+        // (10.00) = 49.98. Tampering the recorded total down by 1 cent to
+        // 49.97 is within Reconciler's tolerance (componentDelta <= line
+        // count) but forces distribute() to shave 1 minor unit off one of
+        // the two raw lines so they sum to the tampered total exactly.
+        $order = \Database\Factories\OrderFactory::new()->create([
+            'subtotal' => '39.98',
+            'delivery_fee' => '10.00',
+            'tax' => '0.00',
+            'total' => '49.97',
+        ]);
+        \Database\Factories\OrderItemFactory::new()->create([
+            'order_id' => $order->id,
+            'name' => 'Mandi',
+            'price' => '19.99',
+            'quantity' => 2,
+            'line_total' => '39.98',
+        ]);
+
+        $document = $this->issuer()->createDraftFromOrder($order, 'simplified_tax_invoice');
+        $document = $this->issuer()->issue($document, $admin);
+
+        $this->assertSame(4997, $document->grand_total_minor, 'Sanity check on the tampered total this test relies on.');
+
+        $lines = $document->lines->map(fn ($line) => [
+            'source_line_id' => $line->id,
+            'quantity' => \App\Services\Billing\Money::milliToDecimal($line->quantity_milli),
+        ])->all();
+
+        $creditNote = $this->creditIssuer()->issue($document, $admin, 'Full refund, testing the rounding-adjustment fix', $lines);
+
+        $this->assertSame(
+            $document->grand_total_minor,
+            $creditNote->grand_total_minor,
+            'A full-document credit must credit exactly the original grand total, including any distribute() rounding.',
+        );
+
+        $document->refresh();
+        $this->assertSame(BillingDocument::STATUS_FULLY_CREDITED, $document->status);
+    }
 }
