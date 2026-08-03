@@ -85,6 +85,42 @@
             </div>
 
             <div class="a-card">
+                <h3>Payment</h3>
+                @php $transaction = $order->paymentTransactions()->latest()->first(); @endphp
+                @if ($transaction)
+                    <div class="a-stack" style="font-size:0.88rem;">
+                        <div>
+                            <span class="a-muted">Status</span><br>
+                            @php
+                                $tone = match ($transaction->status) {
+                                    'paid' => 'ok',
+                                    'failed', 'cancelled' => 'danger',
+                                    'pending', 'processing' => 'warn',
+                                    default => 'info',
+                                };
+                            @endphp
+                            <span class="a-badge {{ $tone }}">{{ __('payments.status_'.$transaction->status) }}</span>
+                        </div>
+                        <div><span class="a-muted">Amount</span><br>{{ $transaction->currency }} {{ \App\Payments\Money::toDecimal($transaction->amount_minor, $transaction->currency) }}</div>
+                        <div><span class="a-muted">Method</span><br>{{ $transaction->paymentMethod->label_en ?: $transaction->driver }}</div>
+                        @if ($transaction->paid_at)
+                            <div><span class="a-muted">Paid at</span><br>{{ $transaction->paid_at->format('d M Y, H:i') }}</div>
+                        @endif
+                    </div>
+
+                    @can('markPaid', $transaction)
+                        <form method="POST" action="{{ route('admin.payment-transactions.mark-paid', $transaction) }}"
+                              data-confirm="{{ __('payments.mark_paid_confirm') }}" style="margin-top:10px;">
+                            @csrf @method('PUT')
+                            <button type="submit" class="a-btn block">{{ __('payments.mark_paid') }}</button>
+                        </form>
+                    @endcan
+                @else
+                    <p class="a-card-sub" style="margin-top:0;">{{ __('payments.no_transaction') }}</p>
+                @endif
+            </div>
+
+            <div class="a-card">
                 <h3>Customer</h3>
                 <div class="a-stack" style="font-size:0.88rem;">
                     <div><span class="a-muted">Name</span><br>{{ $order->customer_name }}</div>

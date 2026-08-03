@@ -119,6 +119,16 @@
                 </div>
             @endcan
 
+            @can('manage-payments')
+                <div class="a-nav-group">
+                    <div class="a-nav-title">Payments</div>
+                    <a href="{{ route('admin.settings.payment-methods') }}" class="{{ request()->routeIs('admin.settings.payment-methods*') ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="6" width="18" height="12" rx="1.5"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M6.5 15h3"/></svg>
+                        Payment methods
+                    </a>
+                </div>
+            @endcan
+
             <div class="a-nav-group">
                 <div class="a-nav-title">Reporting</div>
                 <a href="{{ route('admin.reports.index') }}" class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">

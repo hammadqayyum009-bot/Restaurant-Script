@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             MenuSeeder::class,
             PageSeeder::class,
             ReviewSeeder::class,
+            PaymentMethodSeeder::class,
         ]);
     }
 }

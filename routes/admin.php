@@ -15,6 +15,8 @@ use App\Http\Controllers\Admin\MenuItemController;
 use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\Payments\PaymentMethodController;
+use App\Http\Controllers\Admin\Payments\PaymentTransactionController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReservationController;
@@ -114,6 +116,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('can:manage-billing')->group(function () {
             Route::get('/settings/billing', [BillingSettingsController::class, 'edit'])->name('settings.billing');
             Route::put('/settings/billing', [BillingSettingsController::class, 'update'])->name('settings.billing.save');
+        });
+
+        // ---- Payments (Phase 1: foundation + Cash on Delivery only) ----
+        Route::middleware('can:manage-payments')->group(function () {
+            Route::get('/settings/payment-methods', [PaymentMethodController::class, 'index'])->name('settings.payment-methods');
+            // The literal "reorder" segment must be declared before the
+            // {paymentMethod} wildcard below, or Laravel would try to
+            // model-bind "reorder" as an id (same rule already documented
+            // for billing.create above).
+            Route::put('/settings/payment-methods/reorder', [PaymentMethodController::class, 'reorder'])->name('settings.payment-methods.reorder');
+            Route::get('/settings/payment-methods/{paymentMethod}/edit', [PaymentMethodController::class, 'edit'])->name('settings.payment-methods.edit');
+            Route::put('/settings/payment-methods/{paymentMethod}', [PaymentMethodController::class, 'update'])->name('settings.payment-methods.update');
+            Route::put('/settings/payment-methods/{paymentMethod}/toggle', [PaymentMethodController::class, 'toggle'])->name('settings.payment-methods.toggle');
+        });
+
+        Route::middleware('can:mark-payment-paid')->group(function () {
+            Route::put('/payment-transactions/{paymentTransaction}/mark-paid', [PaymentTransactionController::class, 'markPaid'])->name('payment-transactions.mark-paid');
         });
 
         // ---- Email ----
