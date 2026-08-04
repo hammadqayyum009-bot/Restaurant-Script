@@ -69,6 +69,12 @@ class Mailer
             'body' => "<p>{{name}} ({{phone}}) requested a table for <strong>{{guests}}</strong> on <strong>{{date}}</strong> at <strong>{{time}}</strong>.</p>\n<p>Notes: {{notes}}</p>",
             'vars' => ['name', 'phone', 'guests', 'date', 'time', 'notes'],
         ],
+        'payment_security_alert' => [
+            'label' => 'Payment amount/currency mismatch (admin alert)',
+            'subject' => 'Payment mismatch on order #{{order_id}} — action needed',
+            'body' => "<p>A payment provider returned an amount or currency that did not match our records. The transaction was <strong>not</strong> marked paid.</p>\n<p>Transaction: {{transaction_id}}<br>Order: #{{order_id}}</p>\n<p>{{detail}}</p>\n<p>Check the payment transaction's log in the admin panel.</p>",
+            'vars' => ['transaction_id', 'order_id', 'detail'],
+        ],
     ];
 
     public function __construct(protected Settings $settings)

@@ -1,6 +1,7 @@
 <?php
 
 use App\Payments\Drivers\CashOnDeliveryDriver;
+use App\Payments\Drivers\MoyasarDriver;
 
 return [
     'currency' => env('PAYMENTS_CURRENCY', 'SAR'),
@@ -12,5 +13,6 @@ return [
      */
     'drivers' => [
         CashOnDeliveryDriver::class,
+        MoyasarDriver::class,
     ],
 ];

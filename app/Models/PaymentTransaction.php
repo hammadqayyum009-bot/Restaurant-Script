@@ -49,4 +49,14 @@ class PaymentTransaction extends Model
     {
         return $this->hasMany(PaymentStatusLog::class);
     }
+
+    public function webhookEvents(): HasMany
+    {
+        return $this->hasMany(PaymentWebhookEvent::class);
+    }
+
+    public function gatewayLogs(): HasMany
+    {
+        return $this->hasMany(PaymentGatewayLog::class);
+    }
 }

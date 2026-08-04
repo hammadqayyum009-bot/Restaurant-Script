@@ -4,6 +4,9 @@ return [
     'cod_label' => 'Cash on Delivery',
     'cod_description' => 'Pay in cash when your order is delivered, or at pickup.',
 
+    'moyasar_label' => 'Card / mada / Apple Pay',
+    'moyasar_description' => 'Pay online by card, mada or Apple Pay via Moyasar.',
+
     'status_pending' => 'Pending',
     'status_processing' => 'Processing',
     'status_paid' => 'Paid',
@@ -32,4 +35,28 @@ return [
     'order_type_delivery' => 'Delivery',
     'order_type_pickup' => 'Pickup',
     'save' => 'Save',
+
+    'test_connection' => 'Test connection',
+    'test_connection_success' => 'Connection successful.',
+    'test_connection_failed' => 'Connection failed — check the secret key.',
+    'secret_key_test' => 'Secret key (test)',
+    'secret_key_live' => 'Secret key (live)',
+    'webhook_secret_test' => 'Webhook secret (test)',
+    'webhook_secret_live' => 'Webhook secret (live)',
+    'credentials_write_only' => 'Credentials are write-only — a saved value is never shown again.',
+    'credentials_saved_masked' => 'A value is saved. Leave blank to keep it.',
+
+    'transaction_detail_title' => 'Payment transaction',
+    'reverify' => 'Re-verify with provider',
+    'reverify_success' => 'Verification complete.',
+    'refund' => 'Refund',
+    'refund_amount' => 'Refund amount',
+    'refund_reason' => 'Reason',
+    'refund_success' => 'Refund recorded.',
+    'refund_failed' => 'Refund failed',
+    'gateway_log_title' => 'Provider request log',
+    'webhook_events_title' => 'Webhook events',
+    'issue_credit_note' => 'Issue a credit note',
+    'issue_credit_note_hint' => 'Refunded: :amount. This links to the existing billing screen — nothing here is filled in automatically.',
+    'amount_mismatch_alert' => 'The amount Moyasar returned did not match this order. The transaction was not marked paid. Check the payment log.',
 ];

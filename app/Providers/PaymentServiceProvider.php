@@ -37,6 +37,7 @@ class PaymentServiceProvider extends ServiceProvider
     {
         Gate::define('manage-payments', fn (User $user): bool => $user->isAdmin());
         Gate::define('mark-payment-paid', fn (User $user): bool => $user->isAdmin());
+        Gate::define('refund-payment', fn (User $user): bool => $user->isAdmin());
 
         Gate::policy(PaymentMethod::class, PaymentMethodPolicy::class);
         Gate::policy(PaymentTransaction::class, PaymentTransactionPolicy::class);

@@ -17,7 +17,7 @@ use Throwable;
  */
 class ActivityLogger
 {
-    public const ACTIONS = ['created', 'updated', 'deleted', 'status', 'settings', 'email', 'export'];
+    public const ACTIONS = ['created', 'updated', 'deleted', 'status', 'settings', 'email', 'export', 'payment_amount_mismatch'];
 
     public function log(string $action, string $description, ?Model $subject = null): void
     {

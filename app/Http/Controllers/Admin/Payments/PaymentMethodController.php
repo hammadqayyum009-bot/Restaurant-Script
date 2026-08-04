@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Payments\ReorderPaymentMethodsRequest;
 use App\Http\Requests\Payments\UpdatePaymentMethodRequest;
 use App\Models\PaymentMethod;
+use App\Payments\Contracts\SupportsConnectionTest;
 use App\Payments\Money;
 use App\Payments\PaymentDriverRegistry;
 use App\Services\ActivityLogger;
@@ -64,6 +65,7 @@ class PaymentMethodController extends Controller
             'max_order_amount_minor' => isset($data['max_order_amount'])
                 ? Money::toMinor((string) $data['max_order_amount'], $currency) : null,
             'allowed_order_types' => $data['allowed_order_types'] ?? null,
+            'credentials' => $this->mergedCredentials($paymentMethod, $data),
         ];
 
         $wantsEnabled = $request->boolean('enabled');
@@ -109,6 +111,45 @@ class PaymentMethodController extends Controller
         }
 
         return response()->json(['status' => 'ok']);
+    }
+
+    public function testConnection(PaymentMethod $paymentMethod)
+    {
+        Gate::authorize('update', $paymentMethod);
+
+        $driver = $this->registry->has($paymentMethod->driver) ? $this->registry->get($paymentMethod->driver) : null;
+
+        if (! $driver instanceof SupportsConnectionTest) {
+            return back()->with('error', 'This payment method does not support a connection test.');
+        }
+
+        $ok = $driver->testConnection($paymentMethod);
+
+        return back()->with(
+            $ok ? 'success' : 'error',
+            $ok ? __('payments.test_connection_success') : __('payments.test_connection_failed'),
+        );
+    }
+
+    /**
+     * Any credential field left blank in the form keeps its existing stored
+     * value — credentials are write-only, never rendered back into an
+     * input, so a blank field must never be read as "clear this."
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mergedCredentials(PaymentMethod $paymentMethod, array $data): array
+    {
+        $credentials = $paymentMethod->credentials ?? [];
+
+        foreach (['secret_key_test', 'secret_key_live', 'webhook_secret_test', 'webhook_secret_live'] as $field) {
+            if (! empty($data[$field])) {
+                $credentials[$field] = $data[$field];
+            }
+        }
+
+        return $credentials;
     }
 
     /**

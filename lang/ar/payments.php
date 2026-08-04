@@ -4,6 +4,9 @@ return [
     'cod_label' => 'الدفع عند الاستلام',
     'cod_description' => 'ادفع نقدًا عند استلام طلبك أو عند الاستلام من الفرع.',
 
+    'moyasar_label' => 'بطاقة / مدى / Apple Pay',
+    'moyasar_description' => 'ادفع عبر الإنترنت بالبطاقة أو مدى أو Apple Pay عبر ميسر.',
+
     'status_pending' => 'قيد الانتظار',
     'status_processing' => 'قيد المعالجة',
     'status_paid' => 'مدفوع',
@@ -32,4 +35,28 @@ return [
     'order_type_delivery' => 'توصيل',
     'order_type_pickup' => 'استلام',
     'save' => 'حفظ',
+
+    'test_connection' => 'اختبار الاتصال',
+    'test_connection_success' => 'تم الاتصال بنجاح.',
+    'test_connection_failed' => 'فشل الاتصال — تحقق من المفتاح السري.',
+    'secret_key_test' => 'المفتاح السري (اختبار)',
+    'secret_key_live' => 'المفتاح السري (مباشر)',
+    'webhook_secret_test' => 'سر الويب هوك (اختبار)',
+    'webhook_secret_live' => 'سر الويب هوك (مباشر)',
+    'credentials_write_only' => 'بيانات الاعتماد للكتابة فقط — لن تُعرض القيمة المحفوظة مرة أخرى.',
+    'credentials_saved_masked' => 'توجد قيمة محفوظة. اتركه فارغًا للاحتفاظ بها.',
+
+    'transaction_detail_title' => 'عملية الدفع',
+    'reverify' => 'إعادة التحقق من مزود الخدمة',
+    'reverify_success' => 'اكتمل التحقق.',
+    'refund' => 'استرداد',
+    'refund_amount' => 'مبلغ الاسترداد',
+    'refund_reason' => 'السبب',
+    'refund_success' => 'تم تسجيل الاسترداد.',
+    'refund_failed' => 'فشل الاسترداد',
+    'gateway_log_title' => 'سجل طلبات المزود',
+    'webhook_events_title' => 'أحداث الويب هوك',
+    'issue_credit_note' => 'إصدار إشعار دائن',
+    'issue_credit_note_hint' => 'المسترد: :amount. هذا رابط لشاشة الفوترة الحالية — لا شيء هنا معبأ تلقائيًا.',
+    'amount_mismatch_alert' => 'المبلغ الذي أعادته ميسر لا يطابق هذا الطلب. لم يتم وضع علامة مدفوع على العملية. راجع سجل الدفع.',
 ];

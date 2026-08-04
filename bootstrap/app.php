@@ -16,6 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
             'active' => \App\Http\Middleware\EnsureActiveAccount::class,
         ]);
+
+        // A provider webhook cannot carry our CSRF token — its own
+        // signature check is the authentication for this one route.
+        $middleware->validateCsrfTokens(except: [
+            'payments/moyasar/webhook',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // A guessed or expired reservations.success link (signed route) —

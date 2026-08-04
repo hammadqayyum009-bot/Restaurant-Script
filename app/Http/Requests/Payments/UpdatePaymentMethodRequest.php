@@ -28,6 +28,15 @@ class UpdatePaymentMethodRequest extends FormRequest
             'max_order_amount' => ['nullable', 'numeric', 'min:0', 'gte:min_order_amount'],
             'allowed_order_types' => ['nullable', 'array'],
             'allowed_order_types.*' => [Rule::in(['delivery', 'pickup'])],
+
+            // Write-only credential fields (Phase 2, Moyasar). Blank means
+            // "keep the existing stored value" — see PaymentMethodController
+            // ::update(). Never populated back into the form from a stored
+            // value.
+            'secret_key_test' => ['nullable', 'string', 'max:255'],
+            'secret_key_live' => ['nullable', 'string', 'max:255'],
+            'webhook_secret_test' => ['nullable', 'string', 'max:255'],
+            'webhook_secret_live' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

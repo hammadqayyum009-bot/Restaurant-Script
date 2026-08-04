@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PaymentWebhookEvent extends Model
 {
     protected $fillable = [
+        'payment_transaction_id',
         'driver',
         'provider_event_id',
         'signature_valid',
@@ -26,5 +28,10 @@ class PaymentWebhookEvent extends Model
             'processed' => 'boolean',
             'processed_at' => 'datetime',
         ];
+    }
+
+    public function transaction(): BelongsTo
+    {
+        return $this->belongsTo(PaymentTransaction::class, 'payment_transaction_id');
     }
 }

@@ -21,4 +21,17 @@ class PaymentTransactionPolicy
     {
         return $user->can('mark-payment-paid') && $transaction->status === 'pending';
     }
+
+    /** A distinct ability from manage-payments, same shape as markPaid(). */
+    public function refund(User $user, PaymentTransaction $transaction): bool
+    {
+        return $user->can('refund-payment')
+            && in_array($transaction->status, ['paid', 'partially_refunded'], true);
+    }
+
+    public function reverify(User $user, PaymentTransaction $transaction): bool
+    {
+        return $user->can('manage-payments')
+            && ! in_array($transaction->status, ['refunded', 'failed', 'cancelled'], true);
+    }
 }

@@ -10,6 +10,8 @@ use App\Http\Controllers\Install\InstallController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderTrackingController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\Payments\MoyasarCallbackController;
+use App\Http\Controllers\Payments\MoyasarWebhookController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ReviewController;
@@ -44,6 +46,11 @@ Route::middleware('installed')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/success/{orderNumber}', [CheckoutController::class, 'success'])->name('checkout.success');
+
+    Route::middleware('throttle:60,1')->group(function () {
+        Route::get('/payments/moyasar/callback', [MoyasarCallbackController::class, 'handle'])->name('payments.moyasar.callback');
+        Route::post('/payments/moyasar/webhook', [MoyasarWebhookController::class, 'handle'])->name('payments.moyasar.webhook');
+    });
 
     Route::get('/track', [OrderTrackingController::class, 'show'])->name('track.show');
     Route::post('/track', [OrderTrackingController::class, 'find'])->name('track.find');
