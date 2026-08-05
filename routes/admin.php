@@ -118,7 +118,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/settings/billing', [BillingSettingsController::class, 'update'])->name('settings.billing.save');
         });
 
-        // ---- Payments (Phase 1: foundation + Cash on Delivery only) ----
+        // ---- Payments (Phase 1 foundation + Phase 2 Moyasar) ----
         Route::middleware('can:manage-payments')->group(function () {
             Route::get('/settings/payment-methods', [PaymentMethodController::class, 'index'])->name('settings.payment-methods');
             // The literal "reorder" segment must be declared before the
@@ -129,10 +129,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/settings/payment-methods/{paymentMethod}/edit', [PaymentMethodController::class, 'edit'])->name('settings.payment-methods.edit');
             Route::put('/settings/payment-methods/{paymentMethod}', [PaymentMethodController::class, 'update'])->name('settings.payment-methods.update');
             Route::put('/settings/payment-methods/{paymentMethod}/toggle', [PaymentMethodController::class, 'toggle'])->name('settings.payment-methods.toggle');
+            Route::post('/settings/payment-methods/{paymentMethod}/test-connection', [PaymentMethodController::class, 'testConnection'])->name('settings.payment-methods.test-connection');
+
+            Route::get('/payment-transactions/{paymentTransaction}', [PaymentTransactionController::class, 'show'])->name('payment-transactions.show');
+            Route::put('/payment-transactions/{paymentTransaction}/reverify', [PaymentTransactionController::class, 'reverify'])->name('payment-transactions.reverify');
         });
 
         Route::middleware('can:mark-payment-paid')->group(function () {
             Route::put('/payment-transactions/{paymentTransaction}/mark-paid', [PaymentTransactionController::class, 'markPaid'])->name('payment-transactions.mark-paid');
+        });
+
+        Route::middleware('can:refund-payment')->group(function () {
+            Route::post('/payment-transactions/{paymentTransaction}/refund', [PaymentTransactionController::class, 'refund'])->name('payment-transactions.refund');
         });
 
         // ---- Email ----

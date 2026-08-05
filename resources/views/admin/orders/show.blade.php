@@ -108,6 +108,10 @@
                         @endif
                     </div>
 
+                    @can('view', $transaction)
+                        <a href="{{ route('admin.payment-transactions.show', $transaction) }}" class="a-btn ghost block" style="margin-top:10px;">View details</a>
+                    @endcan
+
                     @can('markPaid', $transaction)
                         <form method="POST" action="{{ route('admin.payment-transactions.mark-paid', $transaction) }}"
                               data-confirm="{{ __('payments.mark_paid_confirm') }}" style="margin-top:10px;">

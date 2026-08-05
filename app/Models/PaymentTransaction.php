@@ -22,6 +22,10 @@ class PaymentTransaction extends Model
         'last_provider_status',
         'failure_reason',
         'paid_at',
+        'last_verified_at',
+        'refunded_amount_minor',
+        'refunded_at',
+        'refund_reason',
     ];
 
     /**
@@ -32,6 +36,9 @@ class PaymentTransaction extends Model
         return [
             'amount_minor' => 'integer',
             'paid_at' => 'datetime',
+            'last_verified_at' => 'datetime',
+            'refunded_amount_minor' => 'integer',
+            'refunded_at' => 'datetime',
         ];
     }
 
