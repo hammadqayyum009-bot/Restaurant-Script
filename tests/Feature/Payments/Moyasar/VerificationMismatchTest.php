@@ -7,6 +7,7 @@ use App\Models\EmailLog;
 use App\Models\Order;
 use App\Models\PaymentMethod;
 use App\Models\PaymentTransaction;
+use App\Models\User;
 use App\Payments\PaymentTransactionStatusService;
 use App\Payments\PaymentVerificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -49,8 +50,13 @@ class VerificationMismatchTest extends TestCase
         ]);
 
         $transaction = $this->transaction();
+        $admin = User::factory()->create(['is_admin' => true, 'is_active' => true]);
 
-        app(PaymentVerificationService::class)->verify($transaction, PaymentTransactionStatusService::SOURCE_VERIFICATION);
+        // Routed through the real admin re-verify endpoint, not a direct
+        // service call — dispatchTemplate()'s email queues via
+        // ->afterResponse(), which only fires once a full HTTP
+        // request/response cycle actually completes.
+        $this->actingAs($admin, 'web')->put(route('admin.payment-transactions.reverify', $transaction));
 
         $fresh = $transaction->fresh();
         $this->assertSame('pending', $fresh->status);

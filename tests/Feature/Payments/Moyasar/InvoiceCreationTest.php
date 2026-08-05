@@ -62,7 +62,7 @@ class InvoiceCreationTest extends TestCase
         // can have no effect on what is sent.
         $this->get('/?amount=1');
 
-        (new MoyasarDriver())->initiate($transaction, $method);
+        (new MoyasarDriver)->initiate($transaction, $method);
 
         Http::assertSent(function ($request) {
             return $request->url() === 'https://api.moyasar.com/v1/invoices'
@@ -88,7 +88,7 @@ class InvoiceCreationTest extends TestCase
             'status' => 'pending',
         ]);
 
-        (new MoyasarDriver())->initiate($transaction, $method);
+        (new MoyasarDriver)->initiate($transaction, $method);
 
         Http::assertSent(function ($request) {
             return $request['amount'] === 12500 && $request['currency'] === 'KWD';
@@ -108,7 +108,7 @@ class InvoiceCreationTest extends TestCase
             'amount_minor' => 5000, 'currency' => 'SAR', 'status' => 'pending',
         ]);
 
-        $result = (new MoyasarDriver())->initiate($transaction, $method);
+        $result = (new MoyasarDriver)->initiate($transaction, $method);
 
         $this->assertTrue($result->requiresRedirect);
         $this->assertSame('https://checkout.moyasar.com/invoices/inv_789', $result->redirectUrl);

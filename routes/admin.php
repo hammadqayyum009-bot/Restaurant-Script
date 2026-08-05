@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ActivityController;
+use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\Billing\BillingSettingsController;
 use App\Http\Controllers\Admin\Billing\CreditNoteController;
 use App\Http\Controllers\Admin\Billing\DocumentController;

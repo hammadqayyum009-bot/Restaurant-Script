@@ -9,6 +9,7 @@ use App\Models\PaymentTransaction;
 use App\Payments\Drivers\MoyasarDriver;
 use App\Payments\Moyasar\MoyasarClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -39,7 +40,7 @@ class GatewayLogRedactionTest extends TestCase
             'amount_minor' => 5000, 'currency' => 'SAR', 'status' => 'pending',
         ]);
 
-        (new MoyasarDriver())->initiate($transaction, $method);
+        (new MoyasarDriver)->initiate($transaction, $method);
 
         $this->assertGreaterThan(0, PaymentGatewayLog::count());
 
@@ -51,7 +52,7 @@ class GatewayLogRedactionTest extends TestCase
         // The secret is a Basic Auth header value, never part of the logged
         // request/response body — assert the raw table columns too, not
         // just the model accessors.
-        $rows = \Illuminate\Support\Facades\DB::table('payment_gateway_logs')->get();
+        $rows = DB::table('payment_gateway_logs')->get();
         foreach ($rows as $row) {
             $this->assertStringNotContainsString(self::SECRET, (string) $row->request_summary);
             $this->assertStringNotContainsString(self::SECRET, (string) $row->response_summary);

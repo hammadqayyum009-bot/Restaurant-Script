@@ -1,8 +1,12 @@
 <?php
 
+use App\Http\Middleware\EnsureActiveAccount;
+use App\Http\Middleware\EnsureAdmin;
+use App\Http\Middleware\EnsureInstalled;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Routing\Exceptions\InvalidSignatureException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,9 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'installed' => \App\Http\Middleware\EnsureInstalled::class,
-            'admin' => \App\Http\Middleware\EnsureAdmin::class,
-            'active' => \App\Http\Middleware\EnsureActiveAccount::class,
+            'installed' => EnsureInstalled::class,
+            'admin' => EnsureAdmin::class,
+            'active' => EnsureActiveAccount::class,
         ]);
 
         // A provider webhook cannot carry our CSRF token — its own
@@ -27,7 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // A guessed or expired reservations.success link (signed route) —
         // same friendly redirect-with-message pattern used elsewhere for a
         // rejected storefront request, rather than a bare framework 403.
-        $exceptions->render(function (\Illuminate\Routing\Exceptions\InvalidSignatureException $e, $request) {
+        $exceptions->render(function (InvalidSignatureException $e, $request) {
             return redirect()->route('home')
                 ->with('error', 'That confirmation link is invalid or has expired.');
         });

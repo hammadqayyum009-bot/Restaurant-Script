@@ -24,8 +24,7 @@ class PaymentVerificationService
         protected PaymentTransactionStatusService $statusService,
         protected ActivityLogger $activity,
         protected Mailer $mailer,
-    ) {
-    }
+    ) {}
 
     public function verify(PaymentTransaction $transaction, string $source, ?User $actor = null): PaymentStatusTransitionResult
     {

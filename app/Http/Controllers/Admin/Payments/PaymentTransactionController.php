@@ -23,8 +23,7 @@ class PaymentTransactionController extends Controller
         protected PaymentVerificationService $verifier,
         protected PaymentDriverRegistry $registry,
         protected ActivityLogger $activity,
-    ) {
-    }
+    ) {}
 
     public function show(PaymentTransaction $paymentTransaction)
     {

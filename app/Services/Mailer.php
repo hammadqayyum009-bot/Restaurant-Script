@@ -77,9 +77,7 @@ class Mailer
         ],
     ];
 
-    public function __construct(protected Settings $settings)
-    {
-    }
+    public function __construct(protected Settings $settings) {}
 
     public function templateSubject(string $key): string
     {
@@ -99,11 +97,11 @@ class Mailer
      *
      * @param  array<string, string|null>  $vars
      * @param  array<int, string>  $sensitiveKeys  Keys in $vars (e.g. a
-     *     password-reset link) that must never reach email_logs.body in the
-     *     clear — see sendTemplate().
+     *                                             password-reset link) that must never reach email_logs.body in the
+     *                                             clear — see sendTemplate().
      * @param  array<int, string>  $rawKeys  Keys in $vars that are already
-     *     safe, pre-built HTML (e.g. an order's line-item list) and must not
-     *     be escaped a second time — see sendTemplate().
+     *                                       safe, pre-built HTML (e.g. an order's line-item list) and must not
+     *                                       be escaped a second time — see sendTemplate().
      */
     public function dispatchTemplate(string $key, string $toEmail, ?string $toName, array $vars, array $sensitiveKeys = [], array $rawKeys = []): void
     {
@@ -117,15 +115,15 @@ class Mailer
      *
      * @param  array<string, string|null>  $vars
      * @param  array<int, string>  $sensitiveKeys  Any key here is replaced
-     *     with a placeholder before the body is written to email_logs — the
-     *     actual email sent to the recipient is never touched by this. Used
-     *     for one-time secrets (a password-reset link) that have no reason
-     *     to sit in the delivery log the way an order confirmation does.
+     *                                             with a placeholder before the body is written to email_logs — the
+     *                                             actual email sent to the recipient is never touched by this. Used
+     *                                             for one-time secrets (a password-reset link) that have no reason
+     *                                             to sit in the delivery log the way an order confirmation does.
      * @param  array<int, string>  $rawKeys  Any key here is substituted into
-     *     the body as-is, not HTML-escaped. Every var is plain text by
-     *     default — this is only for a var that is itself already-safe,
-     *     deliberately-built HTML (an order's <ul> of line items), never for
-     *     anything that came from a customer-supplied field.
+     *                                       the body as-is, not HTML-escaped. Every var is plain text by
+     *                                       default — this is only for a var that is itself already-safe,
+     *                                       deliberately-built HTML (an order's <ul> of line items), never for
+     *                                       anything that came from a customer-supplied field.
      */
     public function sendTemplate(string $key, string $toEmail, ?string $toName, array $vars, array $sensitiveKeys = [], array $rawKeys = []): bool
     {
@@ -158,8 +156,8 @@ class Mailer
      * Sends an already-rendered message and records the attempt either way.
      *
      * @param  string|null  $loggedBody  What to write to email_logs.body
-     *     instead of $body, when the two must differ (a redacted secret).
-     *     Never affects what is actually sent — that is always $body.
+     *                                   instead of $body, when the two must differ (a redacted secret).
+     *                                   Never affects what is actually sent — that is always $body.
      */
     public function send(string $toEmail, ?string $toName, string $subject, string $body, string $type = 'manual', ?string $loggedBody = null): bool
     {
@@ -194,11 +192,11 @@ class Mailer
     /**
      * @param  array<string, string|null>  $vars
      * @param  array<int, string>  $rawKeys  Keys exempt from $escape — see
-     *     sendTemplate().
+     *                                       sendTemplate().
      * @param  bool  $escape  HTML-escape every value not in $rawKeys before
-     *     substituting it. Off by default: a subject line is plain text, not
-     *     HTML, and escaping it would be wrong, not just unnecessary — only
-     *     an HTML body context should ever pass true.
+     *                        substituting it. Off by default: a subject line is plain text, not
+     *                        HTML, and escaping it would be wrong, not just unnecessary — only
+     *                        an HTML body context should ever pass true.
      */
     public function replace(string $text, array $vars, array $rawKeys = [], bool $escape = false): string
     {

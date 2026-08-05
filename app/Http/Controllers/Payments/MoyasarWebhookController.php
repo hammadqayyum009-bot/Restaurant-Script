@@ -7,8 +7,8 @@ use App\Models\PaymentTransaction;
 use App\Models\PaymentWebhookEvent;
 use App\Payments\PaymentDriverRegistry;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Log;
  */
 class MoyasarWebhookController
 {
-    public function handle(Request $request, PaymentDriverRegistry $registry): Response
+    public function handle(Request $request, PaymentDriverRegistry $registry): JsonResponse
     {
         $rawBody = $request->getContent();
         $payload = json_decode($rawBody, true) ?? [];
@@ -71,7 +71,14 @@ class MoyasarWebhookController
         // leave payment_transaction_id null otherwise. Never crashes, never
         // drops the event either way.
         if ($event && $event->payment_transaction_id === null) {
-            $providerReference = $payload['id'] ?? ($payload['data']['id'] ?? null);
+            // The top-level "id" (used above as the event id) and the
+            // invoice/payment reference are different things when the
+            // payload is wrapped in a "data" envelope — data.id is the
+            // actual object to correlate against, and must be checked
+            // first, or a webhook shaped {id: <event>, data: {id: <invoice>}}
+            // would wrongly try to match the event id as if it were the
+            // provider reference.
+            $providerReference = $payload['data']['id'] ?? $payload['id'] ?? null;
 
             if ($providerReference) {
                 $transaction = PaymentTransaction::where('driver', 'moyasar')

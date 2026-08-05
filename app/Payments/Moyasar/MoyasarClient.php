@@ -18,12 +18,12 @@ use Illuminate\Support\Facades\Http;
 class MoyasarClient
 {
     public const BASE_URL = 'https://api.moyasar.com/v1';
+
     public const CONNECT_TIMEOUT_SECONDS = 5;
+
     public const REQUEST_TIMEOUT_SECONDS = 15;
 
-    public function __construct(protected string $secretKey, protected string $driver = 'moyasar')
-    {
-    }
+    public function __construct(protected string $secretKey, protected string $driver = 'moyasar') {}
 
     /**
      * @param  array<string, mixed>  $payload

@@ -66,7 +66,7 @@ class DriverContractUnchangedTest extends TestCase
 
     public function test_both_drivers_still_implement_the_interface(): void
     {
-        $this->assertInstanceOf(PaymentDriver::class, new CashOnDeliveryDriver());
-        $this->assertInstanceOf(PaymentDriver::class, new MoyasarDriver());
+        $this->assertInstanceOf(PaymentDriver::class, new CashOnDeliveryDriver);
+        $this->assertInstanceOf(PaymentDriver::class, new MoyasarDriver);
     }
 }
