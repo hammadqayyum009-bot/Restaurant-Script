@@ -121,16 +121,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // ---- Payments (Phase 1 foundation + Phase 2 Moyasar) ----
         Route::middleware('can:manage-payments')->group(function () {
             Route::get('/settings/payment-methods', [PaymentMethodController::class, 'index'])->name('settings.payment-methods');
-            // The literal "reorder" segment must be declared before the
-            // {paymentMethod} wildcard below, or Laravel would try to
-            // model-bind "reorder" as an id (same rule already documented
+            // The literal "reorder"/"settings" segments must be declared
+            // before the {paymentMethod} wildcard below, or Laravel would
+            // try to model-bind them as an id (same rule already documented
             // for billing.create above).
             Route::put('/settings/payment-methods/reorder', [PaymentMethodController::class, 'reorder'])->name('settings.payment-methods.reorder');
+            Route::put('/settings/payment-methods/settings', [PaymentMethodController::class, 'saveSettings'])->name('settings.payment-methods.settings');
             Route::get('/settings/payment-methods/{paymentMethod}/edit', [PaymentMethodController::class, 'edit'])->name('settings.payment-methods.edit');
             Route::put('/settings/payment-methods/{paymentMethod}', [PaymentMethodController::class, 'update'])->name('settings.payment-methods.update');
             Route::put('/settings/payment-methods/{paymentMethod}/toggle', [PaymentMethodController::class, 'toggle'])->name('settings.payment-methods.toggle');
             Route::post('/settings/payment-methods/{paymentMethod}/test-connection', [PaymentMethodController::class, 'testConnection'])->name('settings.payment-methods.test-connection');
 
+            // Static segments (stuck, reconcile) must be declared before the
+            // {paymentTransaction} wildcard below, or Laravel would try to
+            // model-bind "stuck"/"reconcile" as an id (same rule already
+            // documented for billing.create and payment-methods.reorder
+            // above).
+            Route::get('/payment-transactions/stuck', [PaymentTransactionController::class, 'stuck'])->name('payment-transactions.stuck');
+            Route::post('/payment-transactions/reconcile', [PaymentTransactionController::class, 'reconcile'])->name('payment-transactions.reconcile');
             Route::get('/payment-transactions/{paymentTransaction}', [PaymentTransactionController::class, 'show'])->name('payment-transactions.show');
             Route::put('/payment-transactions/{paymentTransaction}/reverify', [PaymentTransactionController::class, 'reverify'])->name('payment-transactions.reverify');
         });

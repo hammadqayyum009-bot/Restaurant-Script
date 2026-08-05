@@ -33,7 +33,7 @@
                 </div>
 
                 <div class="a-card">
-                    <div class="a-card-head"><h2>Order types &amp; payment</h2></div>
+                    <div class="a-card-head"><h2>Order types</h2></div>
 
                     <label class="a-check">
                         <input type="checkbox" name="shop_enable_delivery" value="1" {{ old('shop_enable_delivery', config('shop.enable_delivery')) ? 'checked' : '' }}>
@@ -43,14 +43,8 @@
                         <input type="checkbox" name="shop_enable_pickup" value="1" {{ old('shop_enable_pickup', config('shop.enable_pickup')) ? 'checked' : '' }}>
                         <span><strong>Pickup</strong><small>Customers can collect from the restaurant.</small></span>
                     </label>
-                    <label class="a-check">
-                        <input type="checkbox" name="shop_enable_cash" value="1" {{ old('shop_enable_cash', config('shop.enable_cash')) ? 'checked' : '' }}>
-                        <span><strong>Cash on delivery</strong><small>Pay the driver in cash.</small></span>
-                    </label>
-                    <label class="a-check">
-                        <input type="checkbox" name="shop_enable_card" value="1" {{ old('shop_enable_card', config('shop.enable_card')) ? 'checked' : '' }}>
-                        <span><strong>Card on delivery</strong><small>Driver brings a card machine.</small></span>
-                    </label>
+                    <p class="a-hint">Payment methods (cash, card, online gateways) are managed under
+                        <a href="{{ route('admin.settings.payment-methods') }}">Settings &rarr; Payment methods</a>.</p>
                 </div>
             </div>
 

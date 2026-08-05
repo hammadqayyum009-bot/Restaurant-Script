@@ -7,6 +7,8 @@
 @endsection
 
 @section('content')
+    @php $paymentDrivers = app(\App\Payments\PaymentDriverRegistry::class); @endphp
+
     <div class="a-card">
         <form method="GET" class="a-filters">
             <input type="search" name="q" value="{{ $search }}" class="a-input" placeholder="Order number, name or phone…">
@@ -59,7 +61,7 @@
                                     <div class="a-muted" style="font-size:0.78rem;">{{ $order->phone }}</div>
                                 </td>
                                 <td>{{ ucfirst($order->order_type) }}</td>
-                                <td>{{ $order->payment_method === 'cash' ? 'Cash' : 'Card' }}</td>
+                                <td>{{ $paymentDrivers->has($order->payment_method) ? $paymentDrivers->get($order->payment_method)->displayInfo()->label : ucfirst($order->payment_method) }}</td>
                                 <td>@include('admin.partials.order-status', ['status' => $order->status])</td>
                                 <td class="num"><strong>{{ config('site.currency') }} {{ number_format((float) $order->total, 2) }}</strong></td>
                                 <td>

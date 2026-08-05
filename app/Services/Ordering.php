@@ -17,23 +17,9 @@ class Ordering
         ]));
     }
 
-    /** @return array<int, string> */
-    public function paymentMethods(): array
-    {
-        return array_values(array_filter([
-            config('shop.enable_cash') ? 'cash' : null,
-            config('shop.enable_card') ? 'card' : null,
-        ]));
-    }
-
     public function orderTypeLabel(string $type): string
     {
         return $type === 'pickup' ? 'Pickup' : 'Delivery';
-    }
-
-    public function paymentLabel(string $method): string
-    {
-        return $method === 'card' ? 'Card on Delivery' : 'Cash on Delivery';
     }
 
     public function minimumOrder(): float

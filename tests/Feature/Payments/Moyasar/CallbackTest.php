@@ -59,7 +59,8 @@ class CallbackTest extends TestCase
 
         $response = $this->get('/payments/moyasar/callback?transaction='.$transaction->id.'&id=inv_callback_test');
 
-        $response->assertRedirect(route('checkout.success', $transaction->order->order_number));
+        $response->assertStatus(302);
+        $this->assertStringContainsString('/checkout/'.$transaction->order_id.'/result', (string) $response->headers->get('Location'));
         $this->assertSame('failed', $transaction->fresh()->status);
     }
 

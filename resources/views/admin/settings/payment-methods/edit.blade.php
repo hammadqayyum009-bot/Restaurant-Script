@@ -9,7 +9,7 @@
         $allowedOrderTypes = old('allowed_order_types', $method->allowed_order_types ?? []);
     @endphp
 
-    <form method="POST" action="{{ route('admin.settings.payment-methods.update', $method) }}">
+    <form method="POST" action="{{ route('admin.settings.payment-methods.update', $method) }}" enctype="multipart/form-data">
         @csrf @method('PUT')
 
         <div class="a-grid cols-2">
@@ -33,6 +33,24 @@
                     @else
                         <div class="a-alert warn">{{ __('payments.not_configured') }}</div>
                     @endif
+                </div>
+
+                <div class="a-card">
+                    <div class="a-card-head"><h3 style="margin:0;">{{ __('payments.icon') }}</h3></div>
+                    <p class="a-card-sub" style="margin-top:0;">{{ __('payments.icon_hint') }}</p>
+
+                    @if ($method->icon_path)
+                        <img src="{{ asset($method->icon_path) }}" alt="" style="height:32px; width:auto; margin-bottom:10px; display:block;">
+                        <label class="a-check">
+                            <input type="checkbox" name="remove_icon" value="1">
+                            <span>Remove icon</span>
+                        </label>
+                    @endif
+
+                    <div class="a-field">
+                        <input type="file" name="icon" class="a-input" accept="image/*">
+                        @error('icon')<span class="a-hint" style="color:var(--danger,#c0392b);">{{ $message }}</span>@enderror
+                    </div>
                 </div>
 
                 <div class="a-card">

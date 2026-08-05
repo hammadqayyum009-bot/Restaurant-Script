@@ -9,15 +9,18 @@ use App\Models\Order;
 use App\Models\Reservation;
 use App\Models\Review;
 use App\Models\User;
+use App\Payments\PaymentReconciliationService;
 use App\Services\Mailer;
+use Illuminate\Support\Facades\Gate;
 
 class DashboardController extends Controller
 {
-    public function index(Mailer $mailer)
+    public function index(Mailer $mailer, PaymentReconciliationService $reconciliation)
     {
         $today = now()->startOfDay();
 
         return view('admin.dashboard', [
+            'stuckPaymentsCount' => Gate::allows('manage-payments') ? $reconciliation->stuckCount() : 0,
             'ordersTotal' => Order::count(),
             'ordersToday' => Order::where('created_at', '>=', $today)->count(),
             'ordersPending' => Order::where('status', 'pending')->count(),

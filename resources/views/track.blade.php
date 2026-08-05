@@ -90,9 +90,16 @@
                         </div>
                         <div>
                             <span class="track-label">Payment</span>
-                            {{ $order->payment_method === 'cash' ? 'Cash on delivery' : 'Card on delivery' }}
+                            {{ $paymentDrivers && $paymentDrivers->has($order->payment_method) ? $paymentDrivers->get($order->payment_method)->displayInfo()->label : ucfirst($order->payment_method) }}
+                            @if ($transaction)
+                                <span style="font-size:0.82rem; color:var(--ink-500); display:block;">{{ __('payments.status_'.$transaction->status) }}</span>
+                            @endif
                         </div>
                     </div>
+
+                    @if ($retryUrl)
+                        <a href="{{ $retryUrl }}" class="btn btn-outline on-light btn-block" style="margin-top:14px;">{{ __('payments.retry_link') }}</a>
+                    @endif
 
                     <h3 style="margin-top:22px;">Your items</h3>
                     @foreach ($order->items as $item)

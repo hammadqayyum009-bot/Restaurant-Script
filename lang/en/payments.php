@@ -67,4 +67,51 @@ return [
     'country_caveat' => "Tap's merchant-onboarding availability varies by country and may change — confirm directly with Tap before relying on this in a country not already confirmed working for you.",
     'local_source_id' => 'Local payment method override (advanced)',
     'local_source_id_hint' => 'Leave blank to use the universal card method. Only set this if you have confirmed the exact source ID with Tap for a local method (KNET, Benefit, etc).',
+
+    'icon' => 'Icon',
+    'icon_hint' => 'Optional. Shown next to the method name at checkout. Leave blank to show no icon.',
+
+    // ---- Phase 4: checkout, retry, reconciliation ----
+
+    'choose_method_title' => 'Choose how to pay',
+    'choose_method_intro' => 'Order :order_number — total :total.',
+    'no_methods_available' => 'No payment method is currently available for this order.',
+    'method_unavailable' => 'That payment method is no longer available for this order.',
+    'retry_cap_reached' => 'This order has reached the maximum number of payment attempts. Please contact us to complete your order.',
+    'please_wait' => 'Please wait — your last request is still being processed.',
+    'initiation_failed' => 'We could not start that payment. Please try again or choose a different method.',
+    'pay_now' => 'Pay now',
+    'attempts_remaining' => ':count attempt(s) remaining for this order.',
+
+    'redirecting_title' => 'Redirecting you to pay securely...',
+    'redirecting_body' => "You're being sent to our payment partner to complete your payment. If nothing happens within a few seconds, use the button below.",
+    'redirecting_button' => 'Continue to payment',
+
+    'result_success_title' => 'Payment successful',
+    'result_success_body' => 'Thank you! Your payment for order :order_number was successful.',
+    'result_success_cod_body' => 'Thank you! Your order :order_number has been placed. Payment is due in cash.',
+    'result_declined_title' => 'Payment declined',
+    'result_declined_body' => 'Your payment for order :order_number was not successful. No charge was made.',
+    'result_cancelled_title' => 'Payment cancelled',
+    'result_cancelled_body' => 'You cancelled the payment for order :order_number. No charge was made.',
+    'result_pending_title' => 'Payment processing',
+    'result_pending_body' => "We're still confirming your payment for order :order_number. This page will update automatically — you can also refresh it.",
+    'result_unreachable_title' => 'Payment status unavailable',
+    'result_unreachable_body' => 'We could not reach our payment partner just now to confirm order :order_number. If you were charged, this will be resolved automatically shortly — you can also refresh this page or check back on the order tracking page.',
+    'try_again' => 'Try again',
+    'track_order' => 'Track this order',
+
+    'retry_link' => 'Retry payment',
+
+    'reconciliation_settings_title' => 'Checkout &amp; reconciliation',
+    'max_attempts_per_order' => 'Maximum payment attempts per order',
+    'stuck_after_minutes' => 'Treat a payment as stuck after (minutes)',
+    'stuck_after_minutes_hint' => 'Minimum 5 minutes. Used by the reconciliation command/schedule/admin button to find payments that never got a final answer from the provider.',
+
+    'stuck_transactions_title' => 'Stuck payments',
+    'stuck_transactions_intro' => 'Online payments that have sat pending or processing longer than the configured threshold.',
+    'no_stuck_transactions' => 'No stuck payments right now.',
+    'run_reconciliation' => 'Check now',
+    'reconciliation_ran' => 'Reconciliation ran: :checked checked, :resolved resolved.',
+    'reconciliation_already_running' => 'Reconciliation is already running. Try again shortly.',
 ];

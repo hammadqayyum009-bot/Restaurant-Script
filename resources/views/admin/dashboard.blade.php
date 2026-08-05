@@ -52,6 +52,14 @@
         </div>
     @endif
 
+    @if ($stuckPaymentsCount)
+        <div class="a-alert warn">
+            <div>{{ $stuckPaymentsCount }} {{ __('payments.stuck_transactions_title') }} {{ $stuckPaymentsCount === 1 ? 'needs' : 'need' }} a look.
+                <a href="{{ route('admin.payment-transactions.stuck') }}">Review now</a>
+            </div>
+        </div>
+    @endif
+
     <div class="a-grid side">
         <div class="a-card">
             <div class="a-card-head">

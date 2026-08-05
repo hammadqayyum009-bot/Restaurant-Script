@@ -7,8 +7,6 @@ return [
 
     'enable_delivery' => true,
     'enable_pickup' => true,
-    'enable_cash' => true,
-    'enable_card' => true,
 
     'reservations_enabled' => true,
     'reservation_open' => '11:00',

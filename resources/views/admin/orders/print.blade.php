@@ -1,6 +1,10 @@
 @php
     $currency = config('site.currency');
     $isReceipt = ($format ?? 'invoice') === 'receipt';
+    $paymentDrivers = app(\App\Payments\PaymentDriverRegistry::class);
+    $paymentMethodLabel = $paymentDrivers->has($order->payment_method)
+        ? $paymentDrivers->get($order->payment_method)->displayInfo()->label
+        : ucfirst($order->payment_method);
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -163,7 +167,7 @@
             <div>
                 <div class="label">{{ $order->order_type === 'pickup' ? 'Collection' : 'Delivery address' }}</div>
                 {{ $order->order_type === 'pickup' ? 'Pickup from the restaurant' : $order->address }}
-                <br><span class="brand-meta">{{ ucfirst($order->order_type) }} &middot; {{ $order->payment_method === 'cash' ? 'Cash' : 'Card' }} on delivery</span>
+                <br><span class="brand-meta">{{ ucfirst($order->order_type) }} &middot; {{ $paymentMethodLabel }}</span>
             </div>
         </div>
 

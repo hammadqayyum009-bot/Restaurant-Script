@@ -47,6 +47,9 @@ class AppServiceProvider extends ServiceProvider
 
         'notify_admin_email' => 'notifications.admin_email',
 
+        'payments_max_attempts_per_order' => 'payments.max_attempts_per_order',
+        'payments_stuck_after_minutes' => 'payments.reconciliation.stuck_after_minutes',
+
         'mail_host' => 'mail.mailers.smtp.host',
         'mail_port' => 'mail.mailers.smtp.port',
         'mail_username' => 'mail.mailers.smtp.username',
@@ -63,8 +66,6 @@ class AppServiceProvider extends ServiceProvider
     protected array $boolMap = [
         'shop_enable_delivery' => 'shop.enable_delivery',
         'shop_enable_pickup' => 'shop.enable_pickup',
-        'shop_enable_cash' => 'shop.enable_cash',
-        'shop_enable_card' => 'shop.enable_card',
         'shop_reservations_enabled' => 'shop.reservations_enabled',
         'shop_reviews_enabled' => 'shop.reviews_enabled',
         'shop_reviews_auto_approve' => 'shop.reviews_auto_approve',

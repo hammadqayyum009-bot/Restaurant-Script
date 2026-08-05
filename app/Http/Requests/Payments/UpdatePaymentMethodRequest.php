@@ -29,6 +29,9 @@ class UpdatePaymentMethodRequest extends FormRequest
             'allowed_order_types' => ['nullable', 'array'],
             'allowed_order_types.*' => [Rule::in(['delivery', 'pickup'])],
 
+            'icon' => ['nullable', 'image', 'max:512'],
+            'remove_icon' => ['sometimes', 'boolean'],
+
             // Write-only credential fields (Phase 2, Moyasar). Blank means
             // "keep the existing stored value" — see PaymentMethodController
             // ::update(). Never populated back into the form from a stored

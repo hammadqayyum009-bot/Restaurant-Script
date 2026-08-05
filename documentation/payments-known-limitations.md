@@ -121,6 +121,65 @@ by a refund is deferred to a future scoped task. Applies identically to
 Tap's refund action (Phase 3) — the transaction detail screen and its
 credit-note link are driver-agnostic, so no separate item was needed.
 
+## 5. RTL/Arabic is build-ready but verified only via a forced locale (Phase 4)
+
+The storefront has no locale-switching mechanism anywhere — confirmed during
+Phase 4 Stage 1 research, not assumed. There is no `<html dir="rtl">`, no
+language switcher, and no per-request locale resolution; `layouts/app.blade.php`
+hardcodes `<html lang="en">`.
+
+The three new customer-facing payment screens
+(`checkout/payment-method.blade.php`, `checkout/redirecting.blade.php`,
+`checkout/result.blade.php`) are built RTL-ready: all customer-visible text
+goes through `__('payments.*')` (with a complete `lang/ar/payments.php`
+translation set), and each view wraps its content in a `dir="rtl"`/`dir="ltr"`
+container computed from `app()->getLocale()`. This was verified by temporarily
+forcing `app()->setLocale('ar')` for a manual walkthrough — not by a real
+site-wide toggle, since building one was explicitly out of scope for this
+phase (see item 6 below). Every other page in the storefront (menu, cart, the
+first checkout step, tracking) remains English-only and untouched.
+
+**To close this:** a site-wide locale switcher (item 6) is the prerequisite;
+once one exists, these three views need no further changes.
+
+## 6. No site-wide language switcher (Phase 4, future item)
+
+Noted here as a real, scoped future task rather than folded into this phase:
+the storefront could support a customer-facing language switch (URL prefix,
+session-stored preference, or Accept-Language negotiation), which would also
+retroactively make item 5 a genuine feature instead of a forced-locale test.
+This touches routing, the base layout, and every storefront view with
+hardcoded English text — a larger change than Phase 4's checkout/payments
+scope, and deliberately not attempted here.
+
+## 7. `shop.enable_cash` / `shop.enable_card` removed, not just unused (Phase 4)
+
+Phase 1–3 checkout read these two config keys (via `Ordering::paymentMethods()`)
+to decide whether "Cash"/"Card" appeared as payment options. Phase 4 replaces
+that flat two-option list with `PaymentDriverRegistry::availableFor($order)`,
+so those two keys stopped being read. Leaving their two checkboxes visible on
+the admin Ordering settings screen while doing nothing would have been a
+dead, misleading toggle — worse than simply unused config — so they were
+removed outright: the config keys, the settings mapping, the controller
+field list, and the two checkboxes themselves. The admin Ordering screen now
+points to Settings → Payment methods with a short note. Payment method
+enablement lives entirely in the `payment_methods` table from Phase 1
+onward; these two keys never controlled anything else.
+
+## 8. Sales report/export breakdown labels are not remapped (Phase 4)
+
+`ExportController`, `ReportController`, and
+`admin/reports/partials/breakdown.blade.php` all read `orders.payment_method`
+generically (no hardcoded `'cash'`/`'card'` assumption) — confirmed by
+direct inspection, not assumed. The one cosmetic gap: the breakdown partial
+renders a raw key via `ucwords(str_replace('_', ' ', $key))`, so an order
+paid via the `cod` driver now shows as "Cod" there instead of "Cash on
+Delivery". Every other admin screen that shows this value (`orders/index`,
+`orders/print`, `orders/show`, order tracking) was updated in this phase to
+resolve the real driver label instead. This one cosmetic label was
+deliberately left as-is rather than special-cased, since it is a report
+grouping key, not a customer- or decision-facing label.
+
 ## 4. Base URL / test-vs-live model unconfirmed (Phase 2)
 
 `MoyasarClient` uses a single host (`api.moyasar.com`) with test/live

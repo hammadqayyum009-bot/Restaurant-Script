@@ -57,20 +57,6 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Payment Method</label>
-                        <div class="radio-cards">
-                            @foreach ($payments as $method)
-                                <label>
-                                    <input type="radio" name="payment_method" value="{{ $method }}"
-                                           {{ old('payment_method', $payments[0]) === $method ? 'checked' : '' }}>
-                                    {{ $ordering->paymentLabel($method) }}
-                                </label>
-                            @endforeach
-                        </div>
-                        @error('payment_method')<span class="error-text">{{ $message }}</span>@enderror
-                    </div>
-
-                    <div class="form-group">
                         <label for="notes">Order Notes (optional)</label>
                         <textarea class="form-control" id="notes" name="notes" placeholder="e.g. less spicy, no onions...">{{ old('notes') }}</textarea>
                     </div>
@@ -101,7 +87,7 @@
                                 A delivery fee of {{ config('site.currency') }} {{ number_format((float) config('shop.delivery_fee'), 2) }} is added to delivery orders.
                             </p>
                         @endif
-                        <button type="submit" class="btn btn-primary btn-block" style="margin-top:16px;">Place Order</button>
+                        <button type="submit" class="btn btn-primary btn-block" style="margin-top:16px;">Continue to Payment</button>
                     </div>
                 </div>
             </form>

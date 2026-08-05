@@ -133,7 +133,6 @@
                         <div><span class="a-muted">Email</span><br><a href="mailto:{{ $order->email }}">{{ $order->email }}</a></div>
                     @endif
                     <div><span class="a-muted">{{ $order->order_type === 'pickup' ? 'Pickup' : 'Delivery address' }}</span><br>{{ $order->address }}</div>
-                    <div><span class="a-muted">Payment</span><br>{{ $order->payment_method === 'cash' ? 'Cash on delivery' : 'Card on delivery' }}</div>
                     @if ($order->notes)
                         <div><span class="a-muted">Notes</span><br>{{ $order->notes }}</div>
                     @endif

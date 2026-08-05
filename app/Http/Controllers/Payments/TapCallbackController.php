@@ -8,6 +8,7 @@ use App\Payments\PaymentDriverRegistry;
 use App\Payments\PaymentTransactionStatusService;
 use App\Payments\PaymentVerificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 
 /**
  * The customer's browser landing here after Tap's hosted page proves
@@ -38,6 +39,12 @@ class TapCallbackController extends Controller
 
         $verifier->verify($transaction, PaymentTransactionStatusService::SOURCE_CALLBACK);
 
-        return redirect()->route('checkout.success', $transaction->order->order_number);
+        // The customer's browser landing back here after Tap's hosted page
+        // proves nothing by itself (see class docblock) — verify() above is
+        // what actually determined the real status; this redirect only
+        // sends them to the screen that reports it.
+        return redirect()->to(
+            URL::temporarySignedRoute('checkout.payment.result', now()->addHours(6), ['order' => $transaction->order_id])
+        );
     }
 }

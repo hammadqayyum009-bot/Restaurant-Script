@@ -8,6 +8,7 @@ use App\Http\Requests\Payments\RefundPaymentRequest;
 use App\Models\PaymentTransaction;
 use App\Payments\Money;
 use App\Payments\PaymentDriverRegistry;
+use App\Payments\PaymentReconciliationService;
 use App\Payments\PaymentStatus;
 use App\Payments\PaymentTransactionStatusService;
 use App\Payments\PaymentVerificationService;
@@ -57,6 +58,41 @@ class PaymentTransactionController extends Controller
         }
 
         return back()->with('success', __('payments.marked_paid_success'));
+    }
+
+    public function stuck(PaymentReconciliationService $reconciliation)
+    {
+        Gate::authorize('manage-payments');
+
+        $transactions = $reconciliation->stuckTransactionsQuery()
+            ->with(['order', 'paymentMethod'])
+            ->paginate(25);
+
+        return view('admin.payments.stuck', [
+            'transactions' => $transactions,
+            'stuckAfterMinutes' => (int) config('payments.reconciliation.stuck_after_minutes'),
+        ]);
+    }
+
+    public function reconcile(PaymentReconciliationService $reconciliation)
+    {
+        Gate::authorize('manage-payments');
+
+        $result = $reconciliation->run();
+
+        if (! $result['ran']) {
+            return back()->with('error', __('payments.reconciliation_already_running'));
+        }
+
+        $this->activity->log(
+            'status',
+            "Ran payment reconciliation: {$result['checked']} checked, {$result['resolved']} resolved.",
+        );
+
+        return back()->with('success', __('payments.reconciliation_ran', [
+            'checked' => $result['checked'],
+            'resolved' => $result['resolved'],
+        ]));
     }
 
     public function reverify(PaymentTransaction $paymentTransaction)

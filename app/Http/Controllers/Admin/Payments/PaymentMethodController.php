@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Admin\Payments;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Payments\ReorderPaymentMethodsRequest;
+use App\Http\Requests\Payments\SavePaymentSettingsRequest;
 use App\Http\Requests\Payments\UpdatePaymentMethodRequest;
 use App\Models\PaymentMethod;
 use App\Payments\Contracts\SupportsConnectionTest;
 use App\Payments\Money;
 use App\Payments\PaymentDriverRegistry;
 use App\Services\ActivityLogger;
+use App\Services\Settings;
+use App\Services\Uploader;
 use Illuminate\Support\Facades\Gate;
 
 class PaymentMethodController extends Controller
@@ -17,6 +20,7 @@ class PaymentMethodController extends Controller
     public function __construct(
         protected PaymentDriverRegistry $registry,
         protected ActivityLogger $activity,
+        protected Uploader $uploader,
     ) {}
 
     public function index()
@@ -33,7 +37,23 @@ class PaymentMethodController extends Controller
             ];
         });
 
-        return view('admin.settings.payment-methods.index', ['rows' => $rows]);
+        return view('admin.settings.payment-methods.index', [
+            'rows' => $rows,
+            'maxAttemptsPerOrder' => (int) config('payments.max_attempts_per_order'),
+            'stuckAfterMinutes' => (int) config('payments.reconciliation.stuck_after_minutes'),
+        ]);
+    }
+
+    public function saveSettings(SavePaymentSettingsRequest $request, Settings $settings)
+    {
+        $settings->setMany([
+            'payments_max_attempts_per_order' => $request->validated('max_attempts_per_order'),
+            'payments_stuck_after_minutes' => $request->validated('stuck_after_minutes'),
+        ], 'payments');
+
+        $this->activity->settings('payments');
+
+        return back()->with('success', 'Payment settings saved.');
     }
 
     public function edit(PaymentMethod $paymentMethod)
@@ -67,6 +87,14 @@ class PaymentMethodController extends Controller
             'allowed_order_types' => $data['allowed_order_types'] ?? null,
             'credentials' => $this->mergedCredentials($paymentMethod, $data),
         ];
+
+        if ($request->hasFile('icon')) {
+            $this->uploader->delete($paymentMethod->icon_path);
+            $updates['icon_path'] = $this->uploader->store($request->file('icon'), 'payment-icons');
+        } elseif ($request->boolean('remove_icon')) {
+            $this->uploader->delete($paymentMethod->icon_path);
+            $updates['icon_path'] = null;
+        }
 
         $wantsEnabled = $request->boolean('enabled');
 

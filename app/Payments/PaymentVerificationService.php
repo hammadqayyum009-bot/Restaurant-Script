@@ -2,11 +2,13 @@
 
 namespace App\Payments;
 
+use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Models\User;
 use App\Payments\ValueObjects\PaymentStatusTransitionResult;
 use App\Services\ActivityLogger;
 use App\Services\Mailer;
+use App\Services\OrderNotifier;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -24,6 +26,7 @@ class PaymentVerificationService
         protected PaymentTransactionStatusService $statusService,
         protected ActivityLogger $activity,
         protected Mailer $mailer,
+        protected OrderNotifier $notifier,
     ) {}
 
     public function verify(PaymentTransaction $transaction, string $source, ?User $actor = null): PaymentStatusTransitionResult
@@ -46,7 +49,7 @@ class PaymentVerificationService
 
             $transaction->forceFill(['last_verified_at' => now()])->save();
 
-            return new PaymentStatusTransitionResult(false, $transaction->fresh());
+            return new PaymentStatusTransitionResult(false, $transaction->fresh(), providerUnreachable: true);
         }
 
         $transaction->forceFill([
@@ -66,19 +69,32 @@ class PaymentVerificationService
             return new PaymentStatusTransitionResult(false, $transaction->fresh());
         }
 
-        return $this->statusService->transitionTo(
+        $justConfirmedOrderId = null;
+
+        $transitionResult = $this->statusService->transitionTo(
             $transaction,
             $result->status,
             $source,
             $actor,
-            withinTransaction: $result->status === PaymentStatus::Paid ? function (PaymentTransaction $t) {
+            withinTransaction: $result->status === PaymentStatus::Paid ? function (PaymentTransaction $t) use (&$justConfirmedOrderId) {
                 $order = $t->order()->lockForUpdate()->first();
 
                 if ($order && $order->status === 'pending') {
                     $order->update(['status' => 'confirmed']);
+                    $justConfirmedOrderId = $order->id;
                 }
             } : null,
         );
+
+        // Sent after the row lock releases, same reasoning as
+        // CashOnDeliveryDriver::initiate() — and only when this call
+        // actually flipped the order, so a webhook and a callback racing
+        // for the same payment can never send the email twice.
+        if ($justConfirmedOrderId !== null) {
+            $this->notifier->notifyPlaced(Order::findOrFail($justConfirmedOrderId));
+        }
+
+        return $transitionResult;
     }
 
     /**

@@ -56,7 +56,8 @@ class TapCallbackTest extends TestCase
 
         $response = $this->get('/payments/tap/callback?transaction='.$transaction->id.'&tap_id=chg_callback_test');
 
-        $response->assertRedirect(route('checkout.success', $transaction->order->order_number));
+        $response->assertStatus(302);
+        $this->assertStringContainsString('/checkout/'.$transaction->order_id.'/result', (string) $response->headers->get('Location'));
         $this->assertSame('failed', $transaction->fresh()->status);
     }
 

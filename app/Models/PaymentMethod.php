@@ -18,6 +18,7 @@ class PaymentMethod extends Model
         'label_ar',
         'description_en',
         'description_ar',
+        'icon_path',
         'credentials',
         'test_mode',
         'min_order_amount_minor',

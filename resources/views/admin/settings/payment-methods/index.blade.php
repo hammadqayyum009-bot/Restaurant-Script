@@ -56,6 +56,34 @@
             </table>
         </div>
     </div>
+
+    <div class="a-card" style="margin-top:18px;">
+        <div class="a-card-head"><h2>{{ __('payments.reconciliation_settings_title') }}</h2></div>
+
+        <form method="POST" action="{{ route('admin.settings.payment-methods.settings') }}">
+            @csrf @method('PUT')
+
+            <div class="a-row cols-2">
+                <div class="a-field">
+                    <label for="max_attempts_per_order">{{ __('payments.max_attempts_per_order') }}</label>
+                    <input type="number" min="1" max="20" id="max_attempts_per_order" name="max_attempts_per_order"
+                           class="a-input" value="{{ old('max_attempts_per_order', $maxAttemptsPerOrder) }}" required>
+                    @error('max_attempts_per_order')<span class="a-hint" style="color:var(--danger,#c0392b);">{{ $message }}</span>@enderror
+                </div>
+                <div class="a-field">
+                    <label for="stuck_after_minutes">{{ __('payments.stuck_after_minutes') }}</label>
+                    <input type="number" min="5" max="1440" id="stuck_after_minutes" name="stuck_after_minutes"
+                           class="a-input" value="{{ old('stuck_after_minutes', $stuckAfterMinutes) }}" required>
+                    <span class="a-hint">{{ __('payments.stuck_after_minutes_hint') }}</span>
+                    @error('stuck_after_minutes')<span class="a-hint" style="color:var(--danger,#c0392b);">{{ $message }}</span>@enderror
+                </div>
+            </div>
+
+            <div class="a-form-actions">
+                <button type="submit" class="a-btn">{{ __('payments.save') }}</button>
+            </div>
+        </form>
+    </div>
 @endsection
 
 @push('scripts')

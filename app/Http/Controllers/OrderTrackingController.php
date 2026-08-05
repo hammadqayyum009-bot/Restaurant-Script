@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Payments\PaymentDriverRegistry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
 /**
@@ -26,10 +28,10 @@ class OrderTrackingController extends Controller
 
     public function show()
     {
-        return view('track', ['order' => null, 'steps' => self::STEPS]);
+        return view('track', ['order' => null, 'steps' => self::STEPS, 'transaction' => null, 'retryUrl' => null, 'paymentDrivers' => null]);
     }
 
-    public function find(Request $request)
+    public function find(Request $request, PaymentDriverRegistry $registry)
     {
         $data = $request->validate([
             'order_number' => ['required', 'string', 'max:40'],
@@ -52,7 +54,7 @@ class OrderTrackingController extends Controller
         $contact = trim($data['contact']);
         $digits = preg_replace('/\D+/', '', $contact);
 
-        $order = Order::with('items')
+        $order = Order::with(['items', 'paymentTransactions' => fn ($query) => $query->latest()->limit(1)])
             ->where('order_number', trim($data['order_number']))
             ->where(function ($query) use ($contact, $digits) {
                 $query->whereRaw('lower(email) = ?', [Str::lower($contact)]);
@@ -76,9 +78,23 @@ class OrderTrackingController extends Controller
 
         RateLimiter::clear($key);
 
+        $transaction = $order->paymentTransactions->first();
+        $retryUrl = null;
+
+        if ($transaction && in_array($transaction->status, ['failed', 'cancelled'], true)) {
+            $max = (int) config('payments.max_attempts_per_order');
+
+            if ($order->paymentTransactions()->count() < $max) {
+                $retryUrl = URL::temporarySignedRoute('checkout.payment.show', now()->addHours(6), ['order' => $order->id]);
+            }
+        }
+
         return view('track', [
             'order' => $order,
             'steps' => self::STEPS,
+            'transaction' => $transaction,
+            'retryUrl' => $retryUrl,
+            'paymentDrivers' => $registry,
         ]);
     }
 }

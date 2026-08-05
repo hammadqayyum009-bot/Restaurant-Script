@@ -24,6 +24,7 @@ class Uploader
         'branding' => 600,
         'menu' => 1600,
         'content' => 1920,
+        'payment-icons' => 120,
     ];
 
     protected const DEFAULT_MAX_EDGE = 1600;

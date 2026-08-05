@@ -126,7 +126,7 @@ class SettingsController extends Controller
         ]);
 
         $toggles = [
-            'shop_enable_delivery', 'shop_enable_pickup', 'shop_enable_cash', 'shop_enable_card',
+            'shop_enable_delivery', 'shop_enable_pickup',
             'shop_reservations_enabled', 'shop_reviews_enabled', 'shop_reviews_auto_approve',
         ];
 

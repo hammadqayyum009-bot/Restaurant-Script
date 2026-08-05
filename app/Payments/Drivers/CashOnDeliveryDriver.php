@@ -13,6 +13,7 @@ use App\Payments\ValueObjects\PaymentInitiationResult;
 use App\Payments\ValueObjects\PaymentVerificationResult;
 use App\Payments\ValueObjects\PaymentWebhookResult;
 use App\Payments\ValueObjects\RefundResult;
+use App\Services\OrderNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use LogicException;
@@ -57,13 +58,31 @@ class CashOnDeliveryDriver implements PaymentDriver
      */
     public function initiate(PaymentTransaction $transaction, PaymentMethod $method): PaymentInitiationResult
     {
-        DB::transaction(function () use ($transaction) {
+        $justConfirmed = DB::transaction(function () use ($transaction) {
             $order = $transaction->order()->lockForUpdate()->firstOrFail();
 
             if ($order->status === 'pending') {
                 $order->update(['status' => 'confirmed']);
+
+                return true;
             }
+
+            return false;
         });
+
+        // Sent after the row lock releases (not inside the transaction, same
+        // reasoning as PaymentVerificationService's Paid closure never
+        // holding a lock across I/O) and only on the one request that
+        // actually flipped the order — a retry that finds it already
+        // confirmed must never send a second email. Resolved from the
+        // container here rather than injected via the constructor so this
+        // driver keeps the same no-argument instantiation every other
+        // driver and every existing test already relies on (`new
+        // CashOnDeliveryDriver`) — see OrderNotifier's own docblock for why
+        // a constructor dependency here would in fact be circular anyway.
+        if ($justConfirmed) {
+            app(OrderNotifier::class)->notifyPlaced($transaction->order()->first());
+        }
 
         return PaymentInitiationResult::noRedirectRequired();
     }

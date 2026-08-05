@@ -4,12 +4,14 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CheckoutPaymentController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Install\InstallController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderTrackingController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PaymentResultController;
 use App\Http\Controllers\Payments\MoyasarCallbackController;
 use App\Http\Controllers\Payments\MoyasarWebhookController;
 use App\Http\Controllers\Payments\TapCallbackController;
@@ -47,7 +49,13 @@ Route::middleware('installed')->group(function () {
 
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-    Route::get('/checkout/success/{orderNumber}', [CheckoutController::class, 'success'])->name('checkout.success');
+
+    Route::middleware('signed')->group(function () {
+        Route::get('/checkout/{order}/payment', [CheckoutPaymentController::class, 'show'])->name('checkout.payment.show');
+        Route::post('/checkout/{order}/payment', [CheckoutPaymentController::class, 'store'])
+            ->name('checkout.payment.store')->middleware('throttle:10,1');
+        Route::get('/checkout/{order}/result', [PaymentResultController::class, 'show'])->name('checkout.payment.result');
+    });
 
     Route::middleware('throttle:60,1')->group(function () {
         Route::get('/payments/moyasar/callback', [MoyasarCallbackController::class, 'handle'])->name('payments.moyasar.callback');
