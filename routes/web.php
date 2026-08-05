@@ -12,6 +12,8 @@ use App\Http\Controllers\OrderTrackingController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Payments\MoyasarCallbackController;
 use App\Http\Controllers\Payments\MoyasarWebhookController;
+use App\Http\Controllers\Payments\TapCallbackController;
+use App\Http\Controllers\Payments\TapWebhookController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ReviewController;
@@ -50,6 +52,8 @@ Route::middleware('installed')->group(function () {
     Route::middleware('throttle:60,1')->group(function () {
         Route::get('/payments/moyasar/callback', [MoyasarCallbackController::class, 'handle'])->name('payments.moyasar.callback');
         Route::post('/payments/moyasar/webhook', [MoyasarWebhookController::class, 'handle'])->name('payments.moyasar.webhook');
+        Route::get('/payments/tap/callback', [TapCallbackController::class, 'handle'])->name('payments.tap.callback');
+        Route::post('/payments/tap/webhook', [TapWebhookController::class, 'handle'])->name('payments.tap.webhook');
     });
 
     Route::get('/track', [OrderTrackingController::class, 'show'])->name('track.show');

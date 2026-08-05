@@ -2,6 +2,7 @@
 
 use App\Payments\Drivers\CashOnDeliveryDriver;
 use App\Payments\Drivers\MoyasarDriver;
+use App\Payments\Drivers\TapDriver;
 
 return [
     'currency' => env('PAYMENTS_CURRENCY', 'SAR'),
@@ -14,5 +15,6 @@ return [
     'drivers' => [
         CashOnDeliveryDriver::class,
         MoyasarDriver::class,
+        TapDriver::class,
     ],
 ];

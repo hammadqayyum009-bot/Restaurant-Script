@@ -7,6 +7,9 @@ return [
     'moyasar_label' => 'Card / mada / Apple Pay',
     'moyasar_description' => 'Pay online by card, mada or Apple Pay via Moyasar.',
 
+    'tap_label' => 'Card (Tap)',
+    'tap_description' => 'Pay online by card via Tap Payments.',
+
     'status_pending' => 'Pending',
     'status_processing' => 'Processing',
     'status_paid' => 'Paid',
@@ -58,5 +61,10 @@ return [
     'webhook_events_title' => 'Webhook events',
     'issue_credit_note' => 'Issue a credit note',
     'issue_credit_note_hint' => 'Refunded: :amount. This links to the existing billing screen — nothing here is filled in automatically.',
-    'amount_mismatch_alert' => 'The amount Moyasar returned did not match this order. The transaction was not marked paid. Check the payment log.',
+    'amount_mismatch_alert' => 'The amount the provider returned did not match this order. The transaction was not marked paid. Check the payment log.',
+
+    'country' => 'Country',
+    'country_caveat' => "Tap's merchant-onboarding availability varies by country and may change — confirm directly with Tap before relying on this in a country not already confirmed working for you.",
+    'local_source_id' => 'Local payment method override (advanced)',
+    'local_source_id_hint' => 'Leave blank to use the universal card method. Only set this if you have confirmed the exact source ID with Tap for a local method (KNET, Benefit, etc).',
 ];

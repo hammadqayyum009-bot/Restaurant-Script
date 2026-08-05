@@ -105,6 +105,10 @@
                     @include('admin.settings.payment-methods.partials.moyasar-credentials', ['method' => $method])
                 @endif
 
+                @if ($method->driver === 'tap')
+                    @include('admin.settings.payment-methods.partials.tap-credentials', ['method' => $method])
+                @endif
+
                 <div class="a-form-actions">
                     <a href="{{ route('admin.settings.payment-methods') }}" class="a-btn ghost">Cancel</a>
                     <button type="submit" class="a-btn">{{ __('payments.save') }}</button>
@@ -113,7 +117,7 @@
         </div>
     </form>
 
-    @if ($method->driver === 'moyasar')
+    @if (in_array($method->driver, ['moyasar', 'tap'], true))
         <form method="POST" action="{{ route('admin.settings.payment-methods.test-connection', $method) }}" style="margin-top:12px;">
             @csrf
             <button type="submit" class="a-btn ghost">{{ __('payments.test_connection') }}</button>

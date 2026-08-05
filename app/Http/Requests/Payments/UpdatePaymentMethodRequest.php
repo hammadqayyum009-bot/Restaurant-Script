@@ -37,6 +37,12 @@ class UpdatePaymentMethodRequest extends FormRequest
             'secret_key_live' => ['nullable', 'string', 'max:255'],
             'webhook_secret_test' => ['nullable', 'string', 'max:255'],
             'webhook_secret_live' => ['nullable', 'string', 'max:255'],
+
+            // Plain (non-secret) driver config, Phase 3. Deliberately free
+            // text, not Rule::in([...]) — no settled "supported countries"
+            // list exists to validate against.
+            'country' => ['nullable', 'string', 'max:80'],
+            'local_source_id' => ['nullable', 'string', 'max:80'],
         ];
     }
 }

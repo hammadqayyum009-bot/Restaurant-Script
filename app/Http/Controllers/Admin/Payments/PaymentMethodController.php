@@ -132,9 +132,12 @@ class PaymentMethodController extends Controller
     }
 
     /**
-     * Any credential field left blank in the form keeps its existing stored
-     * value — credentials are write-only, never rendered back into an
-     * input, so a blank field must never be read as "clear this."
+     * Secret fields left blank keep their existing stored value —
+     * credentials are write-only, never rendered back into an input, so a
+     * blank field must never be read as "clear this." Plain (non-secret)
+     * config fields like country/local_source_id are the opposite: they
+     * are visible in the form, so a submitted value always overwrites,
+     * including clearing it out with a blank submission.
      *
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
@@ -146,6 +149,12 @@ class PaymentMethodController extends Controller
         foreach (['secret_key_test', 'secret_key_live', 'webhook_secret_test', 'webhook_secret_live'] as $field) {
             if (! empty($data[$field])) {
                 $credentials[$field] = $data[$field];
+            }
+        }
+
+        foreach (['country', 'local_source_id'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $credentials[$field] = $data[$field] !== '' && $data[$field] !== null ? $data[$field] : null;
             }
         }
 

@@ -5,13 +5,15 @@ namespace Tests\Feature\Payments\Moyasar;
 use App\Payments\Contracts\PaymentDriver;
 use App\Payments\Drivers\CashOnDeliveryDriver;
 use App\Payments\Drivers\MoyasarDriver;
+use App\Payments\Drivers\TapDriver;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
 /**
- * Phase 2's Stage 2 contract promised "CONTRACT CHANGES: none". This proves
- * it by reflection rather than by having looked at the diff and believed it —
- * if a future change alters PaymentDriver's shape, this fails immediately.
+ * Phase 2 and Phase 3's Stage 2 contracts both promised "CONTRACT CHANGES:
+ * none". This proves it by reflection rather than by having looked at the
+ * diff and believed it — if a future change alters PaymentDriver's shape,
+ * this fails immediately.
  */
 class DriverContractUnchangedTest extends TestCase
 {
@@ -64,9 +66,10 @@ class DriverContractUnchangedTest extends TestCase
         return array_map(fn ($name) => [$name], array_keys(self::EXPECTED_METHODS));
     }
 
-    public function test_both_drivers_still_implement_the_interface(): void
+    public function test_all_three_drivers_still_implement_the_interface(): void
     {
         $this->assertInstanceOf(PaymentDriver::class, new CashOnDeliveryDriver);
         $this->assertInstanceOf(PaymentDriver::class, new MoyasarDriver);
+        $this->assertInstanceOf(PaymentDriver::class, new TapDriver);
     }
 }

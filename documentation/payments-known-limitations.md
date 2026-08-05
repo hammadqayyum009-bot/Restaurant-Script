@@ -31,6 +31,29 @@ secret and a captured payload + signature pair, or confirmation from Moyasar
 support of the exact algorithm. Once confirmed, the fix is isolated to
 `MoyasarDriver::handleWebhook()` — no other file changes.
 
+## 1b. Tap webhook hashstring verification is not implemented (Phase 3)
+
+Same fail-closed treatment as item 1, for the second provider. Tap's own
+documentation refers to "hashstring" verification, terminology distinct from
+Moyasar's header-based HMAC scheme — the exact computation (which fields are
+concatenated, what algorithm, where the result is delivered) was not found in
+any source reachable during Phase 3 research; `developers.tap.company` could
+not be fetched directly (same 403 pattern as Moyasar's docs host).
+`TapDriver::handleWebhook()` always returns `processed: false` and
+`TapWebhookController` always responds with HTTP 503, for the same reasons
+and with the same safe fallback paths (callback-triggered verify,
+verify-on-page-load, admin re-verify) as Moyasar.
+
+Two webhook gates are open simultaneously (this one and item 1) — confirmed
+as an acceptable state, not a compounding risk: both fail closed
+independently, neither depends on the other closing first, and neither can
+ever mark a transaction paid on an unverified delivery. Both need to close
+before this app takes real online payments in production; that is a
+pre-launch checklist item, not a per-phase blocker.
+
+**To close this:** same path as item 1 — sandbox access with a captured
+payload + signature, or confirmation from Tap support of the exact scheme.
+
 ## 2. Invoice-id vs payment-id assumption (Phase 2)
 
 `MoyasarDriver::verify()` and `refund()` both treat
@@ -43,6 +66,42 @@ confirmed empirically — no sandbox access existed during Phase 2 build.
 **To close this:** verify against a real sandbox invoice once one has been
 paid — confirm `GET /v1/invoices/{id}`'s response shape and whether it
 embeds a distinct payment id that the refund call actually needs.
+
+## 2b. Tap `transaction.url` field name and refund endpoint fields unconfirmed (Phase 3)
+
+`TapDriver::initiate()` reads the redirect URL from `charge['transaction']
+['url']`, cross-referenced from two independent secondary-source examples,
+not a primary-docs read. `TapDriver::refund()`/`TapClient::refund()` assume
+`POST /v2/refunds` with `charge_id`, `amount`, `currency`, `reason` fields —
+same confidence tier, same reason (fetch block on `developers.tap.company`).
+
+**To close this:** a primary-source read or sandbox charge/refund confirms
+both. If either field name is wrong, the fix is isolated to `TapDriver`/
+`TapClient` — no other file changes, since nothing downstream depends on the
+exact field name, only on the value objects both classes already produce
+correctly.
+
+## 2c. Tap country coverage is not a settled fact (Phase 3)
+
+The admin's Tap country field is free text with an explicit caveat
+(`payments.country_caveat`), deliberately not a dropdown implying a fixed,
+authoritative list. Secondary sources (payment-comparison sites, not Tap's
+own documentation) suggest Tap's actual merchant-payout domicile coverage may
+be narrower than commonly assumed (six GCC countries, with Egypt/Jordan/
+Lebanon reportedly no longer onboarded as of 2025) — this was never
+confirmed against a primary source, and the driver does not encode any
+country list as fact anywhere. This is a business/onboarding question for
+whoever configures a live Tap account, not something code should decide.
+
+## 2d. `local_source_id` — no verified per-country payment method codes (Phase 3)
+
+`TapDriver` only has real confidence in the universal `src_card` method.
+Country-specific local methods (KNET, Benefit, OmanNet, mada-via-Tap) exist
+per Tap's docs, but their exact `source.id` strings were not confirmed and
+are not hardcoded anywhere. `local_source_id` is a plain, optional
+admin-configurable override (stored in `payment_methods.credentials`, not a
+secret) for a merchant who has confirmed the correct string with Tap
+directly. No guessed method codes ship in this phase.
 
 ## 3. Refund does not automatically generate a credit note (Phase 2)
 
@@ -58,7 +117,9 @@ issuance is a full business operation with its own authorization and its own
 "exact by construction" guarantee (see billing-known-limitations.md), and
 wiring Payments directly into it was judged bigger than a refund feature
 should absorb in this phase. Full automatic credit-note generation triggered
-by a refund is deferred to a future scoped task.
+by a refund is deferred to a future scoped task. Applies identically to
+Tap's refund action (Phase 3) — the transaction detail screen and its
+credit-note link are driver-agnostic, so no separate item was needed.
 
 ## 4. Base URL / test-vs-live model unconfirmed (Phase 2)
 

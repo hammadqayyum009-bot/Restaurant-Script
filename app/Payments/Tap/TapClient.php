@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Payments\Moyasar;
+namespace App\Payments\Tap;
 
 use App\Models\PaymentTransaction;
 use App\Payments\LogsGatewayRequestsSafely;
@@ -8,59 +8,69 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 
 /**
- * Every call goes through request(), which enforces an explicit timeout,
- * logs the attempt (redacted) to payment_gateway_logs, and only retries a
- * GET that failed at the network level — never a POST, and never on an HTTP
- * error response (that's a real answer from Moyasar, not a transient
- * failure, and blind-retrying a payment or refund creation risks a
- * duplicate).
+ * Same shape and retry/timeout discipline as MoyasarClient — Bearer auth
+ * instead of Basic, different endpoint paths, and amounts are sent as
+ * pre-formatted decimal strings (Tap's wire format), never integers and
+ * never PHP floats. redact()/log() come from LogsGatewayRequestsSafely,
+ * shared with MoyasarClient so the two can never drift on what gets masked.
  */
-class MoyasarClient
+class TapClient
 {
     use LogsGatewayRequestsSafely;
 
-    public const BASE_URL = 'https://api.moyasar.com/v1';
+    public const BASE_URL = 'https://api.tap.company/v2';
 
     public const CONNECT_TIMEOUT_SECONDS = 5;
 
     public const REQUEST_TIMEOUT_SECONDS = 15;
 
-    public function __construct(protected string $secretKey, protected string $driver = 'moyasar') {}
+    public function __construct(protected string $secretKey, protected string $driver = 'tap') {}
 
     /**
      * @param  array<string, mixed>  $payload
      * @return array<string, mixed>
      */
-    public function createInvoice(array $payload, ?PaymentTransaction $transaction = null): array
+    public function createCharge(array $payload, ?PaymentTransaction $transaction = null): array
     {
-        return $this->request('POST', '/invoices', $payload, retryable: false, transaction: $transaction);
+        return $this->request('POST', '/charges', $payload, retryable: false, transaction: $transaction);
     }
 
     /** @return array<string, mixed> */
-    public function fetchInvoice(string $invoiceId, ?PaymentTransaction $transaction = null): array
+    public function fetchCharge(string $chargeId, ?PaymentTransaction $transaction = null): array
     {
-        return $this->request('GET', '/invoices/'.$invoiceId, [], retryable: true, transaction: $transaction);
+        return $this->request('GET', '/charges/'.$chargeId, [], retryable: true, transaction: $transaction);
     }
 
-    /** @return array<string, mixed> */
-    public function refund(string $paymentId, ?int $amountMinor, ?PaymentTransaction $transaction = null): array
+    /**
+     * $amountDecimal must already be the pre-formatted string
+     * Money::toDecimal() produces (or null for a full refund) — never a
+     * float, never re-derived here.
+     *
+     * @return array<string, mixed>
+     */
+    public function refund(string $chargeId, ?string $amountDecimal, ?string $currency, string $reason, ?PaymentTransaction $transaction = null): array
     {
-        $payload = $amountMinor !== null ? ['amount' => $amountMinor] : [];
+        $payload = ['charge_id' => $chargeId, 'reason' => $reason];
 
-        return $this->request('POST', '/payments/'.$paymentId.'/refund', $payload, retryable: false, transaction: $transaction);
+        if ($amountDecimal !== null) {
+            $payload['amount'] = $amountDecimal;
+            $payload['currency'] = $currency;
+        }
+
+        return $this->request('POST', '/refunds', $payload, retryable: false, transaction: $transaction);
     }
 
     /**
      * A harmless, read-only authenticated call used by the admin "test
-     * connection" button — never creates or touches a real invoice.
+     * connection" button — never creates or touches a real charge.
      */
     public function testConnection(): bool
     {
         try {
-            $this->request('GET', '/invoices?per_page=1', [], retryable: true);
+            $this->request('GET', '/charges?limit=1', [], retryable: true);
 
             return true;
-        } catch (MoyasarApiException) {
+        } catch (TapApiException) {
             return false;
         }
     }
@@ -78,7 +88,7 @@ class MoyasarClient
             $start = microtime(true);
 
             try {
-                $response = Http::withBasicAuth($this->secretKey, '')
+                $response = Http::withToken($this->secretKey)
                     ->connectTimeout(self::CONNECT_TIMEOUT_SECONDS)
                     ->timeout(self::REQUEST_TIMEOUT_SECONDS)
                     ->{strtolower($method)}(self::BASE_URL.$endpoint, $payload);
@@ -89,8 +99,8 @@ class MoyasarClient
                 $this->log($transaction, $method, $endpoint, $response->status(), $durationMs, $payload, $body);
 
                 if ($response->failed()) {
-                    throw new MoyasarApiException(
-                        "Moyasar API returned HTTP {$response->status()} for {$method} {$endpoint}.",
+                    throw new TapApiException(
+                        "Tap API returned HTTP {$response->status()} for {$method} {$endpoint}.",
                     );
                 }
 
@@ -98,8 +108,8 @@ class MoyasarClient
             } catch (ConnectionException $e) {
                 $durationMs = (int) round((microtime(true) - $start) * 1000);
                 $this->log($transaction, $method, $endpoint, null, $durationMs, $payload, ['error' => 'connection_failed']);
-                $lastException = new MoyasarApiException(
-                    "Could not reach Moyasar for {$method} {$endpoint}: {$e->getMessage()}",
+                $lastException = new TapApiException(
+                    "Could not reach Tap for {$method} {$endpoint}: {$e->getMessage()}",
                     connectionFailure: true,
                     previous: $e,
                 );

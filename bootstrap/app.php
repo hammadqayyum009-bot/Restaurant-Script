@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // signature check is the authentication for this one route.
         $middleware->validateCsrfTokens(except: [
             'payments/moyasar/webhook',
+            'payments/tap/webhook',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

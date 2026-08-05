@@ -37,5 +37,19 @@ class PaymentMethodSeeder extends Seeder
                 'description_ar' => 'ادفع عبر الإنترنت بالبطاقة أو مدى أو Apple Pay عبر ميسر.',
             ],
         );
+
+        // Same reasoning as the moyasar row above.
+        PaymentMethod::firstOrCreate(
+            ['driver' => 'tap'],
+            [
+                'enabled' => false,
+                'test_mode' => true,
+                'sort_order' => 2,
+                'label_en' => 'Card (Tap)',
+                'label_ar' => 'بطاقة (Tap)',
+                'description_en' => 'Pay online by card via Tap Payments.',
+                'description_ar' => 'ادفع عبر الإنترنت بالبطاقة عبر Tap Payments.',
+            ],
+        );
     }
 }
