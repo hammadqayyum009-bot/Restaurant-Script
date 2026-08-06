@@ -115,6 +115,18 @@
                     <span class="a-hint">Printed before every price, e.g. AED, PKR, USD.</span>
                 </div>
             </div>
+
+            <div class="a-row cols-2">
+                <div class="a-field">
+                    <label for="site_theme">Storefront theme</label>
+                    <select id="site_theme" name="site_theme" class="a-select">
+                        @php $currentTheme = old('site_theme', config('site.theme')); @endphp
+                        <option value="classic" {{ $currentTheme === 'classic' ? 'selected' : '' }}>Classic (maroon &amp; gold)</option>
+                        <option value="minimal" {{ $currentTheme === 'minimal' ? 'selected' : '' }}>Quiet Minimal</option>
+                    </select>
+                    <span class="a-hint">Changes the customer-facing site's colours and fonts only — the admin panel, billing documents, and emails are unaffected.</span>
+                </div>
+            </div>
         </div>
 
         <div class="a-card">

@@ -24,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
         'site_address' => 'site.address',
         'site_currency' => 'site.currency',
         'site_hours' => 'site.opening_hours',
+        'site_theme' => 'site.theme',
         'site_logo' => 'site.logo',
         'site_favicon' => 'site.favicon',
         'site_meta_description' => 'site.meta_description',

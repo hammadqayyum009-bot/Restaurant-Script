@@ -21,6 +21,7 @@ class SiteCurrencyValidationTest extends TestCase
         return array_merge([
             'site_name' => 'Al Waha',
             'site_currency' => 'SAR',
+            'site_theme' => 'classic',
         ], $overrides);
     }
 

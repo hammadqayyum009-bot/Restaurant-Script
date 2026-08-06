@@ -40,6 +40,12 @@ class SettingsController extends Controller
             // the same shared exponent table both Billing and Payments
             // already read, so anything not in it can't work downstream.
             'site_currency' => ['required', 'string', Rule::in(array_keys(config('currencies')))],
+            // Storefront only — see documentation of scope in
+            // resources/views/layouts/app.blade.php. The <select> only ever
+            // offers these two, but every other admin-facing enum in this
+            // controller is still server-validated against a direct POST,
+            // same reasoning as site_currency above.
+            'site_theme' => ['required', 'string', Rule::in(['classic', 'minimal'])],
             'site_hours' => ['nullable', 'string', 'max:150'],
             'social_facebook' => ['nullable', 'string', 'max:255'],
             'social_instagram' => ['nullable', 'string', 'max:255'],

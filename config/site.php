@@ -10,6 +10,10 @@ return [
     'currency' => env('SITE_CURRENCY', 'AED'),
     'opening_hours' => env('SITE_HOURS', 'Daily: 11:00 AM - 12:00 AM'),
 
+    // 'classic' (default, maroon & gold) or 'minimal' (Quiet Minimal —
+    // see public/assets/css/theme-quiet-minimal.css). Storefront only.
+    'theme' => env('SITE_THEME', 'classic'),
+
     // Uploaded from the admin panel; null falls back to the built-in vector mark.
     'logo' => env('SITE_LOGO', null),
     'favicon' => env('SITE_FAVICON', null),
