@@ -11,6 +11,10 @@
         $legalLinks = ContentController::defaultLegal();
     }
 
+    // Anything not explicitly http(s):// is forced through url(), which happens to
+    // resolve a "javascript:" value to a harmless same-origin path today — that's
+    // incidental, not an intentional allowlist. Don't let a future refactor of this
+    // line assume it's a real sanitizer; see documentation/known-limitations.md.
     $footerLink = fn (string $url) => \Illuminate\Support\Str::startsWith($url, ['http://', 'https://']) ? $url : url($url);
 @endphp
 

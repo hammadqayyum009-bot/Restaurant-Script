@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\BulkEmailJob;
 use App\Models\EmailLog;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Services\BulkEmailSender;
 use App\Services\Mailer;
 use App\Services\Settings;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class MailController extends Controller
@@ -17,9 +20,8 @@ class MailController extends Controller
         protected Settings $settings,
         protected Mailer $mailer,
         protected ActivityLogger $activity,
-    )
-    {
-    }
+        protected BulkEmailSender $bulkEmailSender,
+    ) {}
 
     /* ---------------- SMTP ---------------- */
 
@@ -122,6 +124,19 @@ class MailController extends Controller
         ]);
     }
 
+    /**
+     * Every audience size — including a single "custom" address — goes
+     * through the same durable BulkEmailSender job, deliberately: one code
+     * path to keep correct, rather than a "small send" shortcut that skips
+     * persistence and a "large send" path that needs it. Even a
+     * one-recipient send benefits, since a job persisted before the SMTP
+     * call is what makes a failed send recoverable instead of silently
+     * lost. The first chunk is processed synchronously in this same
+     * request, so an ordinary-sized send (the overwhelming majority) still
+     * finishes and reports "done" immediately; an oversized one is left
+     * safely at its partial progress, picked up by the schedule or the
+     * "Process next batch" button.
+     */
     public function sendCompose(Request $request)
     {
         $data = $request->validate([
@@ -139,32 +154,37 @@ class MailController extends Controller
             return back()->withInput()->with('error', 'No recipients matched — pick at least one.');
         }
 
-        $sent = 0;
-        $failed = 0;
+        $job = $this->bulkEmailSender->create($data['subject'], $data['body'], $targets, $data['audience'], Auth::id());
 
-        foreach ($targets as $target) {
-            $body = $this->mailer->replace($data['body'], $this->mailer->baseVars() + [
-                'name' => $target['name'],
-                'email' => $target['email'],
-            ]);
+        $this->activity->log('email', 'Queued bulk email to '.$targets->count().' recipient(s) ('.$data['audience'].')');
 
-            $subject = $this->mailer->replace($data['subject'], $this->mailer->baseVars() + [
-                'name' => $target['name'],
-            ]);
+        $this->bulkEmailSender->run($job);
 
-            $this->mailer->send($target['email'], $target['name'], $subject, $body, 'manual')
-                ? $sent++
-                : $failed++;
+        return redirect()->route('admin.email.bulk.show', $job);
+    }
+
+    public function bulkShow(BulkEmailJob $bulkEmailJob)
+    {
+        $bulkEmailJob->load(['recipients' => fn ($q) => $q->where('status', 'failed')->latest('id')->limit(50)]);
+
+        return view('admin.email.bulk-show', ['job' => $bulkEmailJob]);
+    }
+
+    public function bulkProcess(BulkEmailJob $bulkEmailJob)
+    {
+        if ($bulkEmailJob->isCompleted()) {
+            return back()->with('success', 'This send is already complete.');
         }
 
-        $this->activity->log('email', 'Sent '.$sent.' email(s) to '.$data['audience']);
+        $result = $this->bulkEmailSender->run($bulkEmailJob);
 
-        return redirect()->route('admin.email.logs')->with(
-            $failed === 0 ? 'success' : 'error',
-            $failed === 0
-                ? "Sent {$sent} email".($sent === 1 ? '' : 's').'.'
-                : "Sent {$sent}, failed {$failed}. See the errors below."
-        );
+        if (! $result['ran']) {
+            return back()->with('error', 'A batch is already being processed (another run holds the lock) — try again shortly.');
+        }
+
+        $this->activity->log('email', "Processed a batch of bulk email job #{$bulkEmailJob->id}: {$result['sent']} sent, {$result['failed']} failed.");
+
+        return back()->with('success', "Processed {$result['checked']}: {$result['sent']} sent, {$result['failed']} failed.");
     }
 
     public function logs(Request $request)
@@ -183,7 +203,7 @@ class MailController extends Controller
 
     /**
      * @param  array<string, mixed>  $data
-     * @return \Illuminate\Support\Collection<int, array{name: string, email: string}>
+     * @return Collection<int, array{name: string, email: string}>
      */
     protected function resolveRecipients(array $data)
     {

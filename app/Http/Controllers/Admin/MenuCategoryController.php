@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MenuCategory;
 use App\Services\ActivityLogger;
+use App\Services\Uploader;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class MenuCategoryController extends Controller
 {
-    public function __construct(protected ActivityLogger $activity) {}
+    public function __construct(protected ActivityLogger $activity, protected Uploader $uploader) {}
 
     public function index()
     {
@@ -49,8 +50,15 @@ class MenuCategoryController extends Controller
     public function destroy(MenuCategory $category)
     {
         // Dishes cascade with the category, so say so plainly rather than
-        // silently deleting a chunk of the menu.
+        // silently deleting a chunk of the menu. The cascade itself is a raw
+        // DB foreign key (cascadeOnDelete), which bypasses Eloquent and never
+        // runs MenuItemController::destroy()'s image cleanup — so uploaded
+        // files have to be removed explicitly here, before the row delete
+        // triggers the cascade, or they're orphaned on disk forever.
         $dishes = $category->menuItems()->count();
+
+        $category->menuItems()->pluck('image')->each(fn ($image) => $this->uploader->delete($image));
+
         $this->activity->deleted('category "'.$category->name.'" and '.$dishes.' dishes', $category);
         $category->delete();
 

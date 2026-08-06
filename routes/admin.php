@@ -159,6 +159,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/email/templates', [MailController::class, 'saveTemplates'])->name('email.templates.save');
         Route::get('/email/compose', [MailController::class, 'compose'])->name('email.compose');
         Route::post('/email/compose', [MailController::class, 'sendCompose'])->name('email.compose.send');
+        Route::get('/email/bulk/{bulkEmailJob}', [MailController::class, 'bulkShow'])->name('email.bulk.show');
+        Route::post('/email/bulk/{bulkEmailJob}/process', [MailController::class, 'bulkProcess'])->name('email.bulk.process');
         Route::get('/email/logs', [MailController::class, 'logs'])->name('email.logs');
     });
 });

@@ -33,6 +33,11 @@
             <button class="nav-close" id="nav-close" aria-label="Close menu">&times;</button>
             <ul>
                 @foreach ($navLinks as $link)
+                    {{-- Anything not explicitly http(s):// is forced through url(), which
+                         happens to resolve a "javascript:" value to a harmless same-origin
+                         path today — that's incidental, not an intentional allowlist. Don't
+                         let a future refactor of this line assume it's a real sanitizer; see
+                         documentation/known-limitations.md. --}}
                     @php $href = \Illuminate\Support\Str::startsWith($link['url'], ['http://', 'https://']) ? $link['url'] : url($link['url']); @endphp
                     <li>
                         <a href="{{ $href }}" class="{{ $currentPath === '/'.trim($link['url'], '/') ? 'active' : '' }}">
@@ -45,6 +50,8 @@
 
             @if ($showCta && $ctaLabel)
                 <div class="nav-cta">
+                    {{-- Same incidental url()-forcing as the nav links above — see the
+                         comment there and documentation/known-limitations.md. --}}
                     <a href="{{ \Illuminate\Support\Str::startsWith($ctaUrl, ['http://', 'https://']) ? $ctaUrl : url($ctaUrl) }}"
                        class="btn btn-primary btn-block">{{ $ctaLabel }}</a>
                 </div>

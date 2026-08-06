@@ -17,3 +17,10 @@ Artisan::command('inspire', function () {
 // command's own PaymentReconciliationService::run() lock is what actually
 // makes concurrent runs safe regardless of how the command gets triggered.
 Schedule::command('payments:reconcile')->everyFifteenMinutes()->withoutOverlapping();
+
+// Same reasoning as above, faster cadence: a bulk email send has nothing to
+// wait out (unlike a stuck payment, which needs time to genuinely resolve
+// itself), so draining the queue as fast as safely possible is strictly
+// better UX. BulkEmailSender::run()'s own lock makes concurrent runs safe
+// regardless of how the command gets triggered, same as reconciliation.
+Schedule::command('email:send-bulk-batch')->everyMinute()->withoutOverlapping();

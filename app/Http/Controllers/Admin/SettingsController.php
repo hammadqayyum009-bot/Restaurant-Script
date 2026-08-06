@@ -7,6 +7,7 @@ use App\Services\ActivityLogger;
 use App\Services\Settings;
 use App\Services\Uploader;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SettingsController extends Controller
 {
@@ -14,9 +15,7 @@ class SettingsController extends Controller
         protected Settings $settings,
         protected Uploader $uploader,
         protected ActivityLogger $activity,
-    )
-    {
-    }
+    ) {}
 
     /* ---------------- Public site ---------------- */
 
@@ -35,7 +34,12 @@ class SettingsController extends Controller
             'site_whatsapp' => ['nullable', 'string', 'max:30'],
             'site_email' => ['nullable', 'email', 'max:150'],
             'site_address' => ['nullable', 'string', 'max:255'],
-            'site_currency' => ['required', 'string', 'max:10'],
+            // Unvalidated before, an unrecognized code silently broke
+            // Money::exponent() everywhere it's read — including Payments,
+            // since the Fix 2 currency unification. config('currencies') is
+            // the same shared exponent table both Billing and Payments
+            // already read, so anything not in it can't work downstream.
+            'site_currency' => ['required', 'string', Rule::in(array_keys(config('currencies')))],
             'site_hours' => ['nullable', 'string', 'max:150'],
             'social_facebook' => ['nullable', 'string', 'max:255'],
             'social_instagram' => ['nullable', 'string', 'max:255'],
@@ -43,6 +47,8 @@ class SettingsController extends Controller
             'social_tiktok' => ['nullable', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'max:2048'],
             'favicon' => ['nullable', 'image', 'max:1024'],
+        ], [
+            'site_currency.in' => 'Unrecognized currency code. Supported: '.implode(', ', array_keys(config('currencies'))).'.',
         ]);
 
         $this->settings->setMany($data, 'site');

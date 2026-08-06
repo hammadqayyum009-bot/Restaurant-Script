@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Services\AdminUserDeleter;
 use App\Services\Mailer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,9 +14,7 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    public function __construct(protected ActivityLogger $activity)
-    {
-    }
+    public function __construct(protected ActivityLogger $activity, protected AdminUserDeleter $adminUserDeleter) {}
 
     public function index(Request $request)
     {
@@ -127,12 +126,13 @@ class UserController extends Controller
             return back()->with('error', 'You cannot delete the account you are signed in with.');
         }
 
-        if ($user->is_admin && User::where('is_admin', true)->count() <= 1) {
+        $name = $user->name;
+
+        if (! $this->adminUserDeleter->delete($user)) {
             return back()->with('error', 'That is the last admin account — create another one first.');
         }
 
-        $this->activity->deleted('user "'.$user->name.'"', $user);
-        $user->delete();
+        $this->activity->deleted('user "'.$name.'"', $user);
 
         return redirect()->route('admin.users.index')->with('success', 'User deleted.');
     }
