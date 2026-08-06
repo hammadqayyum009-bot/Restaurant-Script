@@ -73,6 +73,21 @@ class Money
         return $negative ? -$minor : $minor;
     }
 
+    /**
+     * A Laravel `decimal:min,max` validation rule string scoped to this
+     * currency's own exponent — e.g. "decimal:0,2" for SAR, "decimal:0,3"
+     * for KWD. Meant to run *before* a value ever reaches toMinor(): without
+     * it, an over-precise amount (an extra digit typed into a refund or a
+     * min/max order-amount field) throws InvalidArgumentException from
+     * toMinor() itself, uncaught, as a raw 500 instead of a field error —
+     * see the full-project audit ("decimal-precision overflow crashes
+     * instead of validating").
+     */
+    public static function decimalPlacesRule(string $currency): string
+    {
+        return 'decimal:0,'.self::exponent($currency);
+    }
+
     public static function toDecimal(int $minor, string $currency): string
     {
         $exponent = self::exponent($currency);

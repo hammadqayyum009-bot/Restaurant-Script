@@ -65,14 +65,14 @@ class PaymentMethodController extends Controller
         return view('admin.settings.payment-methods.edit', [
             'method' => $paymentMethod,
             'driver' => $driver,
-            'currency' => config('payments.currency'),
+            'currency' => config('site.currency'),
         ]);
     }
 
     public function update(UpdatePaymentMethodRequest $request, PaymentMethod $paymentMethod)
     {
         $data = $request->validated();
-        $currency = config('payments.currency');
+        $currency = config('site.currency');
 
         $updates = [
             'test_mode' => $request->boolean('test_mode'),

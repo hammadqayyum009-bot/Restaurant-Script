@@ -45,7 +45,23 @@ class DocumentIssuer
         protected DocumentNumberer $numberer,
         protected BillingSettings $settings,
         protected ActivityLogger $activity,
-    ) {
+    ) {}
+
+    /**
+     * A tax invoice is a permanent, numbered legal document — one attempt
+     * per order. Fully crediting it reverses the value, it doesn't un-issue
+     * it, so this stays truthy (blocking a second attempt) even once the
+     * original has reached fully_credited; a genuinely new commercial event
+     * gets its own order or a standalone document, not a second tax invoice
+     * against this one. Drafts don't count — only a document that actually
+     * left draft status represents something legally issued.
+     */
+    public function issuedTaxInvoiceFor(Order $order): ?BillingDocument
+    {
+        return BillingDocument::where('order_id', $order->id)
+            ->whereIn('document_type', self::TAX_INVOICE_TYPES)
+            ->where('status', '!=', BillingDocument::STATUS_DRAFT)
+            ->first();
     }
 
     /**

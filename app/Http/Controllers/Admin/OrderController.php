@@ -10,9 +10,7 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function __construct(protected ActivityLogger $activity)
-    {
-    }
+    public function __construct(protected ActivityLogger $activity) {}
 
     public const STATUSES = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'completed', 'cancelled'];
 
@@ -92,6 +90,18 @@ class OrderController extends Controller
 
     public function destroy(Order $order)
     {
+        // payment_transactions.order_id is restrictOnDelete() — an order
+        // with any transaction (even a still-pending Cash on Delivery one)
+        // represents real payment activity, the same reasoning Billing
+        // already applies to an issued document. Checked explicitly here
+        // rather than left to the database: an uncaught FK violation would
+        // otherwise surface as a raw 500 instead of an explanation, and the
+        // admin has no way to tell the difference between "failed" and
+        // "refused on purpose".
+        if ($order->paymentTransactions()->exists()) {
+            return back()->with('error', 'This order has a payment record and cannot be deleted — use the status dropdown to mark it Cancelled instead.');
+        }
+
         $this->activity->deleted('order '.$order->order_number, $order);
         $order->delete();
 

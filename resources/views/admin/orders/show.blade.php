@@ -142,12 +142,16 @@
 
             <div class="a-card">
                 <h3>Danger zone</h3>
-                <p class="a-card-sub" style="margin-top:0;">Deleting removes the order and its line items permanently.</p>
-                <form method="POST" action="{{ route('admin.orders.destroy', $order) }}"
-                      data-confirm="Delete order {{ $order->order_number }}? This cannot be undone.">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="a-btn danger block">Delete order</button>
-                </form>
+                @if ($transaction)
+                    <p class="a-card-sub" style="margin-top:0;">This order has a payment record and can't be deleted. Use the status dropdown above to mark it Cancelled instead.</p>
+                @else
+                    <p class="a-card-sub" style="margin-top:0;">Deleting removes the order and its line items permanently.</p>
+                    <form method="POST" action="{{ route('admin.orders.destroy', $order) }}"
+                          data-confirm="Delete order {{ $order->order_number }}? This cannot be undone.">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="a-btn danger block">Delete order</button>
+                    </form>
+                @endif
             </div>
         </div>
     </div>

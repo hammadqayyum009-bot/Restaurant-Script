@@ -84,8 +84,12 @@ class CheckoutPaymentController extends Controller
                 'order_id' => $order->id,
                 'payment_method_id' => $method->id,
                 'driver' => $method->driver,
-                'amount_minor' => Money::toMinor((string) $order->total, config('payments.currency')),
-                'currency' => config('payments.currency'),
+                // config('site.currency') — see PaymentDriverRegistry::availableFor()'s
+                // comment; this must stay the same source that computed
+                // $eligible above, or a transaction could be created in a
+                // currency different from the one it was just filtered by.
+                'amount_minor' => Money::toMinor((string) $order->total, config('site.currency')),
+                'currency' => config('site.currency'),
                 'status' => 'pending',
             ]);
 

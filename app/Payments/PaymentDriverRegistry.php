@@ -49,7 +49,13 @@ class PaymentDriverRegistry
      */
     public function availableFor(Order $order): Collection
     {
-        $amountMinor = Money::toMinor((string) $order->total, config('payments.currency'));
+        // Reads config('site.currency') — the same source Billing's
+        // DocumentIssuer reads — not a separate payments.currency setting.
+        // The two used to diverge silently: changing the storefront
+        // currency (an ordinary admin action) never touched the old
+        // Payments-only value, so a transaction could be tagged with a
+        // currency the customer was never actually shown.
+        $amountMinor = Money::toMinor((string) $order->total, config('site.currency'));
 
         return PaymentMethod::where('enabled', true)
             ->orderBy('sort_order')

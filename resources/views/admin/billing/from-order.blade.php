@@ -15,8 +15,18 @@
                 <div class="a-card">
                     <div class="a-card-head"><h2>Document type</h2></div>
 
+                    @if ($existingTaxInvoice)
+                        <div class="a-alert warn" style="margin-bottom:14px;">
+                            This order already has an issued tax invoice —
+                            <a href="{{ route('admin.billing.show', $existingTaxInvoice) }}">{{ $existingTaxInvoice->document_number }}</a>.
+                            A second tax invoice cannot be created for the same order; a credit note corrects an
+                            issued one instead.
+                        </div>
+                    @endif
+
                     <label class="a-check">
-                        <input type="radio" name="document_type" value="simplified_tax_invoice" checked
+                        <input type="radio" name="document_type" value="simplified_tax_invoice"
+                               {{ $existingTaxInvoice ? 'disabled' : 'checked' }}
                                onchange="document.getElementById('buyer-vat-fields').style.display='none'">
                         <span>
                             <strong>Simplified Tax Invoice</strong>
@@ -25,6 +35,7 @@
                     </label>
                     <label class="a-check">
                         <input type="radio" name="document_type" value="standard_tax_invoice"
+                               {{ $existingTaxInvoice ? 'disabled' : '' }}
                                onchange="document.getElementById('buyer-vat-fields').style.display=''">
                         <span>
                             <strong>Standard Tax Invoice</strong>
@@ -32,7 +43,7 @@
                         </span>
                     </label>
                     <label class="a-check">
-                        <input type="radio" name="document_type" value="quotation"
+                        <input type="radio" name="document_type" value="quotation" {{ $existingTaxInvoice ? 'checked' : '' }}
                                onchange="document.getElementById('buyer-vat-fields').style.display='none'">
                         <span>
                             <strong>Quotation</strong>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Payments;
 
+use App\Payments\Money;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -17,6 +18,12 @@ class UpdatePaymentMethodRequest extends FormRequest
      */
     public function rules(): array
     {
+        // decimalPlacesRule() rejects a min/max order amount with more
+        // decimal places than the site currency allows before it reaches
+        // Money::toMinor() in the controller, which would otherwise throw
+        // uncaught — see the full-project audit.
+        $decimalRule = Money::decimalPlacesRule(config('site.currency'));
+
         return [
             'enabled' => ['sometimes', 'boolean'],
             'test_mode' => ['sometimes', 'boolean'],
@@ -24,8 +31,8 @@ class UpdatePaymentMethodRequest extends FormRequest
             'label_ar' => ['nullable', 'string', 'max:120'],
             'description_en' => ['nullable', 'string', 'max:1000'],
             'description_ar' => ['nullable', 'string', 'max:1000'],
-            'min_order_amount' => ['nullable', 'numeric', 'min:0'],
-            'max_order_amount' => ['nullable', 'numeric', 'min:0', 'gte:min_order_amount'],
+            'min_order_amount' => ['nullable', 'numeric', 'min:0', $decimalRule],
+            'max_order_amount' => ['nullable', 'numeric', 'min:0', 'gte:min_order_amount', $decimalRule],
             'allowed_order_types' => ['nullable', 'array'],
             'allowed_order_types.*' => [Rule::in(['delivery', 'pickup'])],
 

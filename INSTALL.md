@@ -53,6 +53,8 @@ The installer locks itself after a successful run (`storage/installed.lock`) so 
 - [ ] Set up SSL (Let's Encrypt is free and usually one click inside cPanel) so your site runs on `https://`.
 - [ ] Set up a daily database backup in cPanel.
 - [ ] **Configure SMTP** — **Admin → Email → SMTP Settings**. Order confirmations, reservation notices, and customer password reset all depend on this. Until it's set up, the site has no way to actually deliver an email to a customer, so **"Forgot your password?" is intentionally disabled** rather than emailing (or, worse, exposing) a reset link it cannot deliver — see Troubleshooting below.
+- [ ] **Set up online payment gateways (optional)** — **Admin → Settings → Payment methods**. Cash on Delivery needs no setup and works immediately; if you also want Moyasar and/or Tap, follow `documentation/payments-buyer-guide.md` — it walks through creating an account, entering the test/live keys, and doing one safe test payment before switching either method to live.
+- [ ] **Enter your VAT/seller details before issuing your first invoice** — **Admin → Settings → Billing**. Your VAT registration number, Commercial Registration number, legal seller name and address are all printed on every tax invoice and required for the ZATCA-style QR code to be correct.
 
 ## Troubleshooting
 

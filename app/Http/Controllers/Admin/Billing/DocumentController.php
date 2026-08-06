@@ -23,8 +23,7 @@ class DocumentController extends Controller
     public function __construct(
         protected DocumentIssuer $issuer,
         protected ActivityLogger $activity,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -79,7 +78,10 @@ class DocumentController extends Controller
 
     public function createFromOrder(Order $order)
     {
-        return view('admin.billing.from-order', ['order' => $order]);
+        return view('admin.billing.from-order', [
+            'order' => $order,
+            'existingTaxInvoice' => $this->issuer->issuedTaxInvoiceFor($order),
+        ]);
     }
 
     public function storeFromOrder(StoreOrderDocumentRequest $request, Order $order)
@@ -87,6 +89,16 @@ class DocumentController extends Controller
         $this->authorize('create', BillingDocument::class);
 
         $data = $request->validated();
+
+        // Never trust the create screen alone to have hidden the two
+        // tax-invoice options — re-checked here regardless of what was
+        // submitted, since this is the actual point a second legal document
+        // would get numbered.
+        if (in_array($data['document_type'], DocumentIssuer::TAX_INVOICE_TYPES, true)
+            && ($existing = $this->issuer->issuedTaxInvoiceFor($order))) {
+            return redirect()->route('admin.billing.show', $existing)
+                ->with('error', "This order already has an issued tax invoice ({$existing->document_number}). A second one cannot be created for the same order — a credit note corrects an issued one instead.");
+        }
 
         $document = $this->issuer->createDraftFromOrder($order, $data['document_type'], [
             'name_en' => $data['buyer_name_en'] ?? null,

@@ -5,7 +5,12 @@ use App\Payments\Drivers\MoyasarDriver;
 use App\Payments\Drivers\TapDriver;
 
 return [
-    'currency' => env('PAYMENTS_CURRENCY', 'SAR'),
+    // No 'currency' key here on purpose: Payments reads config('site.currency'),
+    // the same source Billing's DocumentIssuer reads, rather than a second,
+    // independent setting that could silently drift from it — see the
+    // full-project audit ("currency code divergence"). Changing the
+    // storefront currency under Settings → Website is enough; nothing
+    // Payments-specific needs to be touched to match.
 
     /**
      * Driver classes registered into App\Payments\PaymentDriverRegistry on

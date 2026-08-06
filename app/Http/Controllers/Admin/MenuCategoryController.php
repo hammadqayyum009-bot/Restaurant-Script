@@ -11,9 +11,7 @@ use Illuminate\Validation\Rule;
 
 class MenuCategoryController extends Controller
 {
-    public function __construct(protected ActivityLogger $activity)
-    {
-    }
+    public function __construct(protected ActivityLogger $activity) {}
 
     public function index()
     {
@@ -72,7 +70,12 @@ class MenuCategoryController extends Controller
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
 
-        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($data['name']);
+        // Random suffix on a blank auto-derived slug, same as
+        // MenuItemController — without it, two categories with the same
+        // name (or names that slugify identically) collide on the unique
+        // index, and the admin gets a confusing "slug already taken" error
+        // for a field they never typed into.
+        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($data['name']).'-'.Str::lower(Str::random(4));
         $data['sort_order'] = $data['sort_order'] ?? 0;
         $data['is_active'] = $request->boolean('is_active');
 

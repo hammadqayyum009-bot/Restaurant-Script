@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Install;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Settings;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Throwable;
 
 class InstallController extends Controller
@@ -34,30 +36,17 @@ class InstallController extends Controller
             return redirect()->route('install.welcome');
         }
 
-        $phpOk = version_compare(PHP_VERSION, '8.2.0', '>=');
-
-        $extensions = collect($this->requiredExtensions)->map(fn ($ext) => [
-            'name' => $ext,
-            'loaded' => extension_loaded($ext),
-        ]);
-
-        $permissions = collect([
-            'storage' => storage_path(),
-            'bootstrap/cache' => base_path('bootstrap/cache'),
-        ])->map(fn ($path, $label) => [
-            'path' => $label,
-            'writable' => is_writable($path),
-        ]);
-
-        $allOk = $phpOk && $extensions->every(fn ($e) => $e['loaded']) && $permissions->every(fn ($p) => $p['writable']);
-
-        return view('install.requirements', compact('phpOk', 'extensions', 'permissions', 'allOk'));
+        return view('install.requirements', $this->checkRequirements());
     }
 
     public function databaseForm()
     {
         if ($this->isInstalled()) {
             return redirect()->route('install.welcome');
+        }
+
+        if ($blocked = $this->blockIfRequirementsNotMet()) {
+            return $blocked;
         }
 
         return view('install.database');
@@ -67,6 +56,16 @@ class InstallController extends Controller
     {
         if ($this->isInstalled()) {
             return redirect()->route('install.welcome');
+        }
+
+        // The requirements screen's "Continue" button is disabled in the
+        // rendered HTML when requirements fail, but that only stops someone
+        // clicking through it — navigating straight to this route (a stale
+        // bookmark, a re-shared link, the wizard's own back/forward) skipped
+        // the gate entirely. Re-checked here, the actual point real state
+        // gets written, not just displayed.
+        if ($blocked = $this->blockIfRequirementsNotMet()) {
+            return $blocked;
         }
 
         $data = $request->validate([
@@ -112,7 +111,7 @@ class InstallController extends Controller
 
             $admin = User::query()->where('email', $data['admin_email'])->first();
             if (! $admin) {
-                $admin = new User();
+                $admin = new User;
             }
             $admin->name = $data['admin_name'];
             $admin->email = $data['admin_email'];
@@ -123,7 +122,7 @@ class InstallController extends Controller
 
             // The restaurant name typed into the wizard becomes the first saved
             // setting, so the site is branded before the admin opens the panel.
-            app(\App\Services\Settings::class)->setMany([
+            app(Settings::class)->setMany([
                 'site_name' => $data['site_name'] ?? config('site.name'),
                 'mail_from_name' => $data['site_name'] ?? config('site.name'),
                 'notify_admin_email' => $data['admin_email'],
@@ -153,6 +152,45 @@ class InstallController extends Controller
     protected function isInstalled(): bool
     {
         return file_exists(storage_path('installed.lock'));
+    }
+
+    /**
+     * @return array{phpOk: bool, extensions: Collection, permissions: Collection, allOk: bool}
+     */
+    protected function checkRequirements(): array
+    {
+        $phpOk = version_compare(PHP_VERSION, '8.2.0', '>=');
+
+        $extensions = collect($this->requiredExtensions)->map(fn ($ext) => [
+            'name' => $ext,
+            'loaded' => extension_loaded($ext),
+        ]);
+
+        $permissions = collect([
+            'storage' => storage_path(),
+            'bootstrap/cache' => base_path('bootstrap/cache'),
+        ])->map(fn ($path, $label) => [
+            'path' => $label,
+            'writable' => is_writable($path),
+        ]);
+
+        $allOk = $phpOk && $extensions->every(fn ($e) => $e['loaded']) && $permissions->every(fn ($p) => $p['writable']);
+
+        return compact('phpOk', 'extensions', 'permissions', 'allOk');
+    }
+
+    /**
+     * Null when requirements pass — nothing to block. Otherwise the
+     * redirect the caller should return immediately.
+     */
+    protected function blockIfRequirementsNotMet(): ?RedirectResponse
+    {
+        if ($this->checkRequirements()['allOk']) {
+            return null;
+        }
+
+        return redirect()->route('install.requirements')
+            ->with('error', 'Server requirements are not met yet — resolve the items below before continuing.');
     }
 
     protected function configureRuntimeConnection(array $data): void
