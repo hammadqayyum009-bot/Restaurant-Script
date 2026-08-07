@@ -17,12 +17,16 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Admin',
                 'email' => 'admin@example.com',
                 'password' => bcrypt('password'),
+                'is_admin' => true,
+                'is_active' => true,
             ]);
         }
 
         $this->call([
             MenuSeeder::class,
             PageSeeder::class,
+            ReviewSeeder::class,
+            PaymentMethodSeeder::class,
         ]);
     }
 }

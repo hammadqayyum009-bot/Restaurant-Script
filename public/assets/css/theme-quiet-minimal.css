@@ -1,0 +1,128 @@
+/* =========================================================
+   Quiet Minimal — Theme 2 override stylesheet.
+
+   Loaded AFTER style.css (never instead of it) when
+   config('site.theme') === 'minimal' — see layouts/app.blade.php. Every
+   rule in style.css that reads a --maroon, --gold, --cream, --ink,
+   --radius, or --shadow custom property picks up the new values here for
+   free via the cascade; nothing below needs to repeat those rules.
+
+   The two sections below exist because roughly half of style.css's visual
+   detail is NOT expressed through those custom properties — it's a literal
+   font name, a literal rgba() border/shadow tint, or a literal 999px pill
+   radius baked directly into the selector. Redefining the variables alone
+   would silently leave every one of these declarations rendering in
+   Theme 1's colors and shapes. Each one below is restated with its
+   Quiet Minimal equivalent. See the Stage 4 build report for the exact,
+   reconciled count and file/line provenance of every declaration in this
+   file against the Stage 2 estimate.
+
+   Deliberately NOT restated here (see Stage 2/4 discussion):
+    - True circles (border-radius: 50%) — avatars, icon buttons, the
+      success icon. A minimal design does not avoid circular treatments;
+      these are left as-is in both themes.
+    - .cart-badge — functionally a circular counter dot (999px radius on a
+      near-square box), same reasoning as the true circles above.
+    - Photo-overlay darkening gradients (.hero, .hero-slides::after,
+      .gallery-item .cap, .dish-origin) and the two white-text-on-photo
+      declarations — legibility treatments on top of a photograph, not a
+      brand-color choice, unaffected by theme (approved in Stage 2).
+    - .qty-delete's danger-red hover and .alert-success/.alert-error — these
+      read as semantic status color (delete/error/success), not brand
+      color, in both themes.
+   ========================================================= */
+
+:root {
+  /* Variable NAMES are unchanged from style.css on purpose — that's what
+     lets every var(--...) rule in style.css repaint without being touched.
+     The values below are Quiet Minimal's actual palette; the "maroon"/
+     "gold"/"cream" names no longer describe the hue they hold. */
+  --maroon-950: #1a1a18; /* near-black — primary text, dark surfaces */
+  --maroon-900: #2b2a26; /* hover-dark */
+  --maroon-800: #3a3833; /* mid-charcoal — secondary text/icons */
+  --maroon-700: #4a473f;
+  --gold-500: #6b7a4f;   /* olive — primary accent/CTA */
+  --gold-400: #8a9a6b;   /* lighter olive — secondary accent */
+  --gold-100: #eef0e6;   /* faint olive tint — icon backgrounds */
+  --cream-050: #f7f5f0;  /* page background — warm off-white */
+  --cream-100: #efece4;
+  --ink-900: #1a1a18;    /* matches maroon-950: one consistent near-black
+                             instead of two competing dark hues */
+  --ink-700: #3f3d38;
+  --ink-500: #6b6960;
+  --ink-300: #a3a099;
+  --success: #4a7c59;
+  --danger: #a1453a;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --shadow-soft: 0 2px 8px rgba(26, 26, 24, 0.08);
+  --shadow-strong: 0 4px 16px rgba(26, 26, 24, 0.12);
+}
+
+/* ---------- Typography: literal font-family, not a variable (11) ---------- */
+body { font-family: "Inter", "Segoe UI", Tahoma, sans-serif; }
+h1, h2, h3, h4 { font-family: "Fraunces", Georgia, serif; }
+.brand-text strong { font-family: "Fraunces", serif; }
+.hero-stats strong { font-family: "Fraunces", serif; }
+.strip .track { font-family: "Fraunces", serif; }
+.price { font-family: "Fraunces", serif; }
+.cart-line-info h4 { font-family: "Inter", sans-serif; }
+.footer-brand strong { font-family: "Fraunces", serif; }
+.order-number { font-family: "Fraunces", serif; }
+.gallery-item .cap { font-family: "Fraunces", serif; }
+.review-avatar { font-family: "Fraunces", serif; }
+
+/* ---------- Gold-glow accents: literal rgba(201,162,75,...), not a variable (12) ---------- */
+.btn-primary { box-shadow: 0 1px 4px rgba(107, 122, 79, 0.25); }
+.btn-primary:hover { box-shadow: 0 2px 8px rgba(107, 122, 79, 0.35); }
+.site-header { border-bottom: 1px solid rgba(107, 122, 79, 0.2); }
+.icon-btn { border: 1px solid rgba(107, 122, 79, 0.25); }
+.icon-btn:hover { background: rgba(107, 122, 79, 0.14); }
+.hamburger { border: 1px solid rgba(107, 122, 79, 0.25); }
+.hero-stats div { border: 1px solid rgba(107, 122, 79, 0.2); }
+.form-control:focus { box-shadow: 0 0 0 3px rgba(107, 122, 79, 0.18); }
+.social-row a { border: 1px solid rgba(107, 122, 79, 0.25); }
+.currency-select { border: 1px solid rgba(107, 122, 79, 0.25); }
+.star-picker label { color: rgba(107, 122, 79, 0.3); }
+.track-step.is-current .track-dot { box-shadow: 0 0 0 4px rgba(107, 122, 79, 0.2); }
+
+/* ---------- Hairline borders/dividers: literal rgba(61,15,22,...), not a variable (16) ---------- */
+.dish-card { border: 1px solid rgba(26, 26, 24, 0.06); }
+.cat-tabs a { border: 1.5px solid rgba(26, 26, 24, 0.14); }
+.cart-line { border-bottom: 1px solid rgba(26, 26, 24, 0.08); }
+.qty-control button:not(.qty-delete) { border: 1px solid rgba(26, 26, 24, 0.14); }
+.cart-drawer-foot { border-top: 1px solid rgba(26, 26, 24, 0.08); }
+.cart-table th, .cart-table td { border-bottom: 1px solid rgba(26, 26, 24, 0.08); }
+.summary-row.total { border-top: 1px solid rgba(26, 26, 24, 0.1); }
+.form-control { border: 1.5px solid rgba(26, 26, 24, 0.15); }
+.radio-cards label { border: 1.5px solid rgba(26, 26, 24, 0.15); }
+.install-steps span { background: rgba(26, 26, 24, 0.1); }
+.req-row { border: 1px solid rgba(26, 26, 24, 0.08); }
+.review-card { border: 1px solid rgba(26, 26, 24, 0.06); }
+.track-head { border-bottom: 1px solid rgba(26, 26, 24, 0.1); }
+.track-steps::before { background: rgba(26, 26, 24, 0.1); }
+.track-dot { border: 2px solid rgba(26, 26, 24, 0.16); }
+.track-meta { border-top: 1px solid rgba(26, 26, 24, 0.1); }
+
+/* ---------- Shape: literal pill/fixed radius, not a variable (9) ----------
+   Found writing this file, not caught in the Stage 2 audit (which only
+   grepped for var(--radius-*) users) — a 999px pill or a hardcoded 8px is
+   just as un-themed as a literal color. .cart-badge is deliberately left
+   at 999px (a circular counter dot, not a "pill" in the stylistic sense —
+   see the note at the top of this file). */
+.btn { border-radius: var(--radius-sm); }
+.dish-tag { border-radius: var(--radius-sm); }
+.dish-origin { border-radius: var(--radius-sm); }
+.add-to-cart-btn { border-radius: var(--radius-sm); }
+.cat-tabs a { border-radius: var(--radius-sm); }
+.currency-select { border-radius: var(--radius-sm); }
+.track-now { border-radius: var(--radius-sm); }
+.qty-control button:not(.qty-delete) { border-radius: var(--radius-sm); }
+.qty-delete { border-radius: var(--radius-sm); }
+
+/* ---------- Solid (non-photo) near-black surface: literal rgba(32,21,18,...), not a variable (1) ----------
+   .site-header is opaque UI chrome (0.97 alpha), not a photo overlay, so
+   unlike the photo-darkening gradients this is worth matching precisely to
+   the new near-black rather than leaving it at Theme 1's literal value. */
+.site-header { background: rgba(26, 26, 24, 0.97); }

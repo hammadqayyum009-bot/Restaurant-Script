@@ -14,25 +14,35 @@
     <section class="section">
         <div class="container checkout-grid">
             <div>
-                <h3 style="margin-bottom:18px;">Send Us a Message</h3>
-                <form action="{{ route('contact') }}" method="POST" onsubmit="return false;">
+                <h3 style="margin-bottom:18px;" id="contact-form">Send Us a Message</h3>
+
+                @if (session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                @endif
+
+                <form action="{{ route('contact.store') }}" method="POST">
+                    @csrf
                     <div class="form-row cols-2">
                         <div class="form-group">
                             <label for="name">Full Name</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" required>
+                            @error('name')<span class="error-text">{{ $message }}</span>@enderror
                         </div>
                         <div class="form-group">
                             <label for="phone">Phone Number</label>
-                            <input type="text" class="form-control" id="phone" name="phone">
+                            <input type="text" class="form-control" id="phone" name="phone" value="{{ old('phone') }}">
+                            @error('phone')<span class="error-text">{{ $message }}</span>@enderror
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="email">Email Address</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" required>
+                        @error('email')<span class="error-text">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group">
                         <label for="message">Message</label>
-                        <textarea class="form-control" id="message" name="message" required></textarea>
+                        <textarea class="form-control" id="message" name="message" required>{{ old('message') }}</textarea>
+                        @error('message')<span class="error-text">{{ $message }}</span>@enderror
                     </div>
                     <button type="submit" class="btn btn-primary">Send Message</button>
                 </form>
@@ -56,7 +66,7 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="var(--maroon-800)" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
                         <span style="color:var(--ink-700)">{{ config('site.opening_hours') }}</span>
                     </div>
-                    <a href="https://wa.me/{{ config('site.whatsapp') }}" target="_blank" rel="noopener" class="btn btn-primary btn-block" style="margin-top:16px;">Chat on WhatsApp</a>
+                    <a href="{{ route('reservations.create') }}" class="btn btn-primary btn-block" style="margin-top:16px;">Book a Table</a>
                 </div>
             </div>
         </div>

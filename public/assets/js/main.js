@@ -41,16 +41,30 @@
     function open() {
       nav.classList.add("is-open");
       scrim && scrim.classList.add("is-open");
-      document.body.style.overflow = "hidden";
+      document.documentElement.classList.add("scroll-locked");
     }
     function closeNav() {
       nav.classList.remove("is-open");
       scrim && scrim.classList.remove("is-open");
-      document.body.style.overflow = "";
+      document.documentElement.classList.remove("scroll-locked");
     }
     toggle.addEventListener("click", open);
     close && close.addEventListener("click", closeNav);
     scrim && scrim.addEventListener("click", closeNav);
+
+    // .main-nav switches from an off-canvas drawer to the static desktop
+    // layout at the same 960px breakpoint style.css uses (@media (min-width:
+    // 960px)). CSS alone recovers the layout at that width, but a resize
+    // (not a reload) leaves .is-open and .scroll-locked stuck, since nothing
+    // else ever clears them. Below that width they're inert (the drawer is
+    // closed either way); above it, this drops the stale locked-scroll state.
+    var mediaQuery = window.matchMedia("(min-width: 960px)");
+    function closeIfDesktop() {
+      if (mediaQuery.matches) closeNav();
+    }
+    mediaQuery.addEventListener
+      ? mediaQuery.addEventListener("change", closeIfDesktop)
+      : window.addEventListener("resize", closeIfDesktop);
   }
 
   function initCartDrawer() {
@@ -63,12 +77,12 @@
     function open() {
       drawer.classList.add("is-open");
       scrim && scrim.classList.add("is-open");
-      document.body.style.overflow = "hidden";
+      document.documentElement.classList.add("scroll-locked");
     }
     function close() {
       drawer.classList.remove("is-open");
       scrim && scrim.classList.remove("is-open");
-      document.body.style.overflow = "";
+      document.documentElement.classList.remove("scroll-locked");
     }
     openers.forEach(function (el) {
       el.addEventListener("click", function (e) {
@@ -101,8 +115,9 @@
     }
     var subtotalEl = document.getElementById("cart-subtotal-value");
     if (subtotalEl && typeof data.subtotal !== "undefined") {
-      subtotalEl.textContent = Number(data.subtotal).toFixed(2);
+      subtotalEl.setAttribute("data-aed", data.subtotal);
     }
+    if (window.applyCurrency) window.applyCurrency();
   }
 
   function initAddToCartForms() {
