@@ -51,6 +51,20 @@
     toggle.addEventListener("click", open);
     close && close.addEventListener("click", closeNav);
     scrim && scrim.addEventListener("click", closeNav);
+
+    // .main-nav switches from an off-canvas drawer to the static desktop
+    // layout at the same 960px breakpoint style.css uses (@media (min-width:
+    // 960px)). CSS alone recovers the layout at that width, but a resize
+    // (not a reload) leaves .is-open and .scroll-locked stuck, since nothing
+    // else ever clears them. Below that width they're inert (the drawer is
+    // closed either way); above it, this drops the stale locked-scroll state.
+    var mediaQuery = window.matchMedia("(min-width: 960px)");
+    function closeIfDesktop() {
+      if (mediaQuery.matches) closeNav();
+    }
+    mediaQuery.addEventListener
+      ? mediaQuery.addEventListener("change", closeIfDesktop)
+      : window.addEventListener("resize", closeIfDesktop);
   }
 
   function initCartDrawer() {
