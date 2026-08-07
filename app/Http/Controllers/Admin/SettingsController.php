@@ -46,6 +46,15 @@ class SettingsController extends Controller
             // controller is still server-validated against a direct POST,
             // same reasoning as site_currency above.
             'site_theme' => ['required', 'string', Rule::in(['classic', 'minimal'])],
+            // Optional overrides layered on top of the active theme above —
+            // see resources/views/partials/theme-overrides.blade.php. An
+            // empty value clears a previously-saved override, same as every
+            // other nullable field in this form; Settings::set() already
+            // treats '' as "no value" (see App\Services\Settings::get()).
+            'theme_primary' => ['nullable', 'string', 'regex:/^#[0-9a-f]{6}$/i'],
+            'theme_accent' => ['nullable', 'string', 'regex:/^#[0-9a-f]{6}$/i'],
+            'theme_background' => ['nullable', 'string', 'regex:/^#[0-9a-f]{6}$/i'],
+            'theme_text' => ['nullable', 'string', 'regex:/^#[0-9a-f]{6}$/i'],
             'site_hours' => ['nullable', 'string', 'max:150'],
             'social_facebook' => ['nullable', 'string', 'max:255'],
             'social_instagram' => ['nullable', 'string', 'max:255'],
@@ -55,6 +64,10 @@ class SettingsController extends Controller
             'favicon' => ['nullable', 'image', 'max:1024'],
         ], [
             'site_currency.in' => 'Unrecognized currency code. Supported: '.implode(', ', array_keys(config('currencies'))).'.',
+            'theme_primary.regex' => 'Enter a 6-digit hex colour, e.g. #c9a24b.',
+            'theme_accent.regex' => 'Enter a 6-digit hex colour, e.g. #d9bd73.',
+            'theme_background.regex' => 'Enter a 6-digit hex colour, e.g. #fffaf2.',
+            'theme_text.regex' => 'Enter a 6-digit hex colour, e.g. #201512.',
         ]);
 
         $this->settings->setMany($data, 'site');

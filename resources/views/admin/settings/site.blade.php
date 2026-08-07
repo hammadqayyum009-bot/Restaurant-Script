@@ -130,6 +130,60 @@
         </div>
 
         <div class="a-card">
+            <div class="a-card-head"><h2>Storefront colours</h2></div>
+            <p class="a-card-sub">Optional — override up to four colours on top of the theme above. Leave a swatch untouched to keep using the active theme's own colour for that role.</p>
+
+            @php
+                $themeDefaults = config('site.theme') === 'minimal'
+                    ? ['primary' => '#6b7a4f', 'accent' => '#8a9a6b', 'background' => '#f7f5f0', 'text' => '#1a1a18']
+                    : ['primary' => '#c9a24b', 'accent' => '#d9bd73', 'background' => '#fffaf2', 'text' => '#201512'];
+                $colourSlots = [
+                    'primary' => 'Primary — buttons, links, highlights',
+                    'accent' => 'Accent — secondary highlights, text on dark',
+                    'background' => 'Background — page backdrop',
+                    'text' => 'Text — body copy and headings',
+                ];
+            @endphp
+
+            <div class="a-row cols-2">
+                @foreach ($colourSlots as $slot => $label)
+                    @php
+                        $key = 'theme_'.$slot;
+                        $stored = old($key, config('site.'.$key));
+                        $effective = $stored ?: $themeDefaults[$slot];
+                    @endphp
+                    <div class="a-field">
+                        <label for="{{ $key }}">{{ $label }}</label>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <input type="color" id="{{ $key }}_picker" value="{{ $effective }}"
+                                   data-colour-picker-for="{{ $key }}"
+                                   style="width:42px; height:38px; padding:2px; border:1px solid var(--a-line); border-radius:6px; cursor:pointer; flex-shrink:0;">
+                            <input type="text" id="{{ $key }}" name="{{ $key }}"
+                                   class="a-input @error($key) has-error @enderror" data-colour-text
+                                   value="{{ $stored }}" placeholder="Theme default ({{ $themeDefaults[$slot] }})"
+                                   maxlength="7">
+                            <button type="button" class="a-btn ghost sm" data-colour-reset="{{ $key }}">Reset</button>
+                        </div>
+                        @error($key)<span class="a-error">{{ $message }}</span>@enderror
+                    </div>
+                @endforeach
+            </div>
+            <span class="a-hint">Applies to the customer-facing site only — the admin panel, billing documents, and emails keep their own colours.</span>
+
+            <div id="theme-preview" style="margin-top:18px; border-radius:14px; overflow:hidden; border:1px solid var(--a-line);">
+                <div id="theme-preview-head" style="padding:16px 20px; display:flex; align-items:center; justify-content:space-between;">
+                    <strong id="theme-preview-brand" style="font-family:'Playfair Display', serif; font-size:1.1rem;">Al Waha Restaurant</strong>
+                    <span id="theme-preview-cta" style="padding:8px 16px; border-radius:999px; font-weight:600; font-size:0.85rem;">Order Online</span>
+                </div>
+                <div id="theme-preview-body" style="padding:20px;">
+                    <h3 id="theme-preview-heading" style="margin:0 0 6px; font-family:'Playfair Display', serif;">Chicken Mandi</h3>
+                    <p id="theme-preview-text" style="margin:0 0 14px; font-size:0.9rem;">Slow-cooked chicken over fragrant basmati rice with traditional Yemeni spices.</p>
+                    <span id="theme-preview-btn" style="display:inline-block; padding:10px 20px; border-radius:999px; font-weight:600; font-size:0.85rem;">Add to cart</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="a-card">
             <div class="a-card-head"><h2>Social links</h2></div>
             <p class="a-card-sub">Leave a field blank to hide that icon in the footer.</p>
 
@@ -148,4 +202,65 @@
             </div>
         </div>
     </form>
+
+    @push('scripts')
+    <script>
+    (function () {
+        var slots = ['primary', 'accent', 'background', 'text'];
+        var defaults = @json($themeDefaults);
+        var hexPattern = /^#[0-9a-f]{6}$/i;
+
+        function textInput(slot) { return document.getElementById('theme_' + slot); }
+        function colourInput(slot) { return document.getElementById('theme_' + slot + '_picker'); }
+
+        function currentValue(slot) {
+            var text = textInput(slot).value.trim();
+            return hexPattern.test(text) ? text : defaults[slot];
+        }
+
+        function updatePreview() {
+            var c = {};
+            slots.forEach(function (slot) { c[slot] = currentValue(slot); });
+
+            var preview = document.getElementById('theme-preview');
+            if (!preview) return;
+
+            preview.style.background = c.background;
+            document.getElementById('theme-preview-head').style.background = c.text;
+            document.getElementById('theme-preview-brand').style.color = c.accent;
+            document.getElementById('theme-preview-cta').style.background = c.primary;
+            document.getElementById('theme-preview-cta').style.color = c.text;
+            document.getElementById('theme-preview-heading').style.color = c.text;
+            document.getElementById('theme-preview-text').style.color = c.text;
+            document.getElementById('theme-preview-btn').style.background = c.text;
+            document.getElementById('theme-preview-btn').style.color = c.accent;
+        }
+
+        slots.forEach(function (slot) {
+            var text = textInput(slot);
+            var colour = colourInput(slot);
+
+            colour.addEventListener('input', function () {
+                text.value = colour.value;
+                updatePreview();
+            });
+
+            text.addEventListener('input', function () {
+                if (hexPattern.test(text.value.trim())) {
+                    colour.value = text.value.trim();
+                }
+                updatePreview();
+            });
+
+            document.querySelector('[data-colour-reset="theme_' + slot + '"]').addEventListener('click', function () {
+                text.value = '';
+                colour.value = defaults[slot];
+                updatePreview();
+            });
+        });
+
+        updatePreview();
+    })();
+    </script>
+    @endpush
 @endsection

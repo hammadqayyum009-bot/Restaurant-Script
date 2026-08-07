@@ -14,6 +14,16 @@ return [
     // see public/assets/css/theme-quiet-minimal.css). Storefront only.
     'theme' => env('SITE_THEME', 'classic'),
 
+    // Optional per-site colour overrides layered on top of whichever theme
+    // above is active (see resources/views/partials/theme-overrides.blade.php).
+    // Null means "use the active theme's own default" — nothing is emitted
+    // for an unset slot, so leaving all four null renders byte-identically
+    // to not having this feature at all.
+    'theme_primary' => env('SITE_THEME_PRIMARY', null),
+    'theme_accent' => env('SITE_THEME_ACCENT', null),
+    'theme_background' => env('SITE_THEME_BACKGROUND', null),
+    'theme_text' => env('SITE_THEME_TEXT', null),
+
     // Uploaded from the admin panel; null falls back to the built-in vector mark.
     'logo' => env('SITE_LOGO', null),
     'favicon' => env('SITE_FAVICON', null),

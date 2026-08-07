@@ -23,6 +23,7 @@
     @if (config('site.theme') === 'minimal')
         <link rel="stylesheet" href="{{ asset('assets/css/theme-quiet-minimal.css') }}">
     @endif
+    @include('partials.theme-overrides')
     @stack('styles')
 </head>
 <body data-flash-success="{{ session('success') }}">
