@@ -60,22 +60,33 @@ class StorefrontColorSlotsTest extends TestCase
         $response->assertRedirect();
     }
 
+    /**
+     * config('site.*') is only re-derived once per application boot (see
+     * AppServiceProvider::applySettings()) — a single test method reuses one
+     * already-booted app instance across both put() calls below, so the
+     * first save never re-triggers that boot step before the second save
+     * runs. Reading the persisted value straight from the Settings service
+     * (the source applySettings() itself reads from) sidesteps that timing
+     * gap entirely; same technique StorefrontThemeTest documents for its own
+     * render assertions, applied here to a direct persistence check instead.
+     */
     public function test_an_empty_value_clears_a_previously_saved_override(): void
     {
         $admin = User::factory()->create(['is_admin' => true, 'is_active' => true]);
+        $settings = app(\App\Services\Settings::class);
 
         $this->actingAs($admin, 'web')->put(
             route('admin.settings.site.save'),
             $this->validPayload(['theme_primary' => '#123abc'])
         );
-        $this->assertSame('#123abc', config('site.theme_primary'));
+        $this->assertSame('#123abc', $settings->get('theme_primary'));
 
         $this->actingAs($admin, 'web')->put(
             route('admin.settings.site.save'),
             $this->validPayload(['theme_primary' => ''])
         );
 
-        $this->assertNull(config('site.theme_primary'));
+        $this->assertNull($settings->get('theme_primary'));
     }
 
     public function test_all_four_slots_default_to_unset(): void
